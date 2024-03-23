@@ -2,9 +2,6 @@
   "name": "meetingrecorder",
   "version": "1.0.0",
   "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
-  "tags": [
-    ""
-  ],
   "author": "Lukas Bach <contact@lukasbach.com>",
   "license": "MIT",
   "main": ".vite/build/main.js",
@@ -13,7 +10,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
@@ -28,16 +26,30 @@
     "@electron-forge/plugin-fuses": "^7.2.0",
     "@electron-forge/plugin-vite": "^7.3.1",
     "@electron/fuses": "^1.7.0",
+    "@lukasbach/eslint-config-deps": "^1.0.7",
     "@types/electron-squirrel-startup": "^1",
-    "@types/eslint": "^8",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "electron": "29.1.5",
-    "eslint": "^8.0.1",
+    "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.25.0",
     "ts-node": "^10.0.0",
     "typescript": "~4.5.4",
     "vite": "^5.0.12"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@lukasbach/base/react",
+      "plugin:import/recommended",
+      "plugin:import/electron",
+      "plugin:import/typescript"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "ignorePatterns": [
+      "lib",
+      "dist",
+      "*.js"
+    ]
   },
   "volta": {
     "node": "20.11.1",
