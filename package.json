@@ -1,8 +1,12 @@
 {
   "name": "meetingrecorder",
-  "productName": "meetingrecorder",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
+  "tags": [
+    ""
+  ],
+  "author": "Lukas Bach <contact@lukasbach.com>",
+  "license": "MIT",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -10,6 +14,9 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.1",
@@ -32,13 +39,11 @@
     "typescript": "~4.5.4",
     "vite": "^5.0.12"
   },
-  "keywords": [],
-  "author": {
-    "name": "Lukas Bach",
-    "email": "contact@lukasbach.com"
+  "volta": {
+    "node": "20.11.1",
+    "yarn": "4.1.1"
   },
-  "license": "MIT",
-  "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
-  }
+  "productName": "meetingrecorder",
+  "keywords": [],
+  "funding": "https://github.com/sponsors/lukasbach"
 }
