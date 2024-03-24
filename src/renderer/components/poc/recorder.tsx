@@ -9,6 +9,7 @@ export const Recorder: FC<{}> = () => {
   useEffect(() => {
     mainApi.getSources().then((sources) => {
       setSources(sources);
+      console.log(sources);
     });
   }, []);
 
@@ -21,17 +22,38 @@ export const Recorder: FC<{}> = () => {
             <button
               onClick={async () => {
                 const usermedia = await navigator.mediaDevices.getUserMedia({
-                  video: false,
+                  // video: {
+                  //   deviceId: source.id,
+                  // },
+                  // audio: false,
+                  // video: {
+                  //   mandatory: {
+                  //     chromeMediaSource: "desktop",
+                  //     chromeMediaSourceId: source.id,
+                  //   },
+                  // } as any,
                   audio: {
                     mandatory: {
                       chromeMediaSource: "desktop",
                       chromeMediaSourceId: source.id,
+                      sampleRate: 48000,
+                      sampleSize: 16,
+                      channelCount: 2,
                     },
-                  } as any,
+                  },
+                  video: {
+                    mandatory: {
+                      chromeMediaSource: "desktop",
+                      chromeMediaSourceId: source.id,
+                      minWidth: 1280,
+                      maxWidth: 1280,
+                      minHeight: 720,
+                      maxHeight: 720,
+                      maxFrameRate: 1,
+                    },
+                  },
                 });
-                const recorder = new MediaRecorder(usermedia, {
-                  mimeType: "audio/wav",
-                });
+                const recorder = new MediaRecorder(usermedia, {});
                 setRecorder(recorder);
                 recorder.start();
               }}
@@ -46,11 +68,11 @@ export const Recorder: FC<{}> = () => {
           onClick={() => {
             recorder.stop();
             recorder.ondataavailable = (e) => {
-              const blob = new Blob([e.data], { type: "audio/wav" });
+              const blob = new Blob([e.data], { type: "video/mp4" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = "recording.wav";
+              a.download = "recording.mp4";
               a.click();
             };
           }}
