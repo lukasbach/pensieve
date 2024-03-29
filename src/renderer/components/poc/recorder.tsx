@@ -33,6 +33,7 @@ export const Recorder: FC<{}> = () => {
                   //   },
                   // } as any,
                   audio: {
+                    // @ts-ignore
                     mandatory: {
                       chromeMediaSource: "desktop",
                       chromeMediaSourceId: source.id,
@@ -42,6 +43,7 @@ export const Recorder: FC<{}> = () => {
                     },
                   },
                   video: {
+                    // @ts-ignore
                     mandatory: {
                       chromeMediaSource: "desktop",
                       chromeMediaSourceId: source.id,
@@ -53,7 +55,12 @@ export const Recorder: FC<{}> = () => {
                     },
                   },
                 });
-                const recorder = new MediaRecorder(usermedia, {});
+                usermedia
+                  .getVideoTracks()
+                  .forEach((t) => usermedia.removeTrack(t));
+                const recorder = new MediaRecorder(usermedia, {
+                  mimeType: "audio/webm",
+                });
                 setRecorder(recorder);
                 recorder.start();
               }}
@@ -68,11 +75,11 @@ export const Recorder: FC<{}> = () => {
           onClick={() => {
             recorder.stop();
             recorder.ondataavailable = (e) => {
-              const blob = new Blob([e.data], { type: "video/mp4" });
+              const blob = new Blob([e.data], { type: "audio/webm" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = "recording.mp4";
+              a.download = "recording.webm";
               a.click();
             };
           }}
