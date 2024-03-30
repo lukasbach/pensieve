@@ -6,6 +6,8 @@ import { MakerRpm } from "@electron-forge/maker-rpm";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
+import fs from "fs-extra";
+import path from "path";
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -53,6 +55,59 @@ const config: ForgeConfig = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+
+  hooks: {
+    generateAssets: async (config, platform, arch) => {
+      const ffmpegBase = path.join(
+        __dirname,
+        "node_modules/ffmpeg-static-electron/bin",
+      );
+      const whisperBase = path.join(
+        __dirname,
+        "node_modules/whisper-cpp-static/bin",
+      );
+      const target = path.join(__dirname, "extra");
+      await fs.ensureDir(target);
+
+      if (platform === "win32" && arch === "x64") {
+        await fs.copy(
+          path.join(ffmpegBase, "win/x64/ffmpeg.exe"),
+          path.join(target, "ffmpeg.exe"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-x64/main.exe"),
+          path.join(target, "whisper.exe"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-x64/SDL2.dll"),
+          path.join(target, "SDL2.dll"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-x64/whisper.dll"),
+          path.join(target, "whisper.dll"),
+        );
+      }
+
+      if (platform === "win32" && arch === "ia32") {
+        await fs.copy(
+          path.join(ffmpegBase, "win/ia32/ffmpeg.exe"),
+          path.join(target, "ffmpeg.exe"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-Win32/main.exe"),
+          path.join(target, "whisper.exe"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-Win32/SDL2.dll"),
+          path.join(target, "SDL2.dll"),
+        );
+        await fs.copy(
+          path.join(whisperBase, "whisper-bin-Win32/whisper.dll"),
+          path.join(target, "whisper.dll"),
+        );
+      }
+    },
+  },
 };
 
 export default config;

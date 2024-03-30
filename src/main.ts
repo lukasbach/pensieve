@@ -3,6 +3,7 @@ import path from "path";
 import { loadIpcInterfaceInMain } from "./main/ipc/ipc-connector";
 import { mainApi } from "./main/ipc/main-api";
 import { AppCore } from "./main/app-core";
+import { modelsApi } from "./main/ipc/models-api";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -60,5 +61,6 @@ app.on("activate", () => {
 
 app.whenReady().then(async () => {
   appCore = await AppCore.start();
-  loadIpcInterfaceInMain("ipc", mainApi);
+  loadIpcInterfaceInMain("main", mainApi);
+  loadIpcInterfaceInMain("models", modelsApi);
 });

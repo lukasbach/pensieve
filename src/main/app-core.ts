@@ -2,6 +2,7 @@ import { app } from "electron";
 import path from "path";
 import fs from "fs-extra";
 import { RecordingData, RecordingMeta } from "../types";
+import { ffmpeg, whisper } from "./index";
 
 export class AppCore {
   private constructor() {}
@@ -61,12 +62,28 @@ export class AppCore {
     );
   }
 
-  public postProcessRecording(id: string) {}
+  public async postProcessRecording(id: string) {
+    const mic = path.join(this.getRecordingsFolder(), id, "mic.webm");
+    const screen = path.join(this.getRecordingsFolder(), id, "screen.webm");
+    const wav = path.join(this.getRecordingsFolder(), id, "whisper-input.wav");
 
-  public getExtraResourcesFolder() {
-    return process.env.NODE_ENV === "development"
-      ? path.join(__dirname, "../../extra")
-      : process.resourcesPath;
+    if (fs.existsSync(mic) && fs.existsSync(screen)) {
+      await ffmpeg.toStereoWavFile(mic, screen, wav);
+    } else if (fs.existsSync(mic)) {
+      await ffmpeg.toWavFile(mic, wav);
+    } else if (fs.existsSync(screen)) {
+      await ffmpeg.toWavFile(screen, wav);
+    } else {
+      throw new Error("No recording found");
+    }
+
+    await whisper.processWavFile(
+      wav,
+      path.join(this.getRecordingsFolder(), id, "transcript.json"),
+      "ggml-large-v3-q5_0",
+    );
+
+    await fs.rm(wav);
   }
 
   public getRecordingsFolder() {
