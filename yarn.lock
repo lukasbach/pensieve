@@ -2530,6 +2530,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.28.9":
+  version: 5.28.9
+  resolution: "@tanstack/query-core@npm:5.28.9"
+  checksum: 10/b336a16af70a7eaebe2fae90ce3ed1f9ad5cdc69b0a7979868ab1870777d9e9a306c370e9853e4526028c0c2473193838a77b94320f7bfee7e30db831731438e
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.28.9":
+  version: 5.28.9
+  resolution: "@tanstack/react-query@npm:5.28.9"
+  dependencies:
+    "@tanstack/query-core": "npm:5.28.9"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 10/dd03f5fb751f73918a583245ac97fdbe43ecd7fbd28d727f0ff6d80ba5c9c978126003a1250f54ab980a3c2070b6788197f1a241f07fbe95883e985aab007f20
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:2":
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
@@ -6649,6 +6667,7 @@ __metadata:
     "@electron/fuses": "npm:^1.7.0"
     "@lukasbach/eslint-config-deps": "npm:^1.0.7"
     "@radix-ui/themes": "npm:^3.0.1"
+    "@tanstack/react-query": "npm:^5.28.9"
     "@types/electron-squirrel-startup": "npm:^1"
     "@types/fs-extra": "npm:^11"
     "@types/node": "npm:^20.11.30"

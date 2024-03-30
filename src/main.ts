@@ -9,12 +9,13 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+// eslint-disable-next-line import/no-mutable-exports
 export let appCore: AppCore;
 
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 1200,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

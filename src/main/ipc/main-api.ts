@@ -10,4 +10,12 @@ export const mainApi = {
   saveRecording: async (recordingData: RecordingData) => {
     await appCore.saveRecording(recordingData);
   },
+
+  getRecordings: async () => {
+    return appCore.listRecordings();
+  },
+
+  postProcessRecording: async (folder: string) => {
+    await appCore.postProcessRecording(folder);
+  },
 };

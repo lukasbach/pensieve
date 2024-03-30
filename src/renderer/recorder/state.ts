@@ -3,11 +3,13 @@ import { DesktopCapturerSource } from "electron";
 import { useCallback, useEffect } from "react";
 import { mainApi } from "../api";
 import { blobToBuffer } from "../../utils";
+import { RecordingMeta } from "../../types";
 
 type RecorderState = {
   sources?: DesktopCapturerSource[];
   selectedSource?: DesktopCapturerSource;
   recorder?: { screen: MediaRecorder; mic: MediaRecorder };
+  meta?: RecordingMeta;
 
   setSelectedSource: (source: DesktopCapturerSource) => void;
   startRecording: () => Promise<void>;
@@ -17,12 +19,16 @@ type RecorderState = {
 export const useRecorderState = create<RecorderState>()((set, get) => ({
   setSelectedSource: (source) => set({ selectedSource: source }),
   startRecording: async () => {
+    const sourceId = get().selectedSource?.id;
+
+    if (!sourceId) return;
+
     const displayMedia = await navigator.mediaDevices.getUserMedia({
       audio: {
         // @ts-ignore
         mandatory: {
           chromeMediaSource: "desktop",
-          chromeMediaSourceId: get().selectedSource.id,
+          chromeMediaSourceId: sourceId,
           sampleRate: 48000,
           sampleSize: 16,
           channelCount: 2,
@@ -32,7 +38,7 @@ export const useRecorderState = create<RecorderState>()((set, get) => ({
         // @ts-ignore
         mandatory: {
           chromeMediaSource: "desktop",
-          chromeMediaSourceId: get().selectedSource.id,
+          chromeMediaSourceId: sourceId,
           minWidth: 1280,
           maxWidth: 1280,
           minHeight: 720,
@@ -53,9 +59,12 @@ export const useRecorderState = create<RecorderState>()((set, get) => ({
     );
     screen.start();
     mic.start();
-    set({ recorder: { screen, mic } });
+    set({
+      recorder: { screen, mic },
+      meta: { started: new Date().toISOString() },
+    });
   },
-  reset: () => set({ recorder: undefined }),
+  reset: () => set({ recorder: undefined, meta: undefined }),
 }));
 
 export const useLoadSources = () => {
@@ -67,8 +76,10 @@ export const useLoadSources = () => {
 };
 
 export const useStopRecording = () => {
-  const { recorder } = useRecorderState();
+  const { recorder, meta } = useRecorderState();
   return useCallback(async () => {
+    if (!recorder || !meta) return;
+
     const mic = new Promise<Blob>((r) => {
       recorder.mic.stop();
       recorder.mic.ondataavailable = (e) => {
@@ -86,6 +97,7 @@ export const useStopRecording = () => {
     await mainApi.saveRecording({
       mic: await blobToBuffer(await mic),
       screen: await blobToBuffer(await screen),
+      meta,
     });
-  }, [recorder]);
+  }, [meta, recorder]);
 };

@@ -17,7 +17,9 @@ export const Recorder: FC<{}> = ({}) => {
       <Select.Root
         value={selectedSource?.id}
         onValueChange={(value) => {
-          setSelectedSource(sources.find((s) => s.id === value));
+          const source = sources?.find((s) => s.id === value);
+          if (!source) return;
+          setSelectedSource(source);
         }}
       >
         <Select.Trigger />
