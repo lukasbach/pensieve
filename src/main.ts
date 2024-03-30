@@ -2,11 +2,14 @@ import { BrowserWindow, app } from "electron";
 import path from "path";
 import { loadIpcInterfaceInMain } from "./main/ipc/ipc-connector";
 import { mainApi } from "./main/ipc/main-api";
+import { AppCore } from "./main/app-core";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
+
+export let appCore: AppCore;
 
 const createWindow = () => {
   // Create the browser window.
@@ -54,6 +57,7 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  appCore = await AppCore.start();
   loadIpcInterfaceInMain("ipc", mainApi);
 });

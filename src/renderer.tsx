@@ -1,9 +1,12 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { Recorder } from "./renderer/components/poc/recorder";
+import { Theme } from "@radix-ui/themes";
+import { Recorder } from "./renderer/recorder/recorder";
+
+import "@radix-ui/themes/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <div>
+  <Theme>
     <Recorder />
-  </div>,
+  </Theme>,
 );

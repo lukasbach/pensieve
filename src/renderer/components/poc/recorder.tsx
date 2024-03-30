@@ -9,7 +9,6 @@ export const Recorder: FC<{}> = () => {
   useEffect(() => {
     mainApi.getSources().then((sources) => {
       setSources(sources);
-      console.log(sources);
     });
   }, []);
 
@@ -22,16 +21,6 @@ export const Recorder: FC<{}> = () => {
             <button
               onClick={async () => {
                 const usermedia = await navigator.mediaDevices.getUserMedia({
-                  // video: {
-                  //   deviceId: source.id,
-                  // },
-                  // audio: false,
-                  // video: {
-                  //   mandatory: {
-                  //     chromeMediaSource: "desktop",
-                  //     chromeMediaSourceId: source.id,
-                  //   },
-                  // } as any,
                   audio: {
                     // @ts-ignore
                     mandatory: {
