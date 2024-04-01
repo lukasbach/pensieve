@@ -1,0 +1,15 @@
+name: Publish new Version
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: volta-cli/action@v4
+      - run: yarn install
+      - run: yarn run lint
+      - run: yarn run publish

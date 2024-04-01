@@ -1,0 +1,17 @@
+name: Verify
+on: 
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: volta-cli/action@v4
+      - run: yarn install
+      - run: yarn run lint
+      - run: yarn run make
