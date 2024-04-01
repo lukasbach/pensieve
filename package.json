@@ -79,5 +79,20 @@
   },
   "productName": "meetingrecorder",
   "keywords": [],
-  "funding": "https://github.com/sponsors/lukasbach"
+  "funding": "https://github.com/sponsors/lukasbach",
+  "tags": [
+    "notes",
+    "notetaker",
+    "meeting",
+    "note",
+    "transcript",
+    "transcribe",
+    "llm",
+    "record",
+    "recording",
+    "summarize",
+    "audio",
+    "mp3"
+  ],
+  "repository": "https://github.com/lukasbach/notetaker.git"
 }
