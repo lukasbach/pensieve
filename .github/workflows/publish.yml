@@ -8,6 +8,7 @@ jobs:
     permissions:
       contents: read
     steps:
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
       - run: yarn install
