@@ -1,10 +1,13 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Box, Flex } from "@radix-ui/themes";
 import { historyDetailsRoute } from "../router/router";
 import { QueryKeys } from "../../query-keys";
 import { historyApi } from "../api";
 import { PageContainer } from "../common/page-container";
 import { Transscript } from "./transscript";
+import { useManagedAudio } from "./use-managed-audio";
+import { AudioControls } from "./audio-controls";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
@@ -16,57 +19,25 @@ export const DetailsScreen: FC = () => {
     queryKey: [QueryKeys.Transcript, id],
     queryFn: () => historyApi.getRecordingTranscript(id),
   });
-  const { data: mp3 } = useQuery({
-    queryKey: [QueryKeys.AudioFile, id],
-    queryFn: () => historyApi.getRecordingAudioFile(id),
-  });
 
-  const [progress, setProgress] = useState(0);
-  const audioTag = useRef<HTMLAudioElement>(null);
-
-  const jump = useCallback(
-    (time: number) => {
-      if (!audioTag.current) return;
-      audioTag.current.pause();
-      audioTag.current.currentTime = time;
-      audioTag.current.play();
-      setProgress(time);
-    },
-    [audioTag],
-  );
-
-  const pause = useCallback(() => {
-    if (!audioTag.current) return;
-    audioTag.current.pause();
-  }, []);
-
-  useEffect(() => {
-    if (!audioTag.current) return;
-    audioTag.current.load();
-  }, []);
+  const audio = useManagedAudio();
 
   return (
     <PageContainer title={recording?.name ?? "Untitled Recording"}>
-      {mp3 && (
-        <audio
-          preload="auto"
-          ref={audioTag}
-          controls
-          onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
-        >
-          <source src={`recording://${id}`} type="audio/mpeg" />
-        </audio>
-      )}
-      {progress}
-      {transcript && (
-        <Transscript
-          isPlaying={audioTag.current?.paused === false}
-          transcript={transcript}
-          progress={progress}
-          onJump={jump}
-          onPause={pause}
-        />
-      )}
+      <Flex direction="column" maxHeight="100%">
+        <Box flexGrow="1" overflowY="auto">
+          {transcript && (
+            <Transscript
+              // isPlaying={audio.audioTag.current?.paused === false}
+              transcript={transcript}
+              audio={audio}
+            />
+          )}
+        </Box>
+        <Box>
+          <AudioControls audio={audio} id={id} />
+        </Box>
+      </Flex>
     </PageContainer>
   );
 };

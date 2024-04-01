@@ -7,23 +7,21 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { RecordingTranscript } from "../../types";
+import { useManagedAudio } from "./use-managed-audio";
 
 export const Transscript: FC<{
   transcript: RecordingTranscript;
-  progress: number;
-  onJump: (time: number) => void;
-  onPause: () => void;
-  isPlaying: boolean;
-}> = ({ transcript, progress, onJump, onPause, isPlaying }) => {
+  audio: ReturnType<typeof useManagedAudio>;
+}> = ({ transcript, audio }) => {
   return (
-    <Box px="2rem">
+    <Box px="2rem" py="1rem">
       {transcript.transcription.map((item, index) => {
         const time = new Date();
         time.setMilliseconds(item.offsets.from);
         const isHighlighted =
-          progress !== 0 &&
-          progress * 1000 >= item.offsets.from &&
-          progress * 1000 <= item.offsets.to;
+          audio.progress !== 0 &&
+          audio.progress * 1000 >= item.offsets.from &&
+          audio.progress * 1000 < item.offsets.to;
         return (
           <Fragment key={item.timestamps.from}>
             {item.speaker !== transcript.transcription[index - 1]?.speaker && (
@@ -69,14 +67,15 @@ export const Transscript: FC<{
                   variant="outline"
                   size="1"
                   onClick={() => {
-                    if (isPlaying && isHighlighted) {
-                      onPause();
+                    if (audio.isPlaying && isHighlighted) {
+                      audio.pause();
                     } else {
-                      onJump(item.offsets.from / 1000);
+                      audio.jump(item.offsets.from / 1000);
+                      audio.play();
                     }
                   }}
                 >
-                  {isPlaying && isHighlighted ? (
+                  {audio.isPlaying && isHighlighted ? (
                     <HiOutlinePause />
                   ) : (
                     <HiOutlinePlay />
