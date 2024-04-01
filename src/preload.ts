@@ -7,4 +7,9 @@ contextBridge.exposeInMainWorld("ipcApi", {
   models: {
     invoke: (payload: any) => ipcRenderer.invoke("models", payload),
   },
+  onInvalidateUiKeys: (listener: (keys: string[]) => void) => {
+    ipcRenderer.on("invalidate", (_event, keys) => {
+      listener(keys);
+    });
+  },
 });

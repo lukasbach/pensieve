@@ -13,10 +13,10 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
       <Card className="hoverhide-container">
         <Flex align="center">
           <Box flexGrow="1">
-            <Text as="h2">
+            <Text as="div">
               <Editable
                 value={recording.name || "Untitled"}
-                onChange={console.log}
+                onChange={(name) => mainApi.updateRecordingMeta(id, { name })}
                 renderValue={({ value, editBtn }) => (
                   <Flex align="center">
                     <Text mr=".5rem">{value}</Text>

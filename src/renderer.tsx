@@ -7,8 +7,14 @@ import { router } from "./renderer/router/router";
 
 import "@radix-ui/themes/styles.css";
 
+const queryClient = new QueryClient();
+(window as any).ipcApi.onInvalidateUiKeys((keys: string[]) => {
+  console.log("Update", keys);
+  queryClient.invalidateQueries({ queryKey: keys });
+});
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <QueryClientProvider client={new QueryClient()}>
+  <QueryClientProvider client={queryClient}>
     <Theme appearance="dark">
       <RouterProvider router={router} />
     </Theme>

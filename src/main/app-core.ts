@@ -3,6 +3,8 @@ import path from "path";
 import fs from "fs-extra";
 import { RecordingData, RecordingMeta } from "../types";
 import { ffmpeg, whisper } from "./index";
+import { invalidateUiKeys } from "./ipc/invalidate-ui";
+import { QueryKeys } from "../query-keys";
 
 export class AppCore {
   private constructor() {}
@@ -60,6 +62,24 @@ export class AppCore {
       },
       {} as Record<string, RecordingMeta>,
     );
+  }
+
+  public async updateRecording(
+    recordingId: string,
+    partial: Partial<RecordingMeta>,
+  ) {
+    const meta = await fs.readJson(
+      path.join(this.getRecordingsFolder(), recordingId, "meta.json"),
+    );
+    await fs.writeJson(
+      path.join(this.getRecordingsFolder(), recordingId, "meta.json"),
+      {
+        ...meta,
+        ...partial,
+      },
+    );
+    invalidateUiKeys(QueryKeys.History, recordingId);
+    invalidateUiKeys(QueryKeys.History);
   }
 
   public async postProcessRecording(id: string) {

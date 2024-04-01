@@ -1,5 +1,5 @@
 import { desktopCapturer } from "electron";
-import { RecordingData } from "../../types";
+import { RecordingData, RecordingMeta } from "../../types";
 import { appCore } from "../../main";
 
 export const mainApi = {
@@ -13,6 +13,13 @@ export const mainApi = {
 
   getRecordings: async () => {
     return appCore.listRecordings();
+  },
+
+  updateRecordingMeta: async (
+    folder: string,
+    partial: Partial<RecordingMeta>,
+  ) => {
+    await appCore.updateRecording(folder, partial);
   },
 
   postProcessRecording: async (folder: string) => {
