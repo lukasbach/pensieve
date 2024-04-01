@@ -1,5 +1,14 @@
 import { FC } from "react";
-import { Badge, Box, Button, Card, Flex, Text } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Flex,
+  IconButton,
+  Text,
+} from "@radix-ui/themes";
+import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { Editable } from "../common/editable";
@@ -34,7 +43,7 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
             </Text>
             <Text as="p">{new Date(recording.started).toLocaleString()}</Text>
           </Box>
-          <Box className="hoverhide-item">
+          <Flex className="hoverhide-item" gap="8px">
             {!recording.isPostProcessed && (
               <Button
                 onClick={() =>
@@ -46,7 +55,12 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
                 Post Process
               </Button>
             )}
-          </Box>
+            <IconButton
+              onClick={() => historyApi.openRecordingDetailsWindow(id)}
+            >
+              <HiArrowTopRightOnSquare />
+            </IconButton>
+          </Flex>
         </Flex>
       </Card>
     </Box>

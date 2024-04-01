@@ -1,24 +1,15 @@
-import { RecordingData, RecordingMeta } from "../../types";
 import * as history from "../domain/history";
+import { openAppWindow } from "../domain/windows";
 
 export const historyApi = {
-  saveRecording: async (recordingData: RecordingData) => {
-    await history.saveRecording(recordingData);
-  },
+  saveRecording: history.saveRecording,
+  getRecordings: history.listRecordings,
+  updateRecordingMeta: history.updateRecording,
+  postProcessRecording: history.postProcessRecording,
+  getRecordingMeta: history.getRecordingMeta,
+  getRecordingTranscript: history.getRecordingTranscript,
 
-  getRecordings: async () => {
-    console.log("!");
-    return history.listRecordings();
-  },
-
-  updateRecordingMeta: async (
-    folder: string,
-    partial: Partial<RecordingMeta>,
-  ) => {
-    await history.updateRecording(folder, partial);
-  },
-
-  postProcessRecording: async (folder: string) => {
-    await history.postProcessRecording(folder);
+  openRecordingDetailsWindow: async (id: string) => {
+    openAppWindow(`/history/${id}`);
   },
 };

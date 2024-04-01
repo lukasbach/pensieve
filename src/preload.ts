@@ -15,4 +15,7 @@ contextBridge.exposeInMainWorld("ipcApi", {
       listener(keys);
     });
   },
+  window: {
+    minimize: () => {},
+  },
 });

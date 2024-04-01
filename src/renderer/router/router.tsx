@@ -6,6 +6,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { MainScreen } from "../main/main-screen";
+import { DetailsScreen } from "../details/details-screen";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -14,20 +15,16 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: function Index() {
-    return <MainScreen />;
-  },
+  component: MainScreen,
 });
 
-const aboutRoute = createRoute({
+export const historyDetailsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/about",
-  component: function About() {
-    return <div className="p-2">Hello from About!</div>;
-  },
+  path: "/history/$id",
+  component: DetailsScreen,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, aboutRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, historyDetailsRoute]);
 
 export const router = createRouter({ routeTree, history: createHashHistory() });
 

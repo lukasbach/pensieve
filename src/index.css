@@ -9,10 +9,10 @@ html, body, #root {
     display: none;
 }
 .hoverhide-container:hover .hoverhide-item {
-    display: block;
+    display: flex;
 }
 .hoverhide-inverseitem {
-    display: block;
+    display: flex;
 }
 .hoverhide-container:hover .hoverhide-inverseitem {
     display: none;

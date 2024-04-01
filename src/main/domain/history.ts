@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs-extra";
 import { app } from "electron";
-import { RecordingData, RecordingMeta } from "../../types";
+import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as ffmpeg from "./ffmpeg";
@@ -60,6 +60,16 @@ export const listRecordings = async () => {
     {} as Record<string, RecordingMeta>,
   );
 };
+
+export const getRecordingMeta = async (
+  recordingId: string,
+): Promise<RecordingMeta> =>
+  fs.readJson(path.join(getRecordingsFolder(), recordingId, "meta.json"));
+
+export const getRecordingTranscript = async (
+  recordingId: string,
+): Promise<RecordingTranscript> =>
+  fs.readJson(path.join(getRecordingsFolder(), recordingId, "transcript.json"));
 
 export const updateRecording = async (
   recordingId: string,

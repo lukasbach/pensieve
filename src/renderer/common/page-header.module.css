@@ -1,0 +1,40 @@
+.windowBtn {
+    background-color: transparent;
+    border: none;
+    height: 28px;
+    width: 38px;
+}
+
+.windowBtn:hover {
+    background-color: var(--accent-3);
+}
+
+.windowCloseBtn:hover {
+    background-color: var(--red-3);
+}
+
+.container {
+    border-bottom: 1px solid var(--gray-5);
+    margin-bottom: -1px;
+    -webkit-app-region: drag;
+    -webkit-user-select: none;
+}
+
+.canDrag {
+    -webkit-app-region: drag;
+    -webkit-user-select: none;
+}
+
+.cannotDrag {
+    -webkit-app-region: no-drag;
+}
+
+.title {
+    font-size: 1.4rem;
+    margin: .5rem 1rem;
+}
+
+.content {
+    margin: .5rem 1rem;
+    margin-top: 0;
+}
