@@ -71,6 +71,11 @@ export const getRecordingTranscript = async (
 ): Promise<RecordingTranscript> =>
   fs.readJson(path.join(getRecordingsFolder(), recordingId, "transcript.json"));
 
+export const getRecordingAudioFile = async (id: string) => {
+  const mp3 = path.join(getRecordingsFolder(), id, "recording.mp3");
+  return fs.existsSync(mp3) ? `file://${mp3}` : null;
+};
+
 export const updateRecording = async (
   recordingId: string,
   partial: Partial<RecordingMeta>,

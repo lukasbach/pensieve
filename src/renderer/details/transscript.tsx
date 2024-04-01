@@ -1,16 +1,29 @@
 import { FC, Fragment } from "react";
-import { Avatar, Box, Flex, Text } from "@radix-ui/themes";
-import { HiOutlineUserCircle, HiOutlineUserGroup } from "react-icons/hi2";
+import { Avatar, Box, Flex, IconButton, Text } from "@radix-ui/themes";
+import {
+  HiOutlinePause,
+  HiOutlinePlay,
+  HiOutlineUserCircle,
+  HiOutlineUserGroup,
+} from "react-icons/hi2";
 import { RecordingTranscript } from "../../types";
 
-export const Transscript: FC<{ transcript: RecordingTranscript }> = ({
-  transcript,
-}) => {
+export const Transscript: FC<{
+  transcript: RecordingTranscript;
+  progress: number;
+  onJump: (time: number) => void;
+  onPause: () => void;
+  isPlaying: boolean;
+}> = ({ transcript, progress, onJump, onPause, isPlaying }) => {
   return (
     <Box px="2rem">
       {transcript.transcription.map((item, index) => {
         const time = new Date();
         time.setMilliseconds(item.offsets.from);
+        const isHighlighted =
+          progress !== 0 &&
+          progress * 1000 >= item.offsets.from &&
+          progress * 1000 <= item.offsets.to;
         return (
           <Fragment key={item.timestamps.from}>
             {item.speaker !== transcript.transcription[index - 1]?.speaker && (
@@ -37,8 +50,42 @@ export const Transscript: FC<{ transcript: RecordingTranscript }> = ({
                 </Text>
               </Flex>
             )}
-            <Box ml="calc(32px + 0.5rem)" mt=".2rem" mb="1rem">
-              {item.text}
+            <Box
+              pl="calc(32px + 0.5rem)"
+              mt=".2rem"
+              mb="1rem"
+              position="relative"
+              className="hoverhide-container"
+            >
+              <Flex
+                position="absolute"
+                top="0"
+                left="0"
+                width="32px"
+                justify="end"
+                className="hoverhide-item"
+              >
+                <IconButton
+                  variant="outline"
+                  size="1"
+                  onClick={() => {
+                    if (isPlaying && isHighlighted) {
+                      onPause();
+                    } else {
+                      onJump(item.offsets.from / 1000);
+                    }
+                  }}
+                >
+                  {isPlaying && isHighlighted ? (
+                    <HiOutlinePause />
+                  ) : (
+                    <HiOutlinePlay />
+                  )}
+                </IconButton>
+              </Flex>
+              <Text color={isHighlighted ? "blue" : undefined}>
+                {item.text}
+              </Text>
             </Box>
           </Fragment>
         );
