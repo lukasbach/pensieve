@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Button, Select } from "@radix-ui/themes";
 import { useLoadSources, useRecorderState, useStopRecording } from "./state";
 
-export const Recorder: FC<{}> = ({}) => {
+export const Recorder: FC = () => {
   const {
     sources,
     setSelectedSource,

@@ -9,6 +9,7 @@ import * as history from "./main/domain/history";
 import { openAppWindow } from "./main/domain/windows";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
+// eslint-disable-next-line global-require
 if (require("electron-squirrel-startup")) {
   app.quit();
 }

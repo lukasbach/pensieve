@@ -4,7 +4,7 @@ import { Recorder } from "../recorder/recorder";
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 
-export const MainScreen: FC<{}> = ({}) => {
+export const MainScreen: FC = () => {
   return (
     <Tabs.Root defaultValue="record">
       <PageContainer

@@ -19,6 +19,7 @@ export const Recorder: FC<{}> = () => {
           <li key={source.id}>
             {source.name}
             <button
+              type="button"
               onClick={async () => {
                 const usermedia = await navigator.mediaDevices.getUserMedia({
                   audio: {
@@ -61,6 +62,7 @@ export const Recorder: FC<{}> = () => {
       </ul>
       {recorder && (
         <button
+          type="button"
           onClick={() => {
             recorder.stop();
             recorder.ondataavailable = (e) => {

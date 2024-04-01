@@ -4,7 +4,7 @@ import { useHistoryRecordings } from "./state";
 import { modelsApi } from "../api";
 import { HistoryItem } from "./history-item";
 
-export const History: FC<{}> = ({}) => {
+export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
   return (
     <Box p="1rem">
