@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { historyDetailsRoute } from "../router/router";
 import { QueryKeys } from "../../query-keys";
 import { historyApi } from "../api";
-import { PageHeader } from "../common/page-header";
+import { PageContainer } from "../common/page-container";
+import { Transscript } from "./transscript";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
@@ -17,12 +18,8 @@ export const DetailsScreen: FC = () => {
   });
 
   return (
-    <>
-      <PageHeader title={recording?.name ?? "Untitled Recording"}>
-        Blubxx
-      </PageHeader>
-      <pre>{JSON.stringify(recording)}</pre>
-      <pre>{JSON.stringify(transcript)}</pre>
-    </>
+    <PageContainer title={recording?.name ?? "Untitled Recording"}>
+      {transcript && <Transscript transcript={transcript} />}
+    </PageContainer>
   );
 };

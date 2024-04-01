@@ -1,3 +1,14 @@
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+.page {
+    flex: 1;
+    overflow-y: auto;
+}
+
 .windowBtn {
     background-color: transparent;
     border: none;
@@ -13,7 +24,8 @@
     background-color: var(--red-3);
 }
 
-.container {
+.headerContainer {
+    position: relative;
     border-bottom: 1px solid var(--gray-5);
     margin-bottom: -1px;
     -webkit-app-region: drag;
