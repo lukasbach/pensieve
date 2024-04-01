@@ -1,5 +1,5 @@
 {
-  "name": "meetingrecorder",
+  "name": "notetaker",
   "version": "1.0.0",
   "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
   "author": "Lukas Bach <contact@lukasbach.com>",
