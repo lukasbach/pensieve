@@ -6,7 +6,8 @@ jobs:
   publish:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: write
+      deployments: write
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
