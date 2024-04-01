@@ -1,6 +1,6 @@
 import { execa } from "execa";
 import path from "path";
-import { getExtraResourcesFolder } from "../main-utils";
+import { getExtraResourcesFolder } from "../../main-utils";
 import { getModelPath } from "./models";
 
 const whisperPath = path.join(getExtraResourcesFolder(), "whisper.exe");

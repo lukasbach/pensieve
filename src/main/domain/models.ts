@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import { app } from "electron";
 import { https } from "follow-redirects";
-import { modelData } from "../model-data";
+import { modelData } from "../../model-data";
 
 const modelFolder = path.join(app.getPath("userData"), "models");
 

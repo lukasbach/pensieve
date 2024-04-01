@@ -1,4 +1,4 @@
-import { models } from "../index";
+import { models } from "../domain";
 import { modelData } from "../../model-data";
 
 export const modelsApi = {

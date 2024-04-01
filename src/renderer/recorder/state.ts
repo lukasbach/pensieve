@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { DesktopCapturerSource } from "electron";
 import { useCallback, useEffect } from "react";
-import { mainApi } from "../api";
+import { historyApi, mainApi } from "../api";
 import { blobToBuffer } from "../../utils";
 import { RecordingMeta } from "../../types";
 
@@ -94,7 +94,7 @@ export const useStopRecording = () => {
         r(blob);
       };
     });
-    await mainApi.saveRecording({
+    await historyApi.saveRecording({
       mic: await blobToBuffer(await mic),
       screen: await blobToBuffer(await screen),
       meta,

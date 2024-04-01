@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Badge, Box, Button, Card, Flex, Text } from "@radix-ui/themes";
 import { RecordingMeta } from "../../types";
-import { mainApi } from "../api";
+import { historyApi } from "../api";
 import { Editable } from "../common/editable";
 
 export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
@@ -16,7 +16,9 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
             <Text as="div">
               <Editable
                 value={recording.name || "Untitled"}
-                onChange={(name) => mainApi.updateRecordingMeta(id, { name })}
+                onChange={(name) =>
+                  historyApi.updateRecordingMeta(id, { name })
+                }
                 renderValue={({ value, editBtn }) => (
                   <Flex align="center">
                     <Text mr=".5rem">{value}</Text>
@@ -36,7 +38,7 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
             {!recording.isPostProcessed && (
               <Button
                 onClick={() =>
-                  mainApi
+                  historyApi
                     .postProcessRecording(id)
                     .then(() => console.log("DONE"))
                 }

@@ -1,6 +1,6 @@
 import { execa } from "execa";
 import path from "path";
-import { getExtraResourcesFolder } from "../main-utils";
+import { getExtraResourcesFolder } from "../../main-utils";
 
 const ffmpegPath = path.join(getExtraResourcesFolder(), "ffmpeg.exe");
 
