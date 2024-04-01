@@ -14,3 +14,5 @@ jobs:
       - run: yarn install
       - run: yarn lint
       - run: yarn publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
