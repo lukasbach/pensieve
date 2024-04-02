@@ -10,6 +10,8 @@ import { QueryKeys } from "../../query-keys";
 
 let isRunning = false;
 const processingQueue: string[] = [];
+const doneList: string[] = [];
+const errors: Record<string, string> = {};
 const emptyProgress = {
   modelDownload: 0,
   wav: null,
@@ -103,6 +105,9 @@ export const startQueue = () => {
     } catch (err) {
       // TODO
       console.error("Failed to process recording", id, err);
+      errors[id] = err instanceof Error ? err.message : String(err);
+    } finally {
+      doneList.push(id);
     }
 
     processingQueue.shift();
@@ -130,5 +135,8 @@ export const getProgressData = () => {
     processingQueue,
     currentlyProcessing: isRunning ? processingQueue[0] : null,
     isRunning,
+    currentStep,
+    errors,
+    doneList,
   };
 };
