@@ -18,6 +18,7 @@ export const Transscript: FC<{
       {transcript.transcription.map((item, index) => {
         const speaker =
           item.speaker === "0" ? "They" : item.speaker === "1" ? "Me" : "?";
+        const text = item.text.trim();
         const time = new Date();
         time.setMilliseconds(item.offsets.from);
         const isHighlighted =
@@ -26,7 +27,8 @@ export const Transscript: FC<{
           audio.progress * 1000 < item.offsets.to;
         return (
           <Fragment key={item.timestamps.from}>
-            {item.speaker !== transcript.transcription[index - 1]?.speaker && (
+            {(item.speaker !== transcript.transcription[index - 1]?.speaker ||
+              text.startsWith("- ")) && (
               <Flex align="center">
                 {/* eslint-disable-next-line no-nested-ternary */}
                 {speaker === "Me" ? (
@@ -85,7 +87,7 @@ export const Transscript: FC<{
                 </IconButton>
               </Flex>
               <Text color={isHighlighted ? "blue" : undefined}>
-                {item.text}
+                {text.startsWith("- ") ? text.slice(2) : text}
               </Text>
             </Box>
           </Fragment>
