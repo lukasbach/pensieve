@@ -19,10 +19,16 @@ export const WhisperSettings: FC = () => {
   return (
     <Tabs.Content value="whisper">
       <Heading>Whisper transcription model</Heading>
-      <Text>
+      <Text as="p">
         The whisper AI model that is used to transcribe the audio file. If the
         model is not yet downloaded, it will be downloaded the first time it is
-        used. Larger models have higher CPU and RAM demands.
+        used. Larger models have higher CPU and RAM demands, but produce better
+        results.
+      </Text>
+      <Text as="p" mt=".3rem">
+        Quantized models are smaller and faster, with only small reductions in
+        accuracy, and are recommended for most users. English models are
+        optimized for English language audio files.
       </Text>
       {/* <TextField.Root {...form.register("whisper.model")} /> */}
 

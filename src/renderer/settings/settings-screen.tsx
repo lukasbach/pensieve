@@ -53,7 +53,7 @@ export const SettingsScreen: FC = () => {
         hasSaved ? <HiOutlineCheckCircle /> : <HiOutlineWrenchScrewdriver />
       }
     >
-      <Tabs.Root orientation="vertical">
+      <Tabs.Root orientation="vertical" defaultValue="general">
         <Flex height="100%" mt="1rem">
           <Tabs.List>
             <SettingsTabs />
