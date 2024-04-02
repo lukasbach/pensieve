@@ -8,4 +8,6 @@ export const modelsApi = {
       `${modelData[modelId].name}.bin`,
     );
   },
+
+  listModels: models.getModels,
 };

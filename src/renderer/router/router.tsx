@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { MainScreen } from "../main/main-screen";
 import { DetailsScreen } from "../details/details-screen";
+import { SettingsScreen } from "../settings/settings-screen";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -24,7 +25,17 @@ export const historyDetailsRoute = createRoute({
   component: DetailsScreen,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, historyDetailsRoute]);
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  component: SettingsScreen,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  historyDetailsRoute,
+  settingsRoute,
+]);
 
 export const router = createRouter({ routeTree, history: createHashHistory() });
 

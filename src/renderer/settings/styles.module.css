@@ -1,0 +1,19 @@
+.tab {
+    position: relative;
+}
+
+.tab[data-state=active] {
+    position: relative;
+    font-weight: bold;
+}
+
+.tab[data-state=active]:after {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -10px;
+    width: 5px;
+    border-radius: 3px;
+    background-color: var(--accent-10);
+}

@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
-import { Box } from "@radix-ui/themes";
+import { Box, Flex } from "@radix-ui/themes";
 import {
   VscChromeClose,
   VscChromeMinimize,
@@ -10,11 +10,12 @@ import { mainApi } from "../api";
 
 export const PageContainer: FC<
   PropsWithChildren<{
-    title?: string;
+    title?: string | ReactNode;
     headerContent?: ReactNode;
     tabs?: ReactNode;
+    icon?: ReactNode;
   }>
-> = ({ tabs, title, children, headerContent }) => {
+> = ({ tabs, title, icon, children, headerContent }) => {
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
@@ -51,7 +52,11 @@ export const PageContainer: FC<
         </Box>
         {(title || headerContent) && (
           <Box>
-            <h1 className={styles.title}>{title}</h1>
+            <h1 className={styles.title}>
+              <Flex align="center" gap=".5rem">
+                {icon} {title}
+              </Flex>
+            </h1>
             <Box className={styles.content}>{headerContent}</Box>
           </Box>
         )}

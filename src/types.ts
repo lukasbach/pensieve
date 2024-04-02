@@ -19,3 +19,12 @@ export type RecordingTranscript = {
     speaker: string;
   }[];
 };
+
+export type Settings = {
+  ui: {
+    dark: boolean;
+  };
+  whisper: {
+    model: string;
+  };
+};

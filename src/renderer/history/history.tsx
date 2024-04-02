@@ -1,11 +1,12 @@
 import { FC } from "react";
 import { Box, Button } from "@radix-ui/themes";
 import { useHistoryRecordings } from "./state";
-import { modelsApi } from "../api";
+import { mainApi, modelsApi } from "../api";
 import { HistoryItem } from "./history-item";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
+  console.log(recordings);
   return (
     <Box p="1rem">
       {Object.entries(recordings || {}).map(([id, meta]) => (
@@ -20,6 +21,7 @@ export const History: FC = () => {
       >
         Download model
       </Button>
+      <Button onClick={() => mainApi.openSettingsWindow()}>Settings</Button>
     </Box>
   );
 };
