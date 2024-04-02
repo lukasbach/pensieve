@@ -1,4 +1,4 @@
-import { Fragment, memo, useEffect, useRef } from "react";
+import { Fragment, memo } from "react";
 import { Avatar, Box, Flex, IconButton, Text } from "@radix-ui/themes";
 import {
   HiOutlinePause,
@@ -13,8 +13,7 @@ export const TranscriptItem = memo<{
   item: RecordingTranscript["transcription"][number];
   priorSpeaker?: string;
   audio: ReturnType<typeof useManagedAudio>;
-  setHighlightOffset: (offset: number) => void;
-}>(({ item, priorSpeaker, audio, setHighlightOffset }) => {
+}>(({ item, priorSpeaker, audio }) => {
   const speaker =
     item.speaker === "0" ? "They" : item.speaker === "1" ? "Me" : "?";
   const text = item.text.trim();
@@ -24,13 +23,6 @@ export const TranscriptItem = memo<{
     audio.progress !== 0 &&
     audio.progress * 1000 >= item.offsets.from &&
     audio.progress * 1000 < item.offsets.to;
-
-  const textItem = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (isHighlighted) {
-      setHighlightOffset(textItem.current?.offsetTop || 0);
-    }
-  }, [isHighlighted, setHighlightOffset]);
 
   return (
     <Fragment key={item.timestamps.from}>
@@ -64,7 +56,6 @@ export const TranscriptItem = memo<{
         mb="1rem"
         position="relative"
         className="hoverhide-container"
-        ref={textItem}
       >
         <Flex
           position="absolute"
