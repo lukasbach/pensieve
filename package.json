@@ -70,7 +70,8 @@
       "project": "./tsconfig.json"
     },
     "rules": {
-      "import/no-extraneous-dependencies": "off"
+      "import/no-extraneous-dependencies": "off",
+      "no-nested-ternary": "warn"
     },
     "ignorePatterns": [
       "lib",

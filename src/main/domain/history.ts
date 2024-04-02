@@ -4,6 +4,7 @@ import { app } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
+import * as models from "./models";
 import * as ffmpeg from "./ffmpeg";
 import * as whisper from "./whisper";
 
@@ -116,7 +117,7 @@ export const postProcessRecording = async (id: string) => {
   await whisper.processWavFile(
     wav,
     path.join(getRecordingsFolder(), id, "transcript.json"),
-    "ggml-large-v3-q5_0",
+    await models.prepareConfiguredModel(),
   );
 
   await fs.rm(wav);

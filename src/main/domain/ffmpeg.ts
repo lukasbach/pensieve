@@ -26,17 +26,19 @@ export const toStereoWavFile = async (
   await execa(
     ffmpegPath,
     [
+      // "-i",      input1,      "-i",      input2,      "-filter_complex",      "[0:a][1:a]join=inputs=2:channel_layout=stereo[a]",      "-map",      "[a]",      "-y",      "-ar",      "16000",      output,
+
       "-i",
       input1,
       "-i",
       input2,
       "-filter_complex",
-      "amerge",
-      "-ac",
-      "2",
-      "-y",
+      "[0:a][1:a] amerge=inputs=2, pan=stereo|c0<c0+c1|c1<c2+c3, highpass=f=300, lowpass=f=3000 [a]", // afftdn=nf=-20
+      "-map",
+      "[a]",
       "-ar",
       "16000",
+      "-y",
       output,
     ],
     { stdio: "inherit" },

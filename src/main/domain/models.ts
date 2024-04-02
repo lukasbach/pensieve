@@ -4,6 +4,7 @@ import path from "path";
 import { app } from "electron";
 import { https } from "follow-redirects";
 import { modelData } from "../../model-data";
+import { getSettings } from "./settings";
 
 const modelFolder = path.join(app.getPath("userData"), "models");
 
@@ -21,6 +22,12 @@ export const downloadModel = async (url: string, modelFile: string) => {
     const req = https.get(url, (res) => {
       const file = fs.createWriteStream(path.join(modelFolder, modelFile));
       res.pipe(file);
+      let downloaded = 0;
+      const length = parseInt(res.headers["content-length"] || "0", 10);
+      res.on("data", (chunk) => {
+        downloaded += chunk.length;
+        console.log("Downloading model", downloaded / length);
+      });
       file.on("finish", () => {
         file.close();
         resolve();
@@ -45,4 +52,12 @@ export const hasModel = async (modelFile: string) => {
 
 export const getModelPath = (modelId: string) => {
   return path.join(modelFolder, modelData[modelId].fileName);
+};
+
+export const prepareConfiguredModel = async () => {
+  const { model } = (await getSettings()).whisper;
+  if (!(await hasModel(model))) {
+    await downloadModel(modelData[model].url, modelData[model].fileName);
+  }
+  return model;
 };

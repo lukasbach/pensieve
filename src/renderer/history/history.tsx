@@ -13,9 +13,9 @@ export const History: FC = () => {
         <HistoryItem key={id} id={id} recording={meta} />
       ))}
       <Button
-        onClick={() =>
+        onClick={async () =>
           modelsApi
-            .downloadModel("ggml-large-v3-q5_0")
+            .downloadModel((await mainApi.getSettings()).whisper.model)
             .then(() => console.log("Download done"))
         }
       >

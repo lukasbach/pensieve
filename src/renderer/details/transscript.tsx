@@ -16,6 +16,8 @@ export const Transscript: FC<{
   return (
     <Box px="2rem" py="1rem">
       {transcript.transcription.map((item, index) => {
+        const speaker =
+          item.speaker === "0" ? "They" : item.speaker === "1" ? "Me" : "?";
         const time = new Date();
         time.setMilliseconds(item.offsets.from);
         const isHighlighted =
@@ -27,15 +29,15 @@ export const Transscript: FC<{
             {item.speaker !== transcript.transcription[index - 1]?.speaker && (
               <Flex align="center">
                 {/* eslint-disable-next-line no-nested-ternary */}
-                {item.speaker === "Me" ? (
+                {speaker === "Me" ? (
                   <Avatar fallback={<HiOutlineUserCircle />} size="2" />
-                ) : item.speaker === "They" ? (
+                ) : speaker === "They" ? (
                   <Avatar fallback={<HiOutlineUserGroup />} size="2" />
                 ) : (
-                  <Avatar fallback={item.speaker[0]} size="2" />
+                  <Avatar fallback={speaker[0]} size="2" />
                 )}
                 <Text weight="bold" ml=".5rem" style={{ flexGrow: 1 }}>
-                  {item.speaker}
+                  {speaker}
                 </Text>
                 <Text color="gray">
                   {Math.floor(item.offsets.from / 60000)
