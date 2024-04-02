@@ -1,4 +1,3 @@
-import { execa } from "execa";
 import path from "path";
 import {
   getExtraResourcesFolder,
@@ -6,6 +5,8 @@ import {
 } from "../../main-utils";
 import { getModelPath } from "./models";
 import * as ffmpeg from "./ffmpeg";
+import * as runner from "./runner";
+import * as postprocess from "./postprocess";
 
 const whisperPath = path.join(getExtraResourcesFolder(), "whisper.exe");
 
@@ -14,6 +15,8 @@ export const processWavFile = async (
   output: string,
   modelId: string,
 ) => {
+  postprocess.setStep("whisper");
+
   // https://trac.ffmpeg.org/wiki/AudioChannelManipulation#a2monostereo
   const out = path.join(
     path.dirname(output),
@@ -21,7 +24,7 @@ export const processWavFile = async (
   );
   const inputTime = await ffmpeg.getDuration(input);
 
-  const process = execa(whisperPath, [
+  const process = runner.execute(whisperPath, [
     input,
     "-di",
     "-oj",
@@ -39,7 +42,8 @@ export const processWavFile = async (
     );
     const time = Array.from(match).map((m: any) => m[1]);
     const duration = getMillisecondsFromTimeString(time[0]);
-    console.log("Progress", duration / inputTime);
+    postprocess.setProgress("whisper", duration / inputTime);
+    console.log("Whisper:", duration / inputTime);
   });
   await process;
 };

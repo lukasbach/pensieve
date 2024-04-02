@@ -5,4 +5,5 @@ export enum QueryKeys {
   Settings = "settings",
   HasModel = "hasmodel",
   Theme = "theme",
+  PostProcessing = "postprocessing",
 }

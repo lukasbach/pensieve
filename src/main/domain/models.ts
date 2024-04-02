@@ -5,6 +5,7 @@ import { app } from "electron";
 import { https } from "follow-redirects";
 import { modelData } from "../../model-data";
 import { getSettings } from "./settings";
+import * as postprocess from "./postprocess";
 
 const modelFolder = path.join(app.getPath("userData"), "models");
 
@@ -26,6 +27,7 @@ export const downloadModel = async (url: string, modelFile: string) => {
       const length = parseInt(res.headers["content-length"] || "0", 10);
       res.on("data", (chunk) => {
         downloaded += chunk.length;
+        postprocess.setProgress("modelDownload", downloaded / length);
         console.log("Downloading model", downloaded / length);
       });
       file.on("finish", () => {
@@ -57,7 +59,9 @@ export const getModelPath = (modelId: string) => {
 export const prepareConfiguredModel = async () => {
   const { model } = (await getSettings()).whisper;
   if (!(await hasModel(model))) {
+    postprocess.setStep("modelDownload");
     await downloadModel(modelData[model].url, modelData[model].fileName);
   }
+  postprocess.setProgress("modelDownload", 1);
   return model;
 };

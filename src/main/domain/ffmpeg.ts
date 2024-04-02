@@ -4,6 +4,7 @@ import {
   getExtraResourcesFolder,
   getMillisecondsFromTimeString,
 } from "../../main-utils";
+import * as runner from "./runner";
 
 const ffmpegPath = path.join(getExtraResourcesFolder(), "ffmpeg.exe");
 
@@ -23,7 +24,7 @@ export const toStereoWavFile = async (
   output: string,
 ) => {
   // https://trac.ffmpeg.org/wiki/AudioChannelManipulation#a2monostereo
-  await execa(
+  await runner.execute(
     ffmpegPath,
     [
       // "-i",      input1,      "-i",      input2,      "-filter_complex",      "[0:a][1:a]join=inputs=2:channel_layout=stereo[a]",      "-map",      "[a]",      "-y",      "-ar",      "16000",      output,
@@ -55,7 +56,7 @@ export const toJoinedFile = async (
   }
 
   if (input1 && input2) {
-    await execa(
+    await runner.execute(
       ffmpegPath,
       [
         "-i",
@@ -77,7 +78,7 @@ export const toJoinedFile = async (
 };
 
 export const getDuration = async (input: string) => {
-  const { stdout, stderr } = await execa(
+  const { stdout, stderr } = await runner.execute(
     ffmpegPath,
     ["-i", input, "-f", "null", "-"],
     {

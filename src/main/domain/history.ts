@@ -4,9 +4,6 @@ import { app } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
-import * as models from "./models";
-import * as ffmpeg from "./ffmpeg";
-import * as whisper from "./whisper";
 
 export const init = async () => {
   await fs.ensureDir(path.join(app.getPath("userData"), "recordings"));
@@ -93,32 +90,4 @@ export const updateRecording = async (
   );
   invalidateUiKeys(QueryKeys.History, recordingId);
   invalidateUiKeys(QueryKeys.History);
-};
-
-export const postProcessRecording = async (id: string) => {
-  const mic = path.join(getRecordingsFolder(), id, "mic.webm");
-  const screen = path.join(getRecordingsFolder(), id, "screen.webm");
-  const wav = path.join(getRecordingsFolder(), id, "whisper-input.wav");
-  const mp3 = path.join(getRecordingsFolder(), id, "recording.mp3");
-
-  if (fs.existsSync(mic) && fs.existsSync(screen)) {
-    await ffmpeg.toStereoWavFile(mic, screen, wav);
-    await ffmpeg.toJoinedFile(mic, screen, mp3);
-  } else if (fs.existsSync(mic)) {
-    await ffmpeg.toWavFile(mic, wav);
-    await ffmpeg.toJoinedFile(mic, null, mp3);
-  } else if (fs.existsSync(screen)) {
-    await ffmpeg.toWavFile(screen, wav);
-    await ffmpeg.toJoinedFile(screen, null, mp3);
-  } else {
-    throw new Error("No recording found");
-  }
-
-  await whisper.processWavFile(
-    wav,
-    path.join(getRecordingsFolder(), id, "transcript.json"),
-    await models.prepareConfiguredModel(),
-  );
-
-  await fs.rm(wav);
 };
