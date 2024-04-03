@@ -80,7 +80,7 @@ export const HistoryItem: FC<{
               color="red"
               onClick={async () => {
                 await confirmDeletion();
-                console.log("DELETE");
+                await historyApi.removeRecording(id);
               }}
             >
               <HiOutlineTrash /> Delete recording

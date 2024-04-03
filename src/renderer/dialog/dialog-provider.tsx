@@ -18,9 +18,9 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
       value={useMemo(
         () => ({
           dialog,
-          setDialog: (data: DialogData<any>) => {
+          setDialog: (data: DialogData<any> | null) => {
             setDialog(data);
-            setValue(data.defaultValue);
+            setValue(data?.defaultValue ?? null);
           },
         }),
         [dialog],
@@ -37,8 +37,9 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
       >
         <Dialog.Content>
           <form
-            onSubmit={() => {
-              console.log("SUBMIT", dialog);
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               dialog?.onSubmit?.(value);
               setDialog(null);
             }}

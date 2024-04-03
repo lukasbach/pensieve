@@ -50,7 +50,7 @@ export const listRecordings = async () => {
         ] as const,
     ),
   );
-  return items.reduce(
+  return items.reverse().reduce(
     (acc, [folder, meta]) => {
       acc[folder] = meta;
       return acc;
@@ -95,4 +95,10 @@ export const updateRecording = async (
 export const openRecordingFolder = async (recordingId: string) => {
   const folder = path.join(getRecordingsFolder(), recordingId);
   await shell.openPath(folder);
+};
+
+export const removeRecording = async (recordingId: string) => {
+  const trash = await import("trash");
+  await trash.default(path.join(getRecordingsFolder(), recordingId));
+  invalidateUiKeys(QueryKeys.History);
 };

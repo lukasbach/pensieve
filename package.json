@@ -20,7 +20,8 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron-squirrel-startup": "^1.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "trash": "^8.1.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.1",
