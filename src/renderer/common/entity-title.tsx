@@ -1,11 +1,13 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
-import { Box, Flex, Text } from "@radix-ui/themes";
+import { Box, Flex, FlexProps, Text } from "@radix-ui/themes";
 
 export const EntityTitle: FC<
-  PropsWithChildren<{ subtitle?: string; icon?: ReactNode; tags?: ReactNode }>
-> = ({ subtitle, tags, icon, children }) => {
+  PropsWithChildren<
+    { subtitle?: string; icon?: ReactNode; tags?: ReactNode } & FlexProps
+  >
+> = ({ subtitle, tags, icon, children, ...props }) => {
   return (
-    <Flex align="center" gap=".5rem">
+    <Flex align="center" gap=".5rem" {...props}>
       {icon && <Box>{icon}</Box>}
       <Flex direction="column" overflow="hidden">
         <Flex mb="-.2rem" gap=".2rem">
