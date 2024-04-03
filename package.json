@@ -1,6 +1,6 @@
 {
   "name": "notetaker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
   "author": "Lukas Bach <contact@lukasbach.com>",
   "license": "MIT",
