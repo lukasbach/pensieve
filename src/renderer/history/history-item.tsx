@@ -25,7 +25,7 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
   return (
     <Box pb=".5rem">
       <Card className="hoverhide-container">
-        <Flex align="center" maxWidth="100%" overflow="hidden">
+        <Flex align="center">
           <Box flexGrow="1" maxWidth="100%" overflow="hidden">
             <Editable
               value={recording.name || "Untitled"}
