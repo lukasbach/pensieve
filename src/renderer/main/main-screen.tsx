@@ -28,15 +28,16 @@ export const MainScreen: FC = () => {
           </IconButton>
         }
       >
-        <Tabs.Content value="record" asChild>
+        {/* TODO cant remember why i put asChild on the tabContent elements, but radix logs error if they exist, due to children not forwarding refs */}
+        <Tabs.Content value="record">
           <Recorder />
         </Tabs.Content>
 
-        <Tabs.Content value="history" asChild>
+        <Tabs.Content value="history">
           <History />
         </Tabs.Content>
 
-        <Tabs.Content value="postprocess" asChild>
+        <Tabs.Content value="postprocess">
           <Postprocess />
         </Tabs.Content>
       </PageContainer>

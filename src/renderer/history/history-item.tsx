@@ -6,11 +6,13 @@ import {
   HiMiniPhone,
   HiOutlineDocumentText,
   HiOutlineFolderOpen,
+  HiOutlineTrash,
 } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
 import { EntityTitle } from "../common/entity-title";
+import { useConfirm } from "../dialog/context";
 
 export const HistoryItem: FC<{
   recording: RecordingMeta;
@@ -18,6 +20,10 @@ export const HistoryItem: FC<{
   priorItemDate: string;
 }> = ({ recording, id, priorItemDate }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const confirmDeletion = useConfirm(
+    "Delete recording",
+    "Are you sure you want to delete this recording?",
+  );
   const isNewDate = useMemo(() => {
     if (!priorItemDate) return true;
     return (
@@ -69,6 +75,15 @@ export const HistoryItem: FC<{
               }}
             >
               <HiOutlineDocumentText /> Postprocess
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              color="red"
+              onClick={async () => {
+                await confirmDeletion();
+                console.log("DELETE");
+              }}
+            >
+              <HiOutlineTrash /> Delete recording
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Root>

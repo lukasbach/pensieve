@@ -13,6 +13,7 @@ import "@radix-ui/themes/styles.css";
 import { FC, PropsWithChildren } from "react";
 import { QueryKeys } from "./query-keys";
 import { mainApi } from "./renderer/api";
+import { DialogProvider } from "./renderer/dialog/dialog-provider";
 
 const queryClient = new QueryClient();
 (window as any).ipcApi.onInvalidateUiKeys((keys: string[]) => {
@@ -31,7 +32,9 @@ const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <DialogProvider>
+        <RouterProvider router={router} />
+      </DialogProvider>
     </ThemeProvider>
   </QueryClientProvider>,
 );
