@@ -5,6 +5,7 @@ import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
+import * as ffmpeg from "./ffmpeg";
 
 export const init = async () => {
   await fs.ensureDir(path.join(app.getPath("userData"), "recordings"));
@@ -37,6 +38,22 @@ export const saveRecording = async (recording: RecordingData) => {
     spaces: 2,
   });
   searchIndex.updateRecordingName(folder, recording.meta.name);
+  invalidateUiKeys(QueryKeys.History);
+};
+
+export const importRecording = async (file: string, meta: RecordingMeta) => {
+  const date = new Date(meta.started);
+  const folder = path.join(
+    getRecordingsFolder(),
+    `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`,
+  );
+  await fs.ensureDir(folder);
+  await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
+  await fs.writeJSON(path.join(folder, "meta.json"), meta, {
+    spaces: 2,
+  });
+  searchIndex.updateRecordingName(folder, meta.name);
+  invalidateUiKeys(QueryKeys.History);
 };
 
 export const listRecordings = async () => {

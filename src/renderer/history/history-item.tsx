@@ -54,7 +54,7 @@ export const HistoryItem: FC<{
       >
         <DropdownMenu.Root onOpenChange={setDropdownOpen}>
           <DropdownMenu.Trigger>
-            <IconButton variant="outline">
+            <IconButton variant="outline" color="gray">
               <HiMiniBars3 />
             </IconButton>
           </DropdownMenu.Trigger>

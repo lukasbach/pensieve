@@ -40,7 +40,11 @@ export const Postprocess: FC = () => {
             ? "Sessions are being processed..."
             : "Postprocessing was cancelled. You can start it again."}
         </Text>
-        <Button onClick={() => historyApi.clearPostProcessingQueue()}>
+        <Button
+          onClick={() => historyApi.clearPostProcessingQueue()}
+          variant="soft"
+          color="gray"
+        >
           Clear list
         </Button>
         {data.isRunning ? (

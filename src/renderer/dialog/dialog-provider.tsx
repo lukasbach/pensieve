@@ -35,7 +35,7 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
           }
         }}
       >
-        <Dialog.Content>
+        <Dialog.Content key={dialog?.title}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -56,7 +56,7 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
                     {dialog.input.label}
                   </Text>
                   <TextField.Root
-                    defaultValue={dialog.defaultValue}
+                    value={value}
                     placeholder={dialog.placeholder}
                     onChange={(e) => setValue(e.currentTarget.value)}
                   />

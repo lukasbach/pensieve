@@ -51,3 +51,24 @@ export const useConfirm = (title: string, description?: string) => {
     [openDialog, title, description],
   );
 };
+
+export const usePromptText = (
+  title: string,
+  label: string,
+  placeholder?: string,
+) => {
+  const { openDialog } = useDialog();
+  return useCallback(
+    (defaultValue?: string) =>
+      new Promise<string | undefined>((onSubmit) => {
+        openDialog({
+          title,
+          placeholder,
+          input: { type: "text", label },
+          onSubmit,
+          defaultValue,
+        });
+      }),
+    [openDialog, title, placeholder, label],
+  );
+};

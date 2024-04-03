@@ -8,6 +8,12 @@ import * as runner from "./runner";
 
 const ffmpegPath = path.join(getExtraResourcesFolder(), "ffmpeg.exe");
 
+export const simpleTranscode = async (input: string, output: string) => {
+  await execa(ffmpegPath, ["-i", input, "-y", output], {
+    stdio: "inherit",
+  });
+};
+
 export const toWavFile = async (input: string, output: string) => {
   await execa(
     ffmpegPath,
