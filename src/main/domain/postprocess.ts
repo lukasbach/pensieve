@@ -25,14 +25,25 @@ const emptyProgress = {
 const progress = { ...emptyProgress };
 let lastUiUpdate = 0;
 let currentStep: keyof typeof progress | "notstarted" = "notstarted";
+let abortedFlag = false;
+
+export const hasAborted = () => abortedFlag;
 
 const updateUiProgress = () => {
-  if (lastUiUpdate + 100 < Date.now()) {
+  if (Date.now() < lastUiUpdate) {
+    return;
+  }
+
+  if (Date.now() - lastUiUpdate > 100) {
     lastUiUpdate = Date.now();
     invalidateUiKeys(QueryKeys.PostProcessing);
-  } else {
-    setTimeout(updateUiProgress, 100);
+    return;
   }
+
+  setTimeout(() => {
+    invalidateUiKeys(QueryKeys.PostProcessing);
+  }, 100);
+  lastUiUpdate = Date.now() + 100;
 };
 
 export const getCurrentItem = () => {
@@ -41,15 +52,19 @@ export const getCurrentItem = () => {
 
 export const setProgress = (step: keyof typeof progress, value: number) => {
   progress[step] = value;
+  console.log("setProgress", value);
   updateUiProgress();
 };
 
 export const setStep = (step: keyof typeof progress | "notstarted") => {
   currentStep = step;
+  console.log("setStep");
+  updateUiProgress();
 };
 
 export const addToQueue = (recordingId: string) => {
   processingQueue.push(recordingId);
+  console.log("addToQueue");
   updateUiProgress();
 };
 
@@ -60,22 +75,28 @@ export const postProcessRecording = async (id: string) => {
   const mp3 = path.join(getRecordingsFolder(), id, "recording.mp3");
 
   setStep("wav");
+  if (hasAborted()) return;
 
   if (fs.existsSync(mic) && fs.existsSync(screen)) {
     await ffmpeg.toStereoWavFile(mic, screen, wav);
+    if (hasAborted()) return;
     setStep("mp3");
     await ffmpeg.toJoinedFile(mic, screen, mp3);
   } else if (fs.existsSync(mic)) {
     await ffmpeg.toWavFile(mic, wav);
+    if (hasAborted()) return;
     setStep("mp3");
     await ffmpeg.toJoinedFile(mic, null, mp3);
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toWavFile(screen, wav);
+    if (hasAborted()) return;
     setStep("mp3");
     await ffmpeg.toJoinedFile(screen, null, mp3);
   } else {
     throw new Error("No recording found");
   }
+
+  if (hasAborted()) return;
 
   await whisper.processWavFile(
     wav,
@@ -84,6 +105,7 @@ export const postProcessRecording = async (id: string) => {
   );
 
   await fs.rm(wav);
+  console.log("postProcessRecording");
   updateUiProgress();
 };
 
@@ -92,6 +114,7 @@ export const startQueue = () => {
     return;
   }
 
+  abortedFlag = false;
   isRunning = true;
   const next = async () => {
     if (processingQueue.length === 0) {
@@ -118,6 +141,7 @@ export const startQueue = () => {
 };
 
 export const stop = () => {
+  abortedFlag = true;
   runner.abortAllExecutions();
   isRunning = false;
   progress.modelDownload = 0;
@@ -126,6 +150,7 @@ export const stop = () => {
   progress.whisper = 0;
   progress.summary = 0;
   setStep("notstarted");
+  console.log("stop");
   updateUiProgress();
 };
 

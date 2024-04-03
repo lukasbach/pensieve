@@ -46,11 +46,10 @@ export const HistoryItem: FC<{ recording: RecordingMeta; id: string }> = ({
           <Flex className="hoverhide-item" gap="8px">
             {!recording.isPostProcessed && (
               <Button
-                onClick={() =>
-                  historyApi
-                    .postProcessRecording(id)
-                    .then(() => console.log("DONE"))
-                }
+                onClick={async () => {
+                  await historyApi.addToPostProcessingQueue(id);
+                  await historyApi.startPostProcessing();
+                }}
               >
                 Post Process
               </Button>

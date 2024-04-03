@@ -11,7 +11,14 @@ import { useHistoryRecordings } from "../history/state";
 import { ProgressCardWrapper } from "./progress-card-wrapper";
 import { historyApi } from "../api";
 
-const allSteps = ["modelDownload", "wav", "mp3", "whisper", "summary"] as const;
+const allSteps = ["wav", "mp3", "modelDownload", "whisper", "summary"] as const;
+const stepLabels = {
+  modelDownload: "Downloading model",
+  wav: "Preparing audio",
+  mp3: "Generating MP3 file",
+  whisper: "Transcribing audio",
+  summary: "Generating summary",
+};
 
 export const ProgressCard: FC<{
   id: string;
@@ -27,7 +34,11 @@ export const ProgressCard: FC<{
         header={<Text color="red">{name}</Text>}
         icon={<HiOutlineExclamationTriangle color="var(--red-11)" />}
       >
-        <pre>{data.errors[id]}</pre>
+        <pre
+          style={{ overflowX: "auto", overflowY: "auto", maxHeight: "400px" }}
+        >
+          {data.errors[id]}
+        </pre>
       </ProgressCardWrapper>
     );
   }
@@ -60,10 +71,10 @@ export const ProgressCard: FC<{
         {allSteps.map((item, index) => (
           <ProgressStep
             key={item}
-            label={item}
+            label={stepLabels[item]}
             isRunning={item === data.currentStep}
             isDone={allSteps.indexOf(data.currentStep as any) > index}
-            progress={data.progress[item] ?? 0}
+            progress={data.progress[item]}
           />
         ))}
       </ProgressCardWrapper>

@@ -1,7 +1,10 @@
 import { FC } from "react";
 import { Flex } from "@radix-ui/themes";
+import { useQuery } from "@tanstack/react-query";
 import { ProgressCard } from "./progress-card";
 import { getProgressData } from "../../main/domain/postprocess";
+import { QueryKeys } from "../../query-keys";
+import { historyApi } from "../api";
 
 const mockData: Awaited<ReturnType<typeof getProgressData>> = {
   processingQueue: ["a", "b"],
@@ -16,12 +19,18 @@ const mockData: Awaited<ReturnType<typeof getProgressData>> = {
 };
 
 export const Postprocess: FC = () => {
+  const { data } = useQuery({
+    queryKey: [QueryKeys.PostProcessing],
+    queryFn: historyApi.getPostProcessingProgress,
+  });
+
+  if (!data) return null;
+
   return (
     <Flex maxWidth="32rem" mx="auto" my="1rem" direction="column" gap="1rem">
-      <ProgressCard id="a" data={mockData} />
-      <ProgressCard id="b" data={mockData} />
-      <ProgressCard id="c" data={mockData} />
-      <ProgressCard id="d" data={mockData} />
+      {[...data.doneList, ...data.processingQueue].map((item) => (
+        <ProgressCard key={item} id={item} data={data} />
+      ))}
     </Flex>
   );
 };

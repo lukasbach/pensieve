@@ -9,7 +9,7 @@ export const ProgressStep: FC<{
   label: string;
   isRunning?: boolean;
   isDone?: boolean;
-  progress: number;
+  progress: number | null | undefined;
 }> = ({ label, isRunning, progress, isDone }) => {
   return (
     <Box>
@@ -32,14 +32,16 @@ export const ProgressStep: FC<{
           >
             {isRunning ? `${label}...` : label}
           </Text>
-          {isRunning && (
+          {isRunning && progress !== undefined && progress !== null && (
             <Text color="gray">
               {Math.min(Math.round(progress * 100), 100)}%
             </Text>
           )}
         </Flex>
       </Flex>
-      {isRunning && <Progress value={progress * 100} mt=".2rem" mb=".8rem" />}
+      {isRunning && progress !== undefined && progress !== null && (
+        <Progress value={Math.min(progress * 100)} mt=".2rem" mb=".8rem" />
+      )}
     </Box>
   );
 };

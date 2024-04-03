@@ -42,7 +42,9 @@ export const processWavFile = async (
     );
     const time = Array.from(match).map((m: any) => m[1]);
     const duration = getMillisecondsFromTimeString(time[0]);
-    postprocess.setProgress("whisper", duration / inputTime);
+    if (duration > 0) {
+      postprocess.setProgress("whisper", duration / inputTime);
+    }
     console.log("Whisper:", duration / inputTime);
   });
   await process;
