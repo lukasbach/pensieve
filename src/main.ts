@@ -1,12 +1,15 @@
 import { BrowserWindow, app, protocol } from "electron";
 import path from "path";
 import fs from "fs-extra";
+import { updateElectronApp } from "update-electron-app";
 import { loadIpcInterfaceInMain } from "./main/ipc/ipc-connector";
 import { mainApi } from "./main/ipc/main-api";
 import { modelsApi } from "./main/ipc/models-api";
 import { historyApi } from "./main/ipc/history-api";
 import * as history from "./main/domain/history";
 import { openAppWindow } from "./main/domain/windows";
+
+updateElectronApp();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // eslint-disable-next-line global-require

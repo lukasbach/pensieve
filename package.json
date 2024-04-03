@@ -55,6 +55,7 @@
     "react-icons": "^5.0.1",
     "ts-node": "^10.0.0",
     "typescript": "^5.4.3",
+    "update-electron-app": "^3.0.0",
     "vite": "^5.0.12",
     "whisper-cpp-static": "^0.0.2",
     "zustand": "^4.5.2"
