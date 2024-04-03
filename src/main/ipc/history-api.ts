@@ -10,10 +10,11 @@ export const historyApi = {
   getRecordingTranscript: history.getRecordingTranscript,
   getRecordingAudioFile: history.getRecordingAudioFile,
 
-  startPostProcessing: postprocess.startQueue,
-  stopPostProcessing: postprocess.stop,
-  addToPostProcessingQueue: postprocess.addToQueue,
-  getPostProcessingProgress: postprocess.getProgressData,
+  startPostProcessing: async () => postprocess.startQueue(),
+  stopPostProcessing: async () => postprocess.stop(),
+  addToPostProcessingQueue: async (modelId: string) =>
+    postprocess.addToQueue(modelId),
+  getPostProcessingProgress: async () => postprocess.getProgressData(),
 
   openRecordingDetailsWindow: async (id: string) => {
     openAppWindow(`/history/${id}`);
