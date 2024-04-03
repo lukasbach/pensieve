@@ -63,6 +63,14 @@ export const setStep = (step: keyof typeof progress | "notstarted") => {
 };
 
 export const addToQueue = (recordingId: string) => {
+  if (processingQueue.includes(recordingId)) {
+    return;
+  }
+
+  if (doneList.includes(recordingId)) {
+    doneList.splice(doneList.indexOf(recordingId), 1);
+  }
+
   processingQueue.push(recordingId);
   console.log("addToQueue");
   updateUiProgress();

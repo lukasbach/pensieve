@@ -12,6 +12,7 @@ export const SettingsTabs: FC = () => (
     py=".5rem"
     gap=".8rem"
     align="end"
+    pt="1rem"
   >
     <Tabs.Trigger value="general" asChild>
       <Button variant="ghost" className={styles.tab}>

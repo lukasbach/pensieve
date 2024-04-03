@@ -53,12 +53,16 @@ export const SettingsScreen: FC = () => {
         hasSaved ? <HiOutlineCheckCircle /> : <HiOutlineWrenchScrewdriver />
       }
     >
-      <Tabs.Root orientation="vertical" defaultValue="general">
-        <Flex height="100%" mt="1rem">
+      <Tabs.Root
+        orientation="vertical"
+        defaultValue="general"
+        style={{ height: "100%" }}
+      >
+        <Flex height="100%">
           <Tabs.List>
             <SettingsTabs />
           </Tabs.List>
-          <Box height="100%" overflowY="auto" flexGrow="1" pr="1rem">
+          <Box height="100%" overflowY="auto" flexGrow="1" pr="1rem" pt="1rem">
             <form onChange={handleSubmit}>
               <FormProvider {...form}>
                 <GeneralSettings />

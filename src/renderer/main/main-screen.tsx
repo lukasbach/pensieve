@@ -7,7 +7,7 @@ import { Postprocess } from "../postprocess/postprocess";
 
 export const MainScreen: FC = () => {
   return (
-    <Tabs.Root defaultValue="record">
+    <Tabs.Root defaultValue="record" style={{ height: "100%" }}>
       <PageContainer
         tabs={
           <Tabs.List>

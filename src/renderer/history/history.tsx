@@ -6,7 +6,6 @@ import { HistoryItem } from "./history-item";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
-  console.log(recordings);
   return (
     <Box p="1rem">
       {Object.entries(recordings || {}).map(([id, meta]) => (
