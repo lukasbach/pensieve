@@ -9,6 +9,7 @@ export const historyApi = {
   getRecordingMeta: history.getRecordingMeta,
   getRecordingTranscript: history.getRecordingTranscript,
   getRecordingAudioFile: history.getRecordingAudioFile,
+  openRecordingFolder: history.openRecordingFolder,
 
   startPostProcessing: async () => postprocess.startQueue(),
   stopPostProcessing: async () => postprocess.stop(),

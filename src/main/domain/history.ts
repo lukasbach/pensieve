@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
-import { app } from "electron";
+import { app, shell } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
@@ -90,4 +90,9 @@ export const updateRecording = async (
   );
   invalidateUiKeys(QueryKeys.History, recordingId);
   invalidateUiKeys(QueryKeys.History);
+};
+
+export const openRecordingFolder = async (recordingId: string) => {
+  const folder = path.join(getRecordingsFolder(), recordingId);
+  await shell.openPath(folder);
 };
