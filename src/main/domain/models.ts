@@ -48,8 +48,8 @@ export const getModels = async () => {
   return fs.readdir(modelFolder);
 };
 
-export const hasModel = async (modelFile: string) => {
-  return fs.pathExists(path.join(modelFolder, modelFile));
+export const hasModel = async (modelId: string) => {
+  return fs.pathExists(path.join(modelFolder, modelData[modelId].fileName));
 };
 
 export const getModelPath = (modelId: string) => {
