@@ -25,7 +25,7 @@ export const MainScreen: FC = () => {
           <History />
         </Tabs.Content>
 
-        <Tabs.Content value="postprocess">
+        <Tabs.Content value="postprocess" asChild>
           <Postprocess />
         </Tabs.Content>
       </PageContainer>

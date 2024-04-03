@@ -5,7 +5,7 @@ export const ProgressCardWrapper: FC<
   PropsWithChildren<{ icon: ReactNode; header: ReactNode; actions?: ReactNode }>
 > = ({ actions, header, icon, children }) => (
   <Card>
-    <Box width="30rem">
+    <Box maxWidth="30rem">
       <Flex align="center" mb={children ? "1rem" : undefined}>
         <Flex mr="1rem" align="center">
           {icon}

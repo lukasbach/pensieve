@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Button, Heading, Spinner, Text } from "@radix-ui/themes";
+import { Heading, Spinner, Text } from "@radix-ui/themes";
 import {
   HiOutlineCheckCircle,
   HiOutlineEllipsisHorizontalCircle,
@@ -9,7 +9,6 @@ import type { getProgressData } from "../../main/domain/postprocess";
 import { ProgressStep } from "./progress-step";
 import { useHistoryRecordings } from "../history/state";
 import { ProgressCardWrapper } from "./progress-card-wrapper";
-import { historyApi } from "../api";
 
 const allSteps = ["wav", "mp3", "modelDownload", "whisper", "summary"] as const;
 const stepLabels = {
@@ -63,9 +62,6 @@ export const ProgressCard: FC<{
             <Heading>{name}</Heading>
             <Text>File is processing...</Text>
           </>
-        }
-        actions={
-          <Button onClick={() => historyApi.stopPostProcessing()}>Stop</Button>
         }
       >
         {allSteps.map((item, index) => (

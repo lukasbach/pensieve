@@ -15,6 +15,7 @@ export const historyApi = {
   addToPostProcessingQueue: async (modelId: string) =>
     postprocess.addToQueue(modelId),
   getPostProcessingProgress: async () => postprocess.getProgressData(),
+  clearPostProcessingQueue: async () => postprocess.clearList(),
 
   openRecordingDetailsWindow: async (id: string) => {
     openAppWindow(`/history/${id}`);

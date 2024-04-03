@@ -9,9 +9,9 @@ import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 
 let isRunning = false;
-const processingQueue: string[] = [];
-const doneList: string[] = [];
-const errors: Record<string, string> = {};
+let processingQueue: string[] = [];
+let doneList: string[] = [];
+let errors: Record<string, string> = {};
 const emptyProgress = {
   modelDownload: 0,
   wav: null,
@@ -133,11 +133,11 @@ export const startQueue = () => {
     const id = processingQueue[0];
     try {
       await postProcessRecording(id);
+      doneList.push(id);
     } catch (err) {
-      // TODO
+      if (hasAborted()) return;
       console.error("Failed to process recording", id, err);
       errors[id] = err instanceof Error ? err.message : String(err);
-    } finally {
       doneList.push(id);
     }
 
@@ -159,6 +159,13 @@ export const stop = () => {
   progress.summary = 0;
   setStep("notstarted");
   console.log("stop");
+  updateUiProgress();
+};
+
+export const clearList = () => {
+  processingQueue = [];
+  doneList = [];
+  errors = {};
   updateUiProgress();
 };
 
