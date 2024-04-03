@@ -13,9 +13,10 @@ export const PageContainer: FC<
     title?: string | ReactNode;
     headerContent?: ReactNode;
     tabs?: ReactNode;
+    statusButtons?: ReactNode;
     icon?: ReactNode;
   }>
-> = ({ tabs, title, icon, children, headerContent }) => {
+> = ({ tabs, title, icon, children, headerContent, statusButtons }) => {
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
@@ -23,6 +24,8 @@ export const PageContainer: FC<
           position="absolute"
           top="0"
           right="0"
+          bottom="0"
+          maxHeight="50px"
           className={styles.cannotDrag}
         >
           <button
@@ -60,11 +63,13 @@ export const PageContainer: FC<
             <Box className={styles.content}>{headerContent}</Box>
           </Box>
         )}
-        {tabs && (
-          <Box className={styles.cannotDrag} display="inline-block">
-            {tabs}
-          </Box>
-        )}
+        {tabs || statusButtons ? (
+          <Flex display="inline-flex" align="center" width="calc(100% - 120px)">
+            <div className={styles.cannotDrag}>{tabs}</div>
+            <Box flexGrow="1" />
+            <div className={styles.cannotDrag}>{statusButtons}</div>
+          </Flex>
+        ) : null}
       </div>
       <div className={styles.page}>{children}</div>
     </div>
