@@ -6,4 +6,5 @@ export enum QueryKeys {
   HasModel = "hasmodel",
   Theme = "theme",
   PostProcessing = "postprocessing",
+  ScreenSources = "screensources",
 }

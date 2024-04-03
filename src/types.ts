@@ -1,6 +1,13 @@
+import type { DesktopCapturerSource } from "electron";
+
+export type RecordingConfig = {
+  screen?: DesktopCapturerSource;
+  mic?: InputDeviceInfo;
+};
+
 export type RecordingData = {
-  mic?: ArrayBuffer;
-  screen?: ArrayBuffer;
+  mic?: ArrayBuffer | null;
+  screen?: ArrayBuffer | null;
   meta: RecordingMeta;
 };
 

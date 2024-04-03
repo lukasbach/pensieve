@@ -1,103 +1,59 @@
 import { create } from "zustand";
-import { DesktopCapturerSource } from "electron";
-import { useCallback, useEffect } from "react";
-import { historyApi, mainApi } from "../api";
+import { useCallback } from "react";
+import { historyApi } from "../api";
 import { blobToBuffer } from "../../utils";
-import { RecordingMeta } from "../../types";
+import { RecordingConfig, RecordingMeta } from "../../types";
+import { createRecorder } from "./create-recorder";
 
 type RecorderState = {
-  sources?: DesktopCapturerSource[];
-  selectedSource?: DesktopCapturerSource;
-  recorder?: { screen: MediaRecorder; mic: MediaRecorder };
+  recorder?: { screen: MediaRecorder | null; mic: MediaRecorder | null };
   meta?: RecordingMeta;
+  recordingConfig: RecordingConfig;
 
-  setSelectedSource: (source: DesktopCapturerSource) => void;
+  setConfig: (config: Partial<RecordingConfig>) => void;
   startRecording: () => Promise<void>;
   reset: () => void;
 };
 
 export const useRecorderState = create<RecorderState>()((set, get) => ({
-  setSelectedSource: (source) => set({ selectedSource: source }),
+  recordingConfig: {},
+
+  setConfig: (config) =>
+    set({ recordingConfig: { ...get().recordingConfig, ...config } }),
   startRecording: async () => {
-    const sourceId = get().selectedSource?.id;
-
-    if (!sourceId) return;
-
-    const displayMedia = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        // @ts-ignore
-        mandatory: {
-          chromeMediaSource: "desktop",
-          chromeMediaSourceId: sourceId,
-          sampleRate: 48000,
-          sampleSize: 16,
-          channelCount: 2,
-        },
-      },
-      video: {
-        // @ts-ignore
-        mandatory: {
-          chromeMediaSource: "desktop",
-          chromeMediaSourceId: sourceId,
-          minWidth: 1280,
-          maxWidth: 1280,
-          minHeight: 720,
-          maxHeight: 720,
-          maxFrameRate: 1,
-        },
-      },
-    });
-    displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
-    const screen = new MediaRecorder(displayMedia, {
-      mimeType: "audio/webm",
-    });
-    const mic = new MediaRecorder(
-      await navigator.mediaDevices.getUserMedia({ audio: true }),
-      {
-        mimeType: "audio/webm",
-      },
-    );
-    screen.start();
-    mic.start();
     set({
-      recorder: { screen, mic },
-      meta: { started: new Date().toISOString() },
+      recorder: await createRecorder(get().recordingConfig),
+      meta: { ...get().meta, started: new Date().toISOString() },
     });
   },
   reset: () => set({ recorder: undefined, meta: undefined }),
 }));
 
-export const useLoadSources = () => {
-  useEffect(() => {
-    mainApi.getSources().then((sources) => {
-      useRecorderState.setState({ sources, selectedSource: sources[0] });
-    });
-  }, []);
+const unpackMediaRecorder = async (
+  recorder: MediaRecorder | null,
+  type = "audio/webm",
+) => {
+  if (!recorder) return Promise.resolve(null);
+  return new Promise<Buffer>((r) => {
+    recorder.stop();
+    // eslint-disable-next-line no-param-reassign
+    recorder.ondataavailable = async (e) => {
+      const blob = new Blob([e.data], { type });
+      r(await blobToBuffer(blob));
+    };
+  });
 };
 
 export const useStopRecording = () => {
-  const { recorder, meta } = useRecorderState();
+  const { recorder, meta, reset } = useRecorderState();
   return useCallback(async () => {
     if (!recorder || !meta) return;
 
-    const mic = new Promise<Blob>((r) => {
-      recorder.mic.stop();
-      recorder.mic.ondataavailable = (e) => {
-        const blob = new Blob([e.data], { type: "audio/webm" });
-        r(blob);
-      };
-    });
-    const screen = new Promise<Blob>((r) => {
-      recorder.screen.stop();
-      recorder.screen.ondataavailable = (e) => {
-        const blob = new Blob([e.data], { type: "audio/webm" });
-        r(blob);
-      };
-    });
+    reset();
     await historyApi.saveRecording({
-      mic: await blobToBuffer(await mic),
-      screen: await blobToBuffer(await screen),
+      mic: await unpackMediaRecorder(recorder.mic),
+      screen: await unpackMediaRecorder(recorder.screen),
       meta,
     });
-  }, [meta, recorder]);
+  }, [meta, recorder, reset]);
 };
