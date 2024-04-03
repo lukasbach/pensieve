@@ -17,11 +17,11 @@ export const MainScreen: FC = () => {
           </Tabs.List>
         }
       >
-        <Tabs.Content value="record">
+        <Tabs.Content value="record" asChild>
           <Recorder />
         </Tabs.Content>
 
-        <Tabs.Content value="history">
+        <Tabs.Content value="history" asChild>
           <History />
         </Tabs.Content>
 

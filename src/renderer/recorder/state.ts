@@ -7,9 +7,10 @@ import { createRecorder } from "./create-recorder";
 
 type RecorderState = {
   recorder?: { screen: MediaRecorder | null; mic: MediaRecorder | null };
-  meta?: RecordingMeta;
+  meta: RecordingMeta;
   recordingConfig: RecordingConfig;
 
+  setMeta: (meta: Partial<RecordingMeta>) => void;
   setConfig: (config: Partial<RecordingConfig>) => void;
   startRecording: () => Promise<void>;
   reset: () => void;
@@ -17,7 +18,10 @@ type RecorderState = {
 
 export const useRecorderState = create<RecorderState>()((set, get) => ({
   recordingConfig: {},
+  meta: { started: new Date().toISOString() },
 
+  setMeta: (meta: Partial<RecordingMeta>) =>
+    set({ meta: { ...get().meta, ...meta } }),
   setConfig: (config) =>
     set({ recordingConfig: { ...get().recordingConfig, ...config } }),
   startRecording: async () => {

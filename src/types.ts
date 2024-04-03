@@ -2,7 +2,7 @@ import type { DesktopCapturerSource } from "electron";
 
 export type RecordingConfig = {
   screen?: DesktopCapturerSource;
-  mic?: InputDeviceInfo;
+  mic?: MediaDeviceInfo;
 };
 
 export type RecordingData = {

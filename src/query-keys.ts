@@ -7,4 +7,5 @@ export enum QueryKeys {
   Theme = "theme",
   PostProcessing = "postprocessing",
   ScreenSources = "screensources",
+  MicrophoneSources = "microphonesources",
 }
