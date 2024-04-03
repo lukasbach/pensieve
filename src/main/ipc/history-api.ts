@@ -1,5 +1,6 @@
 import * as history from "../domain/history";
 import * as postprocess from "../domain/postprocess";
+import * as searchIndex from "../domain/search";
 import { openAppWindow } from "../domain/windows";
 
 export const historyApi = {
@@ -11,6 +12,8 @@ export const historyApi = {
   getRecordingAudioFile: history.getRecordingAudioFile,
   openRecordingFolder: history.openRecordingFolder,
   removeRecording: history.removeRecording,
+
+  search: async (query: string) => searchIndex.search(query),
 
   startPostProcessing: async () => postprocess.startQueue(),
   stopPostProcessing: async () => postprocess.stop(),

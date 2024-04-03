@@ -4,6 +4,7 @@ import { app, shell } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
+import * as searchIndex from "./search";
 
 export const init = async () => {
   await fs.ensureDir(path.join(app.getPath("userData"), "recordings"));
@@ -35,6 +36,7 @@ export const saveRecording = async (recording: RecordingData) => {
   await fs.writeJSON(path.join(folder, "meta.json"), recording.meta, {
     spaces: 2,
   });
+  searchIndex.updateRecordingName(folder, recording.meta.name);
 };
 
 export const listRecordings = async () => {
@@ -66,8 +68,10 @@ export const getRecordingMeta = async (
 
 export const getRecordingTranscript = async (
   recordingId: string,
-): Promise<RecordingTranscript> =>
-  fs.readJson(path.join(getRecordingsFolder(), recordingId, "transcript.json"));
+): Promise<RecordingTranscript | null> => {
+  const file = path.join(getRecordingsFolder(), recordingId, "transcript.json");
+  return fs.existsSync(file) ? fs.readJson(file) : null;
+};
 
 export const getRecordingAudioFile = async (id: string) => {
   const mp3 = path.join(getRecordingsFolder(), id, "recording.mp3");
@@ -88,6 +92,7 @@ export const updateRecording = async (
       ...partial,
     },
   );
+  searchIndex.updateRecordingName(recordingId, partial.name);
   invalidateUiKeys(QueryKeys.History, recordingId);
   invalidateUiKeys(QueryKeys.History);
 };
@@ -100,5 +105,6 @@ export const openRecordingFolder = async (recordingId: string) => {
 export const removeRecording = async (recordingId: string) => {
   const trash = await import("trash");
   await trash.default(path.join(getRecordingsFolder(), recordingId));
+  searchIndex.removeRecordingFromIndex(recordingId);
   invalidateUiKeys(QueryKeys.History);
 };

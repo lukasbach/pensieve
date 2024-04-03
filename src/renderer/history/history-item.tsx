@@ -18,7 +18,8 @@ export const HistoryItem: FC<{
   recording: RecordingMeta;
   id: string;
   priorItemDate: string;
-}> = ({ recording, id, priorItemDate }) => {
+  searchText?: string;
+}> = ({ recording, searchText, id, priorItemDate }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const confirmDeletion = useConfirm(
     "Delete recording",
@@ -41,7 +42,7 @@ export const HistoryItem: FC<{
       )}
       <ListItem
         title={recording.name || "Untitled"}
-        subtitle={new Date(recording.started).toLocaleString()}
+        subtitle={searchText || new Date(recording.started).toLocaleString()}
         onRename={(name) => historyApi.updateRecordingMeta(id, { name })}
         tags={
           !recording.isPostProcessed && (

@@ -7,6 +7,7 @@ import * as runner from "./runner";
 import { getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
+import * as searchIndex from "./search";
 
 let isRunning = false;
 let processingQueue: string[] = [];
@@ -114,6 +115,7 @@ export const postProcessRecording = async (id: string) => {
 
   await fs.rm(wav);
   console.log("postProcessRecording");
+  searchIndex.addRecordingToIndex(id);
   updateUiProgress();
 };
 

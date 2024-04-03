@@ -7,6 +7,7 @@ import { mainApi } from "./main/ipc/main-api";
 import { modelsApi } from "./main/ipc/models-api";
 import { historyApi } from "./main/ipc/history-api";
 import * as history from "./main/domain/history";
+import * as searchIndex from "./main/domain/search";
 import { openAppWindow } from "./main/domain/windows";
 
 updateElectronApp();
@@ -55,6 +56,10 @@ app.whenReady().then(async () => {
   loadIpcInterfaceInMain("main", mainApi);
   loadIpcInterfaceInMain("history", historyApi);
   loadIpcInterfaceInMain("models", modelsApi);
+
+  searchIndex.initializeSearchIndex().then(() => {
+    console.log("Search index initialized.");
+  });
 
   // protocol.handle("recording" doesn't produce a seekable stream
   protocol.registerFileProtocol("recording", async (request, callback) => {
