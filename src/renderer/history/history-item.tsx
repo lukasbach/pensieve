@@ -8,6 +8,7 @@ import {
   HiOutlineFolderOpen,
   HiOutlineTrash,
 } from "react-icons/hi2";
+import humanizer from "humanize-duration";
 import { RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
@@ -43,12 +44,17 @@ export const HistoryItem: FC<{
       )}
       <ListItem
         title={recording.name || "Untitled"}
-        subtitle={searchText || new Date(recording.started).toLocaleString()}
+        subtitle={searchText || humanizer(recording.duration || 0)}
         onRename={(name) => historyApi.updateRecordingMeta(id, { name })}
         tags={
-          !recording.isPostProcessed && (
-            <Badge color="orange">Unprocessed</Badge>
-          )
+          <>
+            {!recording.isPostProcessed && (
+              <Badge color="orange">Unprocessed</Badge>
+            )}
+            {recording.language && (
+              <Badge color="blue">{recording.language.toUpperCase()}</Badge>
+            )}
+          </>
         }
         icon={isProcessing ? <Spinner /> : <HiMiniPhone />}
         forceHoverState={dropdownOpen}
@@ -75,6 +81,7 @@ export const HistoryItem: FC<{
                 await historyApi.addToPostProcessingQueue(id);
                 await historyApi.startPostProcessing();
               }}
+              disabled={!recording.hasRawRecording}
             >
               <HiOutlineDocumentText /> Postprocess
             </DropdownMenu.Item>

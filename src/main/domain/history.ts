@@ -18,10 +18,17 @@ export const getRecordingsFolder = () => {
 };
 
 export const saveRecording = async (recording: RecordingData) => {
-  const date = new Date();
+  const started = new Date(recording.meta.started);
+  const meta: RecordingMeta = {
+    duration: Date.now() - started.getTime(),
+    isPostProcessed: false,
+    hasRawRecording: true,
+    ...recording.meta,
+  };
+
   const folder = path.join(
     getRecordingsFolder(),
-    `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`,
+    `${started.getFullYear()}-${started.getMonth()}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`,
   );
   await fs.ensureDir(folder);
   if (recording.mic) {
@@ -36,7 +43,7 @@ export const saveRecording = async (recording: RecordingData) => {
       Buffer.from(recording.screen),
     );
   }
-  await fs.writeJSON(path.join(folder, "meta.json"), recording.meta, {
+  await fs.writeJSON(path.join(folder, "meta.json"), meta, {
     spaces: 2,
   });
   searchIndex.updateRecordingName(folder, recording.meta.name);

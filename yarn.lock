@@ -2977,6 +2977,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/humanize-duration@npm:^3.27.4":
+  version: 3.27.4
+  resolution: "@types/humanize-duration@npm:3.27.4"
+  checksum: 10/aa7fa41af839021c846a1728d2f097b7885f80acbc5050623a9804d23fd8fee19d2654eaae331f000a4e551b88d99cd0b5f6cc97aa99f869b9205f6248066827
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.12":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
@@ -6301,6 +6308,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"humanize-duration@npm:^3.32.0":
+  version: 3.32.0
+  resolution: "humanize-duration@npm:3.32.0"
+  checksum: 10/5388507c78c845781b2364b0ccdce069fb537ba8cb0a4ee1232c9392e9b942a2d1f8fb36b149ae85b3d57d5698ff0f51ed5a1628124cfd94e8dc630ab1202f9c
+  languageName: node
+  linkType: hard
+
 "humanize-ms@npm:^1.2.1":
   version: 1.2.1
   resolution: "humanize-ms@npm:1.2.1"
@@ -7787,6 +7801,7 @@ __metadata:
     "@types/electron-squirrel-startup": "npm:^1"
     "@types/follow-redirects": "npm:^1"
     "@types/fs-extra": "npm:^11"
+    "@types/humanize-duration": "npm:^3.27.4"
     "@types/node": "npm:^20.11.30"
     "@types/react": "npm:^18.2.69"
     "@types/react-dom": "npm:^18.2.22"
@@ -7800,6 +7815,7 @@ __metadata:
     ffmpeg-static-electron: "npm:^2.0.3"
     follow-redirects: "npm:^1.15.6"
     fs-extra: "npm:^11.2.0"
+    humanize-duration: "npm:^3.32.0"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-hook-form: "npm:^7.51.2"

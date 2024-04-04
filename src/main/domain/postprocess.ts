@@ -1,10 +1,11 @@
 import path from "path";
 import fs from "fs-extra";
 import * as ffmpeg from "./ffmpeg";
+import * as history from "./history";
 import * as whisper from "./whisper";
 import * as models from "./models";
 import * as runner from "./runner";
-import { getRecordingsFolder } from "./history";
+import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
@@ -121,8 +122,13 @@ const postProcessRecording = async (id: string) => {
     if (fs.existsSync(screen)) {
       await fs.rm(screen);
     }
+    await history.updateRecording(id, { hasRawRecording: false });
   }
 
+  await history.updateRecording(id, {
+    isPostProcessed: true,
+    language: (await getRecordingTranscript(id))?.result.language,
+  });
   searchIndex.addRecordingToIndex(id);
   updateUiProgress();
 };

@@ -13,8 +13,11 @@ export type RecordingData = {
 
 export type RecordingMeta = {
   started: string;
+  duration?: number;
   name?: string;
   isPostProcessed?: boolean;
+  hasRawRecording?: boolean;
+  language?: string;
 };
 
 export type RecordingTranscript = {
