@@ -54,13 +54,11 @@ export const getCurrentItem = () => {
 
 export const setProgress = (step: keyof typeof progress, value: number) => {
   progress[step] = value;
-  console.log("setProgress", value);
   updateUiProgress();
 };
 
 export const setStep = (step: keyof typeof progress | "notstarted") => {
   currentStep = step;
-  console.log("setStep");
   updateUiProgress();
 };
 
@@ -74,7 +72,6 @@ export const addToQueue = (recordingId: string) => {
   }
 
   processingQueue.push(recordingId);
-  console.log("addToQueue");
   updateUiProgress();
 };
 
@@ -126,7 +123,6 @@ const postProcessRecording = async (id: string) => {
     }
   }
 
-  console.log("postProcessRecording");
   searchIndex.addRecordingToIndex(id);
   updateUiProgress();
 };
@@ -172,7 +168,6 @@ export const stop = () => {
   progress.whisper = 0;
   progress.summary = 0;
   setStep("notstarted");
-  console.log("stop");
   updateUiProgress();
 };
 
