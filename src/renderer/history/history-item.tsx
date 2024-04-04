@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from "react";
-import { Badge, DropdownMenu, IconButton } from "@radix-ui/themes";
+import { Badge, DropdownMenu, IconButton, Spinner } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
@@ -19,7 +19,8 @@ export const HistoryItem: FC<{
   id: string;
   priorItemDate: string;
   searchText?: string;
-}> = ({ recording, searchText, id, priorItemDate }) => {
+  isProcessing?: boolean;
+}> = ({ recording, searchText, id, priorItemDate, isProcessing }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const confirmDeletion = useConfirm(
     "Delete recording",
@@ -49,7 +50,7 @@ export const HistoryItem: FC<{
             <Badge color="orange">Unprocessed</Badge>
           )
         }
-        icon={<HiMiniPhone />}
+        icon={isProcessing ? <Spinner /> : <HiMiniPhone />}
         forceHoverState={dropdownOpen}
       >
         <DropdownMenu.Root onOpenChange={setDropdownOpen}>

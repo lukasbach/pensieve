@@ -7,14 +7,20 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import { HiMiniBars3, HiOutlineArrowDownOnSquare } from "react-icons/hi2";
+import { useQuery } from "@tanstack/react-query";
 import { useHistoryRecordings } from "./state";
 import { HistoryItem } from "./history-item";
 import { useSearch } from "./use-search";
 import { historyApi } from "../api";
 import { usePromptText } from "../dialog/context";
+import { QueryKeys } from "../../query-keys";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
+  const { data: postprocessing } = useQuery({
+    queryKey: [QueryKeys.PostProcessing],
+    queryFn: historyApi.getPostProcessingProgress,
+  });
   const { setSearch, searchResults, filter } = useSearch();
   const recordingList = useMemo(
     () => Object.entries(recordings || {}),
@@ -75,6 +81,7 @@ export const History: FC = () => {
           recording={meta}
           priorItemDate={arr[idx - 1]?.[1].started}
           searchText={searchResults?.[id] as string}
+          isProcessing={postprocessing?.processingQueue.includes(id) ?? false}
         />
       ))}
     </Box>
