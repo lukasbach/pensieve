@@ -8,6 +8,7 @@ import * as searchIndex from "./search";
 import * as ffmpeg from "./ffmpeg";
 import { getSettings } from "./settings";
 import * as postprocess from "./postprocess";
+import { getDuration } from "./ffmpeg";
 
 export const init = async () => {
   await fs.ensureDir(path.join(app.getPath("userData"), "recordings"));
@@ -23,6 +24,8 @@ export const saveRecording = async (recording: RecordingData) => {
     duration: Date.now() - started.getTime(),
     isPostProcessed: false,
     hasRawRecording: true,
+    hasMic: !!recording.mic,
+    hasScreen: !!recording.screen,
     ...recording.meta,
   };
 
@@ -63,10 +66,15 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   );
   await fs.ensureDir(folder);
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
-  await fs.writeJSON(path.join(folder, "meta.json"), meta, {
+  const fullMeta: RecordingMeta = {
+    ...meta,
+    isImported: true,
+    duration: await getDuration(file),
+  };
+  await fs.writeJSON(path.join(folder, "meta.json"), fullMeta, {
     spaces: 2,
   });
-  searchIndex.updateRecordingName(folder, meta.name);
+  searchIndex.updateRecordingName(folder, fullMeta.name);
   invalidateUiKeys(QueryKeys.History);
 
   if ((await getSettings()).ffmpeg.autoTriggerPostProcess) {

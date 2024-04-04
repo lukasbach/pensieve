@@ -1,9 +1,8 @@
 import { FC, useMemo, useState } from "react";
-import { Badge, DropdownMenu, IconButton, Spinner } from "@radix-ui/themes";
+import { Badge, DropdownMenu, IconButton } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
-  HiMiniPhone,
   HiOutlineDocumentText,
   HiOutlineFolderOpen,
   HiOutlineTrash,
@@ -14,6 +13,7 @@ import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
 import { EntityTitle } from "../common/entity-title";
 import { useConfirm } from "../dialog/context";
+import { HistoryItemIcon } from "./history-item-icon";
 
 export const HistoryItem: FC<{
   recording: RecordingMeta;
@@ -56,7 +56,12 @@ export const HistoryItem: FC<{
             )}
           </>
         }
-        icon={isProcessing ? <Spinner /> : <HiMiniPhone />}
+        icon={
+          <HistoryItemIcon
+            isProcessing={isProcessing ?? false}
+            recording={recording}
+          />
+        }
         forceHoverState={dropdownOpen}
       >
         <DropdownMenu.Root onOpenChange={setDropdownOpen}>

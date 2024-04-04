@@ -16,7 +16,10 @@ export type RecordingMeta = {
   duration?: number;
   name?: string;
   isPostProcessed?: boolean;
+  isImported?: boolean;
   hasRawRecording?: boolean;
+  hasMic?: boolean;
+  hasScreen?: boolean;
   language?: string;
 };
 
