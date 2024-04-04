@@ -1,5 +1,6 @@
 import path from "path";
 import {
+  buildArgs,
   getExtraResourcesFolder,
   getMillisecondsFromTimeString,
 } from "../../main-utils";
@@ -7,6 +8,7 @@ import { getModelPath } from "./models";
 import * as ffmpeg from "./ffmpeg";
 import * as runner from "./runner";
 import * as postprocess from "./postprocess";
+import { getSettings } from "./settings";
 
 const whisperPath = path.join(getExtraResourcesFolder(), "whisper.exe");
 
@@ -24,17 +26,32 @@ export const processWavFile = async (
   );
   const inputTime = await ffmpeg.getDuration(input);
 
-  const process = runner.execute(whisperPath, [
-    input,
-    "-di",
-    "-oj",
-    "-l",
-    "auto",
-    "-of",
-    out,
-    "-m",
-    getModelPath(modelId),
-  ]);
+  const settings = (await getSettings()).whisper;
+  const args = buildArgs({
+    _0: input,
+    t: settings.threads,
+    p: settings.processors,
+    mc: settings.maxContext,
+    ml: settings.maxLen,
+    sow: settings.splitOnWord,
+    bo: settings.bestOf,
+    bs: settings.beamSize,
+    ac: settings.audioCtx,
+    wt: settings.wordThold,
+    et: settings.entropyThold,
+    lpt: settings.logprobThold,
+    tr: settings.translate,
+    di: settings.diarize,
+    nf: settings.noFallback,
+    l: settings.language,
+    oj: true,
+    of: out,
+    m: getModelPath(modelId),
+  });
+
+  console.log(whisperPath, args);
+
+  const process = runner.execute(whisperPath, args);
   process.stdout?.on("data", (data) => {
     const line = data.toString();
     const match = line.matchAll(

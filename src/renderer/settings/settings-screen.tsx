@@ -27,6 +27,8 @@ export const SettingsScreen: FC = () => {
   const form = useForm<Settings>({ values, mode: "onChange" });
   const [hasSaved, setHasSaved] = useState(false);
 
+  console.log(values);
+
   const handleSubmit = useDebouncedCallback(
     () => {
       console.log("SAVE", form.getValues());

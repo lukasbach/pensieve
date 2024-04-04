@@ -5,6 +5,7 @@ import {
   getMillisecondsFromTimeString,
 } from "../../main-utils";
 import * as runner from "./runner";
+import * as settings from "./settings";
 
 const ffmpegPath = path.join(getExtraResourcesFolder(), "ffmpeg.exe");
 
@@ -40,7 +41,7 @@ export const toStereoWavFile = async (
       "-i",
       input2,
       "-filter_complex",
-      "[0:a][1:a] amerge=inputs=2, pan=stereo|c0<c0+c1|c1<c2+c3, highpass=f=300, lowpass=f=3000 [a]", // afftdn=nf=-20
+      (await settings.getSettings()).ffmpeg.stereoWavFilter, // afftdn=nf=-20
       "-map",
       "[a]",
       "-ar",
@@ -70,7 +71,7 @@ export const toJoinedFile = async (
         "-i",
         input2,
         "-filter_complex",
-        "amix=inputs=2:duration=longest",
+        (await settings.getSettings()).ffmpeg.mp3Filter,
         "-y",
         output,
       ],

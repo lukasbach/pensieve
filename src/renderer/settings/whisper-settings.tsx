@@ -7,6 +7,8 @@ import { modelData } from "../../model-data";
 import { Settings } from "../../types";
 import { QueryKeys } from "../../query-keys";
 import { modelsApi } from "../api";
+import { SettingsTextField } from "./settings-text-field";
+import { SettingsSwitchField } from "./settings-switch-field";
 
 export const WhisperSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -15,6 +17,11 @@ export const WhisperSettings: FC = () => {
     queryKey: [QueryKeys.HasModel],
     queryFn: modelsApi.listModels,
   });
+
+  console.log(
+    form.register("whisper.processors"),
+    form.getValues()?.whisper?.processors,
+  );
 
   return (
     <Tabs.Content value="whisper">
@@ -54,6 +61,108 @@ export const WhisperSettings: FC = () => {
           </RadioCards.Item>
         ))}
       </RadioCards.Root>
+
+      <Heading mt="2rem">Whisper configuration</Heading>
+
+      <SettingsTextField
+        {...form.register("whisper.threads")}
+        label="Thread count"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.processors")}
+        label="Processor count"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.maxContext")}
+        label="Maximum context"
+        description="Maximum number of text context tokens to store."
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.maxLen")}
+        label="Maximum Segment length"
+        description="Maximum segment length in characters."
+        type="number"
+      />
+
+      <SettingsSwitchField
+        form={form}
+        field="whisper.splitOnWord"
+        label="Split on Word"
+        description="Split on word rather than on token"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.bestOf")}
+        label="Best of"
+        description="Number of best candidates to keep"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.beamSize")}
+        label="Beam Size"
+        description="Beam size for beam search"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.audioCtx")}
+        label="Audio Context"
+        description="Audio context size"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.wordThold")}
+        label="Word threshold"
+        description="Word timestamp probability threshold"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.entropyThold")}
+        label="Emntropy threshold"
+        description="Entropy threshold for decoder fail"
+        type="number"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.logprobThold")}
+        label="Logprob threshold"
+        description="Log probability threshold for decoder fail"
+        type="number"
+      />
+
+      <SettingsSwitchField
+        form={form}
+        field="whisper.translate"
+        label="Translate"
+        description="Translate transcription from source language to english"
+      />
+      <SettingsSwitchField
+        form={form}
+        field="whisper.diarize"
+        label="Diarize"
+        description="Diarize speakers based on input device, i.e. microphone and screen audio will be split into two speakers in transcript"
+      />
+      <SettingsSwitchField
+        form={form}
+        field="whisper.noFallback"
+        label="No Fallback"
+        description="Do not use temperature fallback while decoding"
+      />
+
+      <SettingsTextField
+        {...form.register("whisper.language")}
+        label="Language"
+        description={`Spoken language, "auto" for auto-detection, "en" for english.`}
+      />
     </Tabs.Content>
   );
 };

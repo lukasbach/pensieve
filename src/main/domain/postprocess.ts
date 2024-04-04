@@ -8,6 +8,7 @@ import { getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
+import { getSettings } from "./settings";
 
 let isRunning = false;
 let processingQueue: string[] = [];
@@ -77,7 +78,7 @@ export const addToQueue = (recordingId: string) => {
   updateUiProgress();
 };
 
-export const postProcessRecording = async (id: string) => {
+const postProcessRecording = async (id: string) => {
   const mic = path.join(getRecordingsFolder(), id, "mic.webm");
   const screen = path.join(getRecordingsFolder(), id, "screen.webm");
   const wav = path.join(getRecordingsFolder(), id, "whisper-input.wav");
@@ -114,6 +115,17 @@ export const postProcessRecording = async (id: string) => {
   );
 
   await fs.rm(wav);
+
+  const settings = await getSettings();
+  if (settings.ffmpeg.removeRawRecordings) {
+    if (fs.existsSync(mic)) {
+      await fs.rm(mic);
+    }
+    if (fs.existsSync(screen)) {
+      await fs.rm(screen);
+    }
+  }
+
   console.log("postProcessRecording");
   searchIndex.addRecordingToIndex(id);
   updateUiProgress();

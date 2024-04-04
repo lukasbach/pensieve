@@ -29,4 +29,5 @@ export const mainApi = {
 
   getSettings: settings.getSettings,
   saveSettings: settings.saveSettings,
+  resetSettings: settings.reset,
 };

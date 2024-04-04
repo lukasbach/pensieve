@@ -6,6 +6,8 @@ import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
 import * as ffmpeg from "./ffmpeg";
+import { getSettings } from "./settings";
+import * as postprocess from "./postprocess";
 
 export const init = async () => {
   await fs.ensureDir(path.join(app.getPath("userData"), "recordings"));
@@ -39,6 +41,11 @@ export const saveRecording = async (recording: RecordingData) => {
   });
   searchIndex.updateRecordingName(folder, recording.meta.name);
   invalidateUiKeys(QueryKeys.History);
+
+  if ((await getSettings()).ffmpeg.autoTriggerPostProcess) {
+    postprocess.addToQueue(folder);
+    postprocess.startQueue();
+  }
 };
 
 export const importRecording = async (file: string, meta: RecordingMeta) => {
@@ -54,6 +61,11 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   });
   searchIndex.updateRecordingName(folder, meta.name);
   invalidateUiKeys(QueryKeys.History);
+
+  if ((await getSettings()).ffmpeg.autoTriggerPostProcess) {
+    postprocess.addToQueue(folder);
+    postprocess.startQueue();
+  }
 };
 
 export const listRecordings = async () => {
