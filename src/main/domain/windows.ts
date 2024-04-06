@@ -1,5 +1,6 @@
 import { BrowserWindow } from "electron";
 import path from "path";
+import { getIconPath } from "../../main-utils";
 
 export const openAppWindow = (
   hash: string,
@@ -10,6 +11,7 @@ export const openAppWindow = (
     width: 1200,
     height: 600,
     frame: false,
+    icon: getIconPath(),
     ...options,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

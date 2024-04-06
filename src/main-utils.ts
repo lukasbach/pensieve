@@ -30,3 +30,6 @@ export const buildArgs = (
   }
   return args;
 };
+
+export const getIconPath = () =>
+  path.join(getExtraResourcesFolder(), "icon.png");

@@ -9,6 +9,24 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import fs from "fs-extra";
 import path from "path";
+import { Resvg } from "@resvg/resvg-js";
+
+const createIcon = async (factor: number, base = 32) => {
+  const source = await fs.readFile(path.join(__dirname, "./icon.svg"), "utf-8");
+  const resvg = new Resvg(source, {
+    background: "transparent",
+    fitTo: { mode: "width", value: base * factor },
+  });
+  const png = resvg.render();
+  await fs.writeFile(
+    path.join(
+      __dirname,
+      "extra",
+      factor === 1 ? "icon.png" : `icon@${factor}x.png`,
+    ),
+    png.asPng(),
+  );
+};
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -124,6 +142,11 @@ const config: ForgeConfig = {
           path.join(target, "whisper.dll"),
         );
       }
+
+      await createIcon(1);
+      await createIcon(2);
+      await createIcon(3);
+      await createIcon(4);
     },
   },
 };
