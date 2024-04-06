@@ -23,6 +23,7 @@ export const SettingsSwitchField = forwardRef<
         checked={form.watch(field) as boolean}
         onCheckedChange={(checked) => {
           form.setValue(field, checked);
+          props.onCheckedChange?.(checked);
         }}
       />
     </Box>

@@ -10,6 +10,14 @@ import { QueryKeys } from "../../query-keys";
 const settingsFile = path.join(app.getPath("userData"), "settings.json");
 let cachedSettings: Settings | null = null;
 
+export const initSettingsFile = async () => {
+  if (!fs.existsSync(settingsFile)) {
+    await fs.writeJSON(settingsFile, {});
+  }
+};
+
+export const existsSettingsFile = () => fs.existsSync(settingsFile);
+
 export const getSettings = async () => {
   if (cachedSettings) {
     return cachedSettings;

@@ -29,6 +29,13 @@ export const GeneralSettings: FC = () => {
         </Button>
       </SettingsField>
       <SettingsSwitchField form={form} field="ui.dark" label="Dark mode" />
+
+      <SettingsSwitchField
+        form={form}
+        field="ui.autoStart"
+        label="Start app on system startup"
+        onCheckedChange={(value) => mainApi.setAutoStart(value)}
+      />
     </Tabs.Content>
   );
 };

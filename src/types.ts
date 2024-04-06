@@ -64,6 +64,7 @@ export type RecordingTranscript = {
 export const defaultSettings = {
   ui: {
     dark: true,
+    autoStart: true,
   },
   ffmpeg: {
     removeRawRecordings: false,

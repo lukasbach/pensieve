@@ -9,6 +9,7 @@ import { historyApi } from "./main/ipc/history-api";
 import * as history from "./main/domain/history";
 import * as searchIndex from "./main/domain/search";
 import { openAppWindow } from "./main/domain/windows";
+import * as settings from "./main/domain/settings";
 
 updateElectronApp();
 
@@ -60,6 +61,11 @@ app.whenReady().then(async () => {
   searchIndex.initializeSearchIndex().then(() => {
     console.log("Search index initialized.");
   });
+
+  if (!settings.existsSettingsFile()) {
+    await settings.initSettingsFile();
+    await mainApi.setAutoStart(true);
+  }
 
   // protocol.handle("recording" doesn't produce a seekable stream
   protocol.registerFileProtocol("recording", async (request, callback) => {
