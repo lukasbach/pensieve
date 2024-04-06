@@ -11,9 +11,22 @@ contextBridge.exposeInMainWorld("ipcApi", {
     invoke: (payload: any) => ipcRenderer.invoke("history", payload),
   },
   onInvalidateUiKeys: (listener: (keys: string[]) => void) => {
-    ipcRenderer.on("invalidate", (_event, keys) => {
+    const handler = (_: unknown, keys: string[]) => {
       listener(keys);
-    });
+    };
+    ipcRenderer.on("invalidate", handler);
+    return () => {
+      ipcRenderer.off("invalidate", handler);
+    };
+  },
+  onSetIsTray: (listener: (isTray: boolean) => void) => {
+    const handler = (_: unknown, isTray: boolean) => {
+      listener(isTray);
+    };
+    ipcRenderer.on("setIsTray", handler);
+    return () => {
+      ipcRenderer.off("setIsTray", handler);
+    };
   },
   window: {
     minimize: () => {},

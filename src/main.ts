@@ -1,4 +1,4 @@
-import { BrowserWindow, app, protocol } from "electron";
+import { app, protocol } from "electron";
 import path from "path";
 import fs from "fs-extra";
 import { updateElectronApp } from "update-electron-app";
@@ -8,9 +8,9 @@ import { modelsApi } from "./main/ipc/models-api";
 import { historyApi } from "./main/ipc/history-api";
 import * as history from "./main/domain/history";
 import * as searchIndex from "./main/domain/search";
-import { openAppWindow } from "./main/domain/windows";
 import * as settings from "./main/domain/settings";
 import { registerTray } from "./main/domain/tray";
+import * as windows from "./main/domain/windows";
 
 updateElectronApp();
 
@@ -20,24 +20,9 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-const createWindow = () => {
-  const mainWindow = openAppWindow("/");
-  mainWindow.webContents.openDevTools();
-};
-
-app.on("ready", createWindow);
-
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-  }
-});
-
-app.on("activate", () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
   }
 });
 
@@ -68,8 +53,6 @@ app.whenReady().then(async () => {
     await mainApi.setAutoStart(true);
   }
 
-  await registerTray();
-
   // protocol.handle("recording" doesn't produce a seekable stream
   protocol.registerFileProtocol("recording", async (request, callback) => {
     const recordingId = request.url.replace("recording://", "");
@@ -84,4 +67,12 @@ app.whenReady().then(async () => {
       callback({ statusCode: 404 });
     }
   });
+
+  windows.initializeMainWindow();
+  if (!process.argv.includes("--autostart")) {
+    windows.openMainWindowNormally();
+  } else {
+    windows.hideMainWindow();
+  }
+  await registerTray();
 });

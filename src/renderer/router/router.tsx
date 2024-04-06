@@ -13,6 +13,7 @@ const rootRoute = createRootRoute({
   component: () => <Outlet />,
   validateSearch: (search: Record<string, unknown>) => ({
     tray: !!search.tray,
+    isMainWindow: !!search.isMainWindow,
   }),
 });
 

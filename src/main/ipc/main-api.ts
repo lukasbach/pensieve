@@ -1,6 +1,6 @@
 import { BrowserWindow, app, desktopCapturer } from "electron";
 import path from "path";
-import { openAppWindow } from "../domain/windows";
+import * as windows from "../domain/windows";
 import * as settings from "../domain/settings";
 
 const updateExe = path.resolve(
@@ -11,7 +11,7 @@ const updateExe = path.resolve(
 const exeName = path.basename(process.execPath);
 
 export const mainApi = {
-  closeWindow: async () => {
+  closeCurrentWindow: async () => {
     BrowserWindow.getFocusedWindow()?.close();
   },
   restoreMaximizeWindow: async () => {
@@ -32,7 +32,14 @@ export const mainApi = {
   },
 
   openSettingsWindow: async () => {
-    openAppWindow("/settings");
+    windows.openAppWindow("/settings");
+  },
+
+  openMainWindowNormally: async () => {
+    windows.openMainWindowNormally();
+  },
+  hideMainWindow: async () => {
+    windows.hideMainWindow();
   },
 
   setAutoStart: async (value: boolean) => {
@@ -44,6 +51,7 @@ export const mainApi = {
         `"${exeName}"`,
         "--process-start-args",
         '"--hidden"',
+        "--autostart",
       ],
     });
   },

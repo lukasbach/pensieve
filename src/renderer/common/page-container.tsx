@@ -1,49 +1,56 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
-import { Box, Flex } from "@radix-ui/themes";
+import { Box, Flex, IconButton } from "@radix-ui/themes";
 import {
   VscChromeClose,
   VscChromeMinimize,
   VscChromeRestore,
 } from "react-icons/vsc";
+import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
 import { useSearch } from "@tanstack/react-router";
 import * as styles from "./page-container.module.css";
 import { mainApi } from "../api";
+import { useIsTray } from "./use-is-tray";
 
-const AppControls = () => (
-  <Box
-    position="absolute"
-    top="0"
-    right="0"
-    bottom="0"
-    maxHeight="50px"
-    className={styles.cannotDrag}
-  >
-    <button
-      className={styles.windowBtn}
-      type="button"
-      aria-label="Minimize"
-      onClick={() => mainApi.minimizeWindow()}
+const AppControls = () => {
+  const { isMainWindow } = useSearch({ strict: false });
+  return (
+    <Box
+      position="absolute"
+      top="0"
+      right="0"
+      bottom="0"
+      maxHeight="50px"
+      className={styles.cannotDrag}
     >
-      <VscChromeMinimize />
-    </button>
-    <button
-      className={styles.windowBtn}
-      type="button"
-      aria-label="Restore"
-      onClick={() => mainApi.restoreMaximizeWindow()}
-    >
-      <VscChromeRestore />
-    </button>
-    <button
-      className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
-      type="button"
-      aria-label="Close"
-      onClick={() => mainApi.closeWindow()}
-    >
-      <VscChromeClose />
-    </button>
-  </Box>
-);
+      <button
+        className={styles.windowBtn}
+        type="button"
+        aria-label="Minimize"
+        onClick={() => mainApi.minimizeWindow()}
+      >
+        <VscChromeMinimize />
+      </button>
+      <button
+        className={styles.windowBtn}
+        type="button"
+        aria-label="Restore"
+        onClick={() => mainApi.restoreMaximizeWindow()}
+      >
+        <VscChromeRestore />
+      </button>
+      <button
+        className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
+        type="button"
+        aria-label="Close"
+        onClick={() =>
+          isMainWindow ? mainApi.hideMainWindow() : mainApi.closeCurrentWindow()
+        }
+      >
+        <VscChromeClose />
+      </button>
+    </Box>
+  );
+};
 
 export const PageContainer: FC<
   PropsWithChildren<{
@@ -54,10 +61,11 @@ export const PageContainer: FC<
     icon?: ReactNode;
   }>
 > = ({ tabs, title, icon, children, headerContent, statusButtons }) => {
-  const { tray } = useSearch({ strict: false });
+  const tray = useIsTray();
+  const dragStyle = tray ? "" : styles.canDrag;
   return (
     <div className={styles.container}>
-      <div className={styles.headerContainer}>
+      <div className={`${styles.headerContainer} ${dragStyle}`}>
         {!tray && <AppControls />}
         {(title || headerContent) && (
           <Box>
@@ -69,11 +77,30 @@ export const PageContainer: FC<
             <Box className={styles.content}>{headerContent}</Box>
           </Box>
         )}
-        {tabs || statusButtons ? (
-          <Flex display="inline-flex" align="center" width="calc(100% - 120px)">
+        {tabs || statusButtons || tray ? (
+          <Flex
+            display="inline-flex"
+            align="center"
+            width={`calc(100% - ${tray ? "8px" : "120px"})`}
+          >
             <div className={styles.cannotDrag}>{tabs}</div>
             <Box flexGrow="1" />
-            <div className={styles.cannotDrag}>{statusButtons}</div>
+            <Flex
+              className={styles.cannotDrag}
+              gap=".3rem"
+              onClick={() => mainApi}
+            >
+              {statusButtons}
+              {tray && (
+                <IconButton
+                  color="gray"
+                  variant="outline"
+                  onClick={() => mainApi.openMainWindowNormally()}
+                >
+                  <HiMiniArrowTopRightOnSquare />
+                </IconButton>
+              )}
+            </Flex>
           </Flex>
         ) : null}
       </div>

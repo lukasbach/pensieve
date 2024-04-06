@@ -20,7 +20,7 @@ export const MainScreen: FC = () => {
         }
         statusButtons={
           <IconButton
-            variant="surface"
+            variant="outline"
             color="gray"
             onClick={() => mainApi.openSettingsWindow()}
           >

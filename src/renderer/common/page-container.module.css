@@ -29,7 +29,6 @@
     position: relative;
     border-bottom: 1px solid var(--gray-5);
     margin-bottom: -1px;
-    -webkit-app-region: drag;
     -webkit-user-select: none;
 }
 
