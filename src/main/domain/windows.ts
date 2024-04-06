@@ -84,6 +84,11 @@ export const hideMainWindow = () => {
 export const openMainWindowNormally = () => {
   mainWindow?.setBounds(oldBounds);
   mainWindow?.setSkipTaskbar(false);
+  mainWindow?.setResizable(true);
+  mainWindow?.setMaximizable(true);
+  mainWindow?.setAlwaysOnTop(false);
+  mainWindow?.setMovable(true);
+  mainWindow?.setClosable(true);
   mainWindow?.removeAllListeners("blur");
   mainWindow?.webContents.send("setIsTray", false);
   mainWindow?.show();
@@ -107,7 +112,11 @@ export const openMainWindowAsTray = () => {
     width,
     height,
   });
-
+  mainWindow.setResizable(false);
+  mainWindow.setMaximizable(false);
+  mainWindow.setAlwaysOnTop(true);
+  mainWindow.setMovable(false);
+  mainWindow.setClosable(false);
   mainWindow.setSkipTaskbar(true);
   mainWindow.on("blur", hideMainWindow);
   mainWindow.webContents.send("setIsTray", true);
