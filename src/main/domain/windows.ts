@@ -1,6 +1,7 @@
-import { BrowserWindow, Rectangle, screen } from "electron";
+import { BrowserWindow, Notification, Rectangle, screen } from "electron";
 import path from "path";
 import { getIconPath } from "../../main-utils";
+import { getSettings, saveSettings } from "./settings";
 
 enum MainWindowModeValue {
   Open,
@@ -63,6 +64,17 @@ export const initializeMainWindow = () => {
 export const hideMainWindow = () => {
   if (mainWindowMode === MainWindowModeValue.Open) {
     oldBounds = mainWindow?.getBounds() as Rectangle;
+
+    (async () => {
+      if (!(await getSettings()).ui.trayRunningNotificationShown) {
+        new Notification({
+          // TODO app name
+          title: "Notetaker is still running",
+          body: "Notetaker will continue running in the tray. You can close the app from there.",
+        }).show();
+        await saveSettings({ ui: { trayRunningNotificationShown: true } });
+      }
+    })();
   }
   mainWindow?.setSkipTaskbar(true);
   mainWindow?.hide();

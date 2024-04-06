@@ -65,6 +65,7 @@ export const defaultSettings = {
   ui: {
     dark: true,
     autoStart: true,
+    trayRunningNotificationShown: false,
   },
   ffmpeg: {
     removeRawRecordings: false,
