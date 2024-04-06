@@ -127,7 +127,7 @@ export const WhisperSettings: FC = () => {
 
       <SettingsTextField
         {...form.register("whisper.entropyThold")}
-        label="Emntropy threshold"
+        label="Entropy threshold"
         description="Entropy threshold for decoder fail"
         type="number"
       />
