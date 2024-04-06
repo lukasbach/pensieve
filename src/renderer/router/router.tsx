@@ -11,6 +11,9 @@ import { SettingsScreen } from "../settings/settings-screen";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
+  validateSearch: (search: Record<string, unknown>) => ({
+    tray: !!search.tray,
+  }),
 });
 
 const indexRoute = createRoute({

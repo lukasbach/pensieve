@@ -5,8 +5,45 @@ import {
   VscChromeMinimize,
   VscChromeRestore,
 } from "react-icons/vsc";
+import { useSearch } from "@tanstack/react-router";
 import * as styles from "./page-container.module.css";
 import { mainApi } from "../api";
+
+const AppControls = () => (
+  <Box
+    position="absolute"
+    top="0"
+    right="0"
+    bottom="0"
+    maxHeight="50px"
+    className={styles.cannotDrag}
+  >
+    <button
+      className={styles.windowBtn}
+      type="button"
+      aria-label="Minimize"
+      onClick={() => mainApi.minimizeWindow()}
+    >
+      <VscChromeMinimize />
+    </button>
+    <button
+      className={styles.windowBtn}
+      type="button"
+      aria-label="Restore"
+      onClick={() => mainApi.restoreMaximizeWindow()}
+    >
+      <VscChromeRestore />
+    </button>
+    <button
+      className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
+      type="button"
+      aria-label="Close"
+      onClick={() => mainApi.closeWindow()}
+    >
+      <VscChromeClose />
+    </button>
+  </Box>
+);
 
 export const PageContainer: FC<
   PropsWithChildren<{
@@ -17,42 +54,11 @@ export const PageContainer: FC<
     icon?: ReactNode;
   }>
 > = ({ tabs, title, icon, children, headerContent, statusButtons }) => {
+  const { tray } = useSearch({ strict: false });
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
-        <Box
-          position="absolute"
-          top="0"
-          right="0"
-          bottom="0"
-          maxHeight="50px"
-          className={styles.cannotDrag}
-        >
-          <button
-            className={styles.windowBtn}
-            type="button"
-            aria-label="Minimize"
-            onClick={() => mainApi.minimizeWindow()}
-          >
-            <VscChromeMinimize />
-          </button>
-          <button
-            className={styles.windowBtn}
-            type="button"
-            aria-label="Restore"
-            onClick={() => mainApi.restoreMaximizeWindow()}
-          >
-            <VscChromeRestore />
-          </button>
-          <button
-            className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
-            type="button"
-            aria-label="Close"
-            onClick={() => mainApi.closeWindow()}
-          >
-            <VscChromeClose />
-          </button>
-        </Box>
+        {!tray && <AppControls />}
         {(title || headerContent) && (
           <Box>
             <h1 className={styles.title}>

@@ -10,6 +10,7 @@ import * as history from "./main/domain/history";
 import * as searchIndex from "./main/domain/search";
 import { openAppWindow } from "./main/domain/windows";
 import * as settings from "./main/domain/settings";
+import { registerTray } from "./main/domain/tray";
 
 updateElectronApp();
 
@@ -66,6 +67,8 @@ app.whenReady().then(async () => {
     await settings.initSettingsFile();
     await mainApi.setAutoStart(true);
   }
+
+  await registerTray();
 
   // protocol.handle("recording" doesn't produce a seekable stream
   protocol.registerFileProtocol("recording", async (request, callback) => {

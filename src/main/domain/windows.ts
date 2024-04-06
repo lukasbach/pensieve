@@ -4,6 +4,7 @@ import { getIconPath } from "../../main-utils";
 
 export const openAppWindow = (
   hash: string,
+  query?: Record<string, string>,
   options?: Electron.BrowserWindowConstructorOptions,
 ) => {
   // Create the browser window.
@@ -21,11 +22,18 @@ export const openAppWindow = (
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}#${hash}`);
+    const queryString = query
+      ? Object.entries(query)
+          .map(([key, value]) => `${key}=${value}`)
+          .join("&")
+      : "";
+    mainWindow.loadURL(
+      `${MAIN_WINDOW_VITE_DEV_SERVER_URL}#${hash}?${queryString}`,
+    );
   } else {
     mainWindow.loadFile(
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-      { hash },
+      { hash, query },
     );
   }
   return mainWindow;
