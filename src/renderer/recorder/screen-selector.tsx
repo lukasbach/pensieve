@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Select } from "@radix-ui/themes";
+import { Select, Tooltip } from "@radix-ui/themes";
 import { useRecorderState } from "./state";
 import { useScreenSources } from "./hooks";
 
@@ -15,15 +15,18 @@ export const ScreenSelector: FC = () => {
         if (!screen) return;
         setConfig({ screen });
       }}
-      disabled={!recordingConfig.screen}
+      // disabled={!recordingConfig.screen}
+      disabled
     >
-      <Select.Trigger
-        style={{
-          maxWidth: "-webkit-fill-available",
-          minWidth: "-webkit-fill-available",
-        }}
-        placeholder="Screen"
-      />
+      <Tooltip content="Coming soon">
+        <Select.Trigger
+          style={{
+            maxWidth: "-webkit-fill-available",
+            minWidth: "-webkit-fill-available",
+          }}
+          placeholder="Screen"
+        />
+      </Tooltip>
       <Select.Content position="popper">
         {screenSources?.map((source) => (
           <Select.Item value={source.id} key={source.id}>
