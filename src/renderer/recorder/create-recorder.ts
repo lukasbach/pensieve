@@ -3,6 +3,7 @@ import { RecordingConfig } from "../../types";
 const createScreenRecorder = async (config: RecordingConfig) => {
   if (!config.screen) return null;
 
+  // @ts-ignore
   const displayMedia = await navigator.mediaDevices.getUserMedia({
     audio: {
       // @ts-ignore
@@ -27,9 +28,9 @@ const createScreenRecorder = async (config: RecordingConfig) => {
       },
     },
   });
-  displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
+  // displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
   const screen = new MediaRecorder(displayMedia, {
-    mimeType: "audio/webm",
+    mimeType: "video/webm",
   });
   screen.start();
   return screen;

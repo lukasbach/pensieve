@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["w3c-image-capture"],
     "target": "ESNext",
     "module": "commonjs",
     "allowJs": true,

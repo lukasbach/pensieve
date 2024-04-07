@@ -6,6 +6,7 @@ import * as searchIndex from "../domain/search";
 import { openAppWindow } from "../domain/windows";
 
 export const historyApi = {
+  storeUnassociatedScreenshot: history.storeUnassociatedScreenshot,
   saveRecording: history.saveRecording,
   importRecording: history.importRecording,
   getRecordings: history.listRecordings,

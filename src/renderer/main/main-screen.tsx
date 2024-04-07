@@ -6,6 +6,7 @@ import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
 import { mainApi } from "../api";
+import { RecorderV2 } from "../recorder/recorder-v2";
 
 export const MainScreen: FC = () => {
   return (
@@ -30,7 +31,7 @@ export const MainScreen: FC = () => {
       >
         {/* TODO cant remember why i put asChild on the tabContent elements, but radix logs error if they exist, due to children not forwarding refs */}
         <Tabs.Content value="record">
-          <Recorder />
+          {(window as any).ipcApi.isDev ? <RecorderV2 /> : <Recorder />}
         </Tabs.Content>
 
         <Tabs.Content value="history">

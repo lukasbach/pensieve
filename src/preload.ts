@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("ipcApi", {
+  isDev: process.env.NODE_ENV === "development",
   main: {
     invoke: (payload: any) => ipcRenderer.invoke("main", payload),
   },

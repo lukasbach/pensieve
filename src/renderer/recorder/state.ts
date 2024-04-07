@@ -9,16 +9,29 @@ type RecorderState = {
   recorder?: { screen: MediaRecorder | null; mic: MediaRecorder | null };
   meta: RecordingMeta;
   recordingConfig: RecordingConfig;
+  isPaused: boolean;
+  isRecording: boolean;
 
+  getCurrentTime: () => number;
   setMeta: (meta: Partial<RecordingMeta>) => void;
   setConfig: (config: Partial<RecordingConfig>) => void;
   startRecording: () => Promise<void>;
   reset: () => void;
+  pause: () => void;
+  resume: () => void;
+  addHighlight: () => void;
+  addTimestampedNote: (note: string) => void;
+  addScreenshot: (fileName: string) => void;
 };
 
 export const useRecorderState = create<RecorderState>()((set, get) => ({
   recordingConfig: {},
   meta: { started: new Date().toISOString() },
+  isRecording: false,
+  isPaused: false,
+
+  getCurrentTime: () =>
+    new Date().getTime() - new Date(get().meta.started).getTime(),
 
   setMeta: (meta: Partial<RecordingMeta>) =>
     set({ meta: { ...get().meta, ...meta } }),
@@ -28,9 +41,57 @@ export const useRecorderState = create<RecorderState>()((set, get) => ({
     set({
       recorder: await createRecorder(get().recordingConfig),
       meta: { ...get().meta, started: new Date().toISOString() },
+      isRecording: true,
+      isPaused: false,
     });
   },
-  reset: () => set({ recorder: undefined, meta: undefined }),
+  reset: () =>
+    set({
+      recorder: undefined,
+      meta: undefined,
+      isRecording: false,
+      isPaused: false,
+    }),
+  pause: () => {
+    get().recorder?.mic?.pause();
+    get().recorder?.screen?.pause();
+    set({ isPaused: true });
+  },
+  resume: () => {
+    get().recorder?.mic?.resume();
+    get().recorder?.screen?.resume();
+    set({ isPaused: false });
+  },
+  addHighlight: () => {
+    set({
+      meta: {
+        ...get().meta,
+        highlights: [...(get().meta.highlights ?? []), get().getCurrentTime()],
+      },
+    });
+  },
+  addTimestampedNote: (note: string) => {
+    set({
+      meta: {
+        ...get().meta,
+        timestampedNotes: {
+          ...get().meta.timestampedNotes,
+          [get().getCurrentTime()]: note,
+        },
+      },
+    });
+  },
+  addScreenshot: (url: string) => {
+    set({
+      meta: {
+        ...get().meta,
+        screenshots: {
+          ...get().meta.screenshots,
+          [get().getCurrentTime()]: url,
+        },
+      },
+    });
+  },
 }));
 
 const unpackMediaRecorder = async (
@@ -60,4 +121,32 @@ export const useStopRecording = () => {
       meta,
     });
   }, [meta, recorder, reset]);
+};
+
+export const useMakeScreenshot = () => {
+  // TODO NOT WORKING
+  const { recorder, addScreenshot } = useRecorderState();
+  return useCallback(async () => {
+    if (!recorder?.screen) return;
+    const videoStream = recorder.screen.stream.getVideoTracks()[0];
+    const imageCapturer = new ImageCapture(videoStream);
+    const constraints = videoStream.getConstraints();
+    console.log(
+      "!!",
+      await imageCapturer.getPhotoSettings(),
+      await imageCapturer.getPhotoCapabilities(),
+      {
+        imageWidth: videoStream.getSettings().width,
+        imageHeight: videoStream.getSettings().height,
+      },
+    );
+    const blob = await imageCapturer.takePhoto({
+      imageWidth: videoStream.getSettings().width,
+      imageHeight: videoStream.getSettings().height,
+    });
+    const buffer = await blobToBuffer(blob);
+    const fileName = `${new Date().toISOString()}.png`;
+    await historyApi.storeUnassociatedScreenshot(fileName, buffer);
+    addScreenshot(fileName);
+  }, [addScreenshot, recorder?.screen]);
 };

@@ -3211,6 +3211,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/w3c-image-capture@npm:^1.0.10":
+  version: 1.0.10
+  resolution: "@types/w3c-image-capture@npm:1.0.10"
+  dependencies:
+    "@types/webrtc": "npm:*"
+  checksum: 10/f0c6d5960aecc06a10492d3fa8c8fd9ca6e506bd96ff32c4dbdef9136e068e50373c9e6ce159505fb6c4924ee3960008cda0418957f61159debda91e4be099c1
+  languageName: node
+  linkType: hard
+
+"@types/webrtc@npm:*":
+  version: 0.0.42
+  resolution: "@types/webrtc@npm:0.0.42"
+  checksum: 10/3e67244176b3849ab5a0532fcd5434ac26c6943b75442e7ed554bc56823f85de5a093f8b155ed89f513234abadc91f98cdbe715bf213bd2ffa38c425d881ce4e
+  languageName: node
+  linkType: hard
+
 "@types/yauzl@npm:^2.9.1":
   version: 2.10.3
   resolution: "@types/yauzl@npm:2.10.3"
@@ -7935,6 +7951,7 @@ __metadata:
     "@types/node": "npm:^20.11.30"
     "@types/react": "npm:^18.2.69"
     "@types/react-dom": "npm:^18.2.22"
+    "@types/w3c-image-capture": "npm:^1.0.10"
     "@vitejs/plugin-react": "npm:^4.2.1"
     deepmerge: "npm:^4.3.1"
     electron: "npm:29.1.5"

@@ -18,6 +18,22 @@ export const getRecordingsFolder = () => {
   return path.join(app.getPath("userData"), "recordings");
 };
 
+export const getUnassociatedImagesFolder = () => {
+  return path.join(app.getPath("userData"), "unassociated-images");
+};
+
+export const storeUnassociatedScreenshot = async (
+  fileName: string,
+  data: ArrayBuffer,
+) => {
+  if (!fileName.endsWith(".png")) {
+    throw new Error("Only PNG files are supported");
+  }
+
+  await fs.ensureDir(getUnassociatedImagesFolder());
+  await fs.writeFile(path.join(getUnassociatedImagesFolder(), fileName), data);
+};
+
 export const saveRecording = async (recording: RecordingData) => {
   const started = new Date(recording.meta.started);
   const meta: RecordingMeta = {

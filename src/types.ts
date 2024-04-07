@@ -21,6 +21,10 @@ export type RecordingMeta = {
   hasMic?: boolean;
   hasScreen?: boolean;
   language?: string;
+  notes?: string;
+  timestampedNotes?: Record<number, string>;
+  highlights?: number[];
+  screenshots?: Record<number, string>;
 };
 
 export type RecordingTranscript = {
