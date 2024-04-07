@@ -44,7 +44,11 @@ export const HistoryItem: FC<{
       )}
       <ListItem
         title={recording.name || "Untitled"}
-        subtitle={searchText || humanizer(recording.duration || 0)}
+        subtitle={
+          isProcessing
+            ? "Recording is processing..."
+            : searchText || humanizer(recording.duration || 0)
+        }
         onRename={(name) => historyApi.updateRecordingMeta(id, { name })}
         tags={
           <>
