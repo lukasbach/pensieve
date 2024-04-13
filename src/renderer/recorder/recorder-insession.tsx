@@ -6,20 +6,32 @@ import {
   HiMiniPlay,
   HiOutlineStar,
   HiOutlineStopCircle,
+  HiOutlineTrash,
 } from "react-icons/hi2";
 import { MdScreenshotMonitor } from "react-icons/md";
 import { useMakeScreenshot, useRecorderState, useStopRecording } from "./state";
 import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
-import { usePromptText } from "../dialog/context";
+import { useConfirm, usePromptText } from "../dialog/context";
 
 export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
-  const { pause, isPaused, resume, addTimestampedNote, addHighlight, setMeta } =
-    useRecorderState();
+  const {
+    pause,
+    isPaused,
+    resume,
+    addTimestampedNote,
+    addHighlight,
+    setMeta,
+    reset,
+  } = useRecorderState();
   const promptTimestampedNote = usePromptText(
     "Add note at current time",
     "Add note",
     "Note content",
+  );
+  const confirmAbort = useConfirm(
+    "Abort recording",
+    "Are you sure you want to abort the current recording?",
   );
   const stopRecording = useStopRecording();
   const makeScreenshot = useMakeScreenshot();
@@ -28,6 +40,11 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
     const content = await promptTimestampedNote();
     if (!content) return;
     addTimestampedNote(content);
+  };
+
+  const onAbort = async () => {
+    await confirmAbort();
+    reset();
   };
 
   return (
@@ -78,6 +95,12 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
           onClick={addHighlight}
         >
           <HiOutlineStar size="24" />
+        </RecordingActionButton>
+        <RecordingActionButton
+          tooltip="Abort the current recording without saving"
+          onClick={onAbort}
+        >
+          <HiOutlineTrash size="24" />
         </RecordingActionButton>
       </Flex>
       <TextArea
