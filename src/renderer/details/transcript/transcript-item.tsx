@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { RecordingMeta, RecordingTranscriptItem } from "../../../types";
 import { useManagedAudio } from "../use-managed-audio";
-import { isInRange, useEvent } from "../../../utils";
+import { isInRange, timeToDisplayString, useEvent } from "../../../utils";
 import { TranscriptItemUi } from "./transcript-item-ui";
 
 export const TranscriptItem = memo<{
@@ -11,7 +11,8 @@ export const TranscriptItem = memo<{
   audio: ReturnType<typeof useManagedAudio>;
   meta: RecordingMeta;
   updateMeta: (update: Partial<RecordingMeta>) => Promise<void>;
-}>(({ item, priorItem, nextItem, audio, meta, updateMeta }) => {
+  recordingId: string;
+}>(({ item, priorItem, nextItem, audio, meta, updateMeta, recordingId }) => {
   const text = item.text.trim();
   const time = new Date();
   time.setMilliseconds(item.offsets.from);
@@ -74,6 +75,48 @@ export const TranscriptItem = memo<{
     }
   });
 
+  const timestampedNotes = useMemo(
+    () =>
+      (Object.entries(meta.timestampedNotes ?? {}) as any as [number, string][])
+        .filter(([time]) => isInRange(time, nextRange))
+        .map(([time, note]) => ({ time, note })),
+    [],
+  );
+
+  const screenshots = useMemo(
+    () =>
+      (Object.entries(meta.screenshots ?? {}) as any as [number, string][])
+        .filter(([time]) => isInRange(time, nextRange))
+        .map(([time, file]) => ({ time, file })),
+    [],
+  );
+
+  const nextItems = useMemo(
+    () => (
+      <>
+        {timestampedNotes.map(({ time, note }) => (
+          <div>
+            <strong>NOTE {timeToDisplayString(time / 1000)}</strong>
+            <br />
+            {note}
+          </div>
+        ))}
+        {screenshots.map(({ time, file }) => (
+          <div>
+            <strong>SCREENSHOT {timeToDisplayString(time / 1000)}</strong>
+            <br />
+            <img
+              src={`screenshot://${recordingId}/${file}`}
+              alt=""
+              style={{ maxWidth: "100%", maxHeight: "100%" }}
+            />
+          </div>
+        ))}
+      </>
+    ),
+    [timestampedNotes, screenshots],
+  );
+
   return (
     <TranscriptItemUi
       key={item.timestamps.from}
@@ -88,6 +131,7 @@ export const TranscriptItem = memo<{
       timeText={timeText}
       onTogglePlaying={onTogglePlaying}
       onToggleHighlight={onToggleHighlight}
+      nextItems={nextItems}
     />
   );
 });

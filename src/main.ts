@@ -64,6 +64,25 @@ app.whenReady().then(async () => {
     if (fs.existsSync(mp3)) {
       callback({ path: mp3 });
     } else {
+      console.error(`Recording audio not found: ${mp3}`);
+      callback({ statusCode: 404 });
+    }
+  });
+
+  protocol.registerFileProtocol("screenshot", async (request, callback) => {
+    const fileName = request.url.replace("screenshot://", "");
+
+    if (!/^[\w-_]+\/[\w]+\.png$/.test(fileName)) {
+      console.error(`Invalid image loaded: ${fileName}`);
+      callback({ statusCode: 400 });
+      return;
+    }
+
+    const imageFile = path.join(history.getRecordingsFolder(), fileName);
+    if (fs.existsSync(imageFile)) {
+      callback({ path: imageFile });
+    } else {
+      console.error(`Image not found: ${fileName}`);
       callback({ statusCode: 404 });
     }
   });

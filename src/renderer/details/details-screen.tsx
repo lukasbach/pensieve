@@ -37,6 +37,7 @@ export const DetailsScreen: FC = () => {
               // isPlaying={audio.audioTag.current?.paused === false}
               transcript={transcript}
               audio={audio}
+              recordingId={id}
             />
           )}
         </Box>

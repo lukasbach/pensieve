@@ -10,7 +10,8 @@ export const Transscript: FC<{
   audio: ReturnType<typeof useManagedAudio>;
   meta: RecordingMeta;
   updateMeta: (update: Partial<RecordingMeta>) => Promise<void>;
-}> = ({ transcript, audio, meta, updateMeta }) => {
+  recordingId: string;
+}> = ({ transcript, audio, meta, updateMeta, recordingId }) => {
   return (
     <Box px="2rem" py="1rem">
       {transcript.transcription.map((item, index) => (
@@ -21,6 +22,7 @@ export const Transscript: FC<{
           audio={audio}
           priorItem={transcript.transcription[index - 1]}
           nextItem={transcript.transcription[index + 1]}
+          recordingId={recordingId}
         />
       ))}
     </Box>

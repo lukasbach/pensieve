@@ -1,4 +1,4 @@
-import { Fragment, memo } from "react";
+import { Fragment, ReactNode, memo } from "react";
 import { Box, Flex, IconButton, Text } from "@radix-ui/themes";
 import {
   HiMiniStar,
@@ -18,6 +18,7 @@ export const TranscriptItemUi = memo<{
   timeText: string;
   onTogglePlaying: () => void;
   onToggleHighlight: () => void;
+  nextItems?: ReactNode;
 }>(
   ({
     text,
@@ -29,6 +30,7 @@ export const TranscriptItemUi = memo<{
     timeText,
     onTogglePlaying,
     onToggleHighlight,
+    nextItems,
   }) => {
     return (
       <>
@@ -74,6 +76,7 @@ export const TranscriptItemUi = memo<{
             {text.startsWith("- ") ? text.slice(2) : text}
           </Text>
         </Box>
+        {nextItems}
       </>
     );
   },
