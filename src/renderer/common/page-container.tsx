@@ -63,12 +63,13 @@ export const PageContainer: FC<
 > = ({ tabs, title, icon, children, headerContent, statusButtons }) => {
   const tray = useIsTray();
   const dragStyle = tray ? "" : styles.canDrag;
+  const hasBoth = (tabs || statusButtons || tray) && (title || headerContent);
   return (
     <div className={styles.container}>
       <div className={`${styles.headerContainer} ${dragStyle}`}>
         {!tray && <AppControls />}
         {(title || headerContent) && (
-          <Box>
+          <Box mb={hasBoth ? "-.7rem" : undefined}>
             <h1 className={styles.title}>
               <Flex align="center" gap=".5rem">
                 {icon} {title}

@@ -16,6 +16,7 @@ export const Transscript: FC<{
     <Box px="2rem" py="1rem">
       {transcript.transcription.map((item, index) => (
         <TranscriptItem
+          key={item.offsets.from}
           meta={meta}
           updateMeta={updateMeta}
           item={item}
