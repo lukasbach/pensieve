@@ -1,5 +1,5 @@
 import { FC, useMemo, useState } from "react";
-import { Badge, DropdownMenu, IconButton } from "@radix-ui/themes";
+import { Badge, DropdownMenu, IconButton, Tooltip } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
@@ -90,7 +90,7 @@ export const HistoryItem: FC<{
                 await historyApi.addToPostProcessingQueue(id);
                 await historyApi.startPostProcessing();
               }}
-              disabled={!recording.hasRawRecording}
+              disabled={!recording.hasRawRecording || isProcessing}
             >
               <HiOutlineDocumentText /> Postprocess
             </DropdownMenu.Item>
@@ -105,9 +105,25 @@ export const HistoryItem: FC<{
             </DropdownMenu.Item>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
-        <IconButton onClick={() => historyApi.openRecordingDetailsWindow(id)}>
-          <HiArrowTopRightOnSquare />
-        </IconButton>
+        {recording.isPostProcessed && (
+          <IconButton onClick={() => historyApi.openRecordingDetailsWindow(id)}>
+            <HiArrowTopRightOnSquare />
+          </IconButton>
+        )}
+        {!recording.isPostProcessed &&
+          recording.hasRawRecording &&
+          !isProcessing && (
+            <Tooltip content="Postprocess recording">
+              <IconButton
+                onClick={async () => {
+                  await historyApi.addToPostProcessingQueue(id);
+                  await historyApi.startPostProcessing();
+                }}
+              >
+                <HiOutlineDocumentText />
+              </IconButton>
+            </Tooltip>
+          )}
       </ListItem>
     </>
   );
