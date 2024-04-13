@@ -1,8 +1,10 @@
 import { memo, useMemo } from "react";
 import { RecordingMeta, RecordingTranscriptItem } from "../../../types";
 import { useManagedAudio } from "../use-managed-audio";
-import { isInRange, timeToDisplayString, useEvent } from "../../../utils";
+import { isInRange, useEvent } from "../../../utils";
 import { TranscriptItemUi } from "./transcript-item-ui";
+import { Screenshot } from "./screenshot";
+import { TimeframedComment } from "./timeframed-comment";
 
 export const TranscriptItem = memo<{
   item: RecordingTranscriptItem;
@@ -95,22 +97,10 @@ export const TranscriptItem = memo<{
     () => (
       <>
         {timestampedNotes.map(({ time, note }) => (
-          <div>
-            <strong>NOTE {timeToDisplayString(time / 1000)}</strong>
-            <br />
-            {note}
-          </div>
+          <TimeframedComment time={time} note={note} key={time} />
         ))}
-        {screenshots.map(({ time, file }) => (
-          <div>
-            <strong>SCREENSHOT {timeToDisplayString(time / 1000)}</strong>
-            <br />
-            <img
-              src={`screenshot://${recordingId}/${file}`}
-              alt=""
-              style={{ maxWidth: "100%", maxHeight: "100%" }}
-            />
-          </div>
+        {screenshots.map(({ file }) => (
+          <Screenshot url={`screenshot://${recordingId}/${file}`} key={file} />
         ))}
       </>
     ),

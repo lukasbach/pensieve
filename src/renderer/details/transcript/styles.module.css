@@ -1,0 +1,25 @@
+.screenshotThumbnail {
+    width: 120px;
+    margin-left: calc(32px + 0.5rem);
+    margin-right: 8px;
+    border-radius: 8px;
+}
+
+.screenshotThumbnail:hover {
+    cursor: pointer;
+    opacity: .8;
+}
+
+.screenshotThumbnailFullscreen {
+    position: absolute;
+    margin: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    z-index: 99999;
+    opacity: 1 !important;
+    background: #00000088;
+}

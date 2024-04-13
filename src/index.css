@@ -17,3 +17,7 @@ html, body, #root, .radix-themes {
 .hoverhide-container:hover .hoverhide-inverseitem {
     display: none;
 }
+
+body.screenshot-fullscreen * {
+    overflow: hidden;
+}
