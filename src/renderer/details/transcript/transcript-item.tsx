@@ -97,7 +97,7 @@ export const TranscriptItem = memo<{
     () => (
       <>
         {timestampedNotes.map(({ time, note }) => (
-          <TimeframedComment time={time} note={note} key={time} />
+          <TimeframedComment note={note} key={time} />
         ))}
         {screenshots.map(({ file }) => (
           <Screenshot url={`screenshot://${recordingId}/${file}`} key={file} />

@@ -2,9 +2,7 @@ import { FC } from "react";
 import { Box, Callout } from "@radix-ui/themes";
 import { HiMiniPencilSquare } from "react-icons/hi2";
 
-export const TimeframedComment: FC<{ time: number; note: string }> = ({
-  note,
-}) => (
+export const TimeframedComment: FC<{ note: string }> = ({ note }) => (
   <Box mb="1rem">
     <Callout.Root variant="surface">
       <Callout.Icon>
