@@ -81,6 +81,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
         <RecordingActionButton
           tooltip="Take screenshot"
           onClick={makeScreenshot}
+          signalSuccess
         >
           <MdScreenshotMonitor size="24" />
         </RecordingActionButton>
@@ -93,6 +94,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
         <RecordingActionButton
           tooltip="Highlight the current timestamp in the recording"
           onClick={addHighlight}
+          signalSuccess
         >
           <HiOutlineStar size="24" />
         </RecordingActionButton>
