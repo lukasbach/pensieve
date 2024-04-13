@@ -1,0 +1,28 @@
+import { FC } from "react";
+import { Box } from "@radix-ui/themes";
+
+import { RecordingMeta, RecordingTranscript } from "../../../types";
+import { useManagedAudio } from "../use-managed-audio";
+import { TranscriptItem } from "./transcript-item";
+
+export const Transscript: FC<{
+  transcript: RecordingTranscript;
+  audio: ReturnType<typeof useManagedAudio>;
+  meta: RecordingMeta;
+  updateMeta: (update: Partial<RecordingMeta>) => Promise<void>;
+}> = ({ transcript, audio, meta, updateMeta }) => {
+  return (
+    <Box px="2rem" py="1rem">
+      {transcript.transcription.map((item, index) => (
+        <TranscriptItem
+          meta={meta}
+          updateMeta={updateMeta}
+          item={item}
+          audio={audio}
+          priorItem={transcript.transcription[index - 1]}
+          nextItem={transcript.transcription[index + 1]}
+        />
+      ))}
+    </Box>
+  );
+};

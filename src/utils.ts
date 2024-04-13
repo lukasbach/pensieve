@@ -1,4 +1,5 @@
 import { Buffer } from "buffer";
+import { useCallback, useEffect, useRef } from "react";
 
 export const blobToBuffer = async (blob: Blob) => {
   return new Promise<Buffer>((r) => {
@@ -23,4 +24,18 @@ export const timeToDisplayString = (time: number) => {
   return `${hoursString}${String(minutes).padStart(2, "0")}:${String(
     seconds,
   ).padStart(2, "0")}.${String(ms).padStart(1, "0")}`;
+};
+
+export const isInRange = (value: number, range: readonly [number, number]) =>
+  value >= range[0] && value < range[1];
+
+export const useEvent = <T extends (...p: any[]) => any>(handler: T) => {
+  const handlerRef = useRef(handler);
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
+  return useCallback(
+    (...args: Parameters<T>) => handlerRef.current(...args),
+    [],
+  );
 };

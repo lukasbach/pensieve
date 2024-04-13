@@ -5,7 +5,7 @@ import { historyDetailsRoute } from "../router/router";
 import { QueryKeys } from "../../query-keys";
 import { historyApi } from "../api";
 import { PageContainer } from "../common/page-container";
-import { Transscript } from "./transscript";
+import { Transscript } from "./transcript/transscript";
 import { useManagedAudio } from "./use-managed-audio";
 import { AudioControls } from "./audio-controls";
 
@@ -22,12 +22,18 @@ export const DetailsScreen: FC = () => {
 
   const audio = useManagedAudio();
 
+  if (!recording) return null;
+
   return (
     <PageContainer title={recording?.name ?? "Untitled Recording"}>
       <Flex direction="column" maxHeight="100%">
         <Box flexGrow="1" overflowY="auto">
           {transcript && (
             <Transscript
+              meta={recording}
+              updateMeta={(update) =>
+                historyApi.updateRecordingMeta(id, update)
+              }
               // isPlaying={audio.audioTag.current?.paused === false}
               transcript={transcript}
               audio={audio}
