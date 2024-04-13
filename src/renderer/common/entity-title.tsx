@@ -10,11 +10,10 @@ export const EntityTitle: FC<
     <Flex align="center" gap=".5rem" {...props}>
       {icon && <Box>{icon}</Box>}
       <Flex direction="column" overflow="hidden">
-        <Flex mb="-.2rem" gap=".2rem">
+        <Flex gap=".2rem">
           <Text
             as="div"
             weight="bold"
-            mb="-.2rem"
             style={{
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -30,7 +29,7 @@ export const EntityTitle: FC<
             </Box>
           )}
         </Flex>
-        {subtitle && <Text>{subtitle}</Text>}
+        {subtitle && <Text mt="-.4rem">{subtitle}</Text>}
       </Flex>
     </Flex>
   );
