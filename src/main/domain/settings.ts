@@ -33,6 +33,9 @@ export const getSettings = async () => {
 };
 
 export const saveSettings = async (partialSettings: DeepPartial<Settings>) => {
+  if (partialSettings.core?.recordingsFolder) {
+    await fs.ensureDir(partialSettings.core.recordingsFolder);
+  }
   const settings = fs.existsSync(settingsFile)
     ? await fs.readJSON(settingsFile)
     : {};

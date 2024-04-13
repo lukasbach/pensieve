@@ -1,4 +1,5 @@
-import type { DesktopCapturerSource } from "electron";
+import { DesktopCapturerSource, app } from "electron";
+import path from "path";
 
 export type RecordingConfig = {
   screen?: DesktopCapturerSource;
@@ -68,6 +69,7 @@ export type RecordingTranscriptItem = {
 }; */
 
 export const defaultSettings = {
+  core: { recordingsFolder: path.join(app.getPath("userData"), "recordings") },
   ui: {
     dark: true,
     autoStart: true,

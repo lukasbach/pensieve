@@ -57,7 +57,7 @@ app.whenReady().then(async () => {
   protocol.registerFileProtocol("recording", async (request, callback) => {
     const recordingId = request.url.replace("recording://", "");
     const mp3 = path.join(
-      history.getRecordingsFolder(),
+      await history.getRecordingsFolder(),
       recordingId,
       "recording.mp3",
     );
@@ -78,7 +78,7 @@ app.whenReady().then(async () => {
       return;
     }
 
-    const imageFile = path.join(history.getRecordingsFolder(), fileName);
+    const imageFile = path.join(await history.getRecordingsFolder(), fileName);
     if (fs.existsSync(imageFile)) {
       callback({ path: imageFile });
     } else {

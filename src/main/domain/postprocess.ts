@@ -77,10 +77,11 @@ export const addToQueue = (recordingId: string) => {
 };
 
 const postProcessRecording = async (id: string) => {
-  const mic = path.join(getRecordingsFolder(), id, "mic.webm");
-  const screen = path.join(getRecordingsFolder(), id, "screen.webm");
-  const wav = path.join(getRecordingsFolder(), id, "whisper-input.wav");
-  const mp3 = path.join(getRecordingsFolder(), id, "recording.mp3");
+  const recordingsFolder = await getRecordingsFolder();
+  const mic = path.join(recordingsFolder, id, "mic.webm");
+  const screen = path.join(recordingsFolder, id, "screen.webm");
+  const wav = path.join(recordingsFolder, id, "whisper-input.wav");
+  const mp3 = path.join(recordingsFolder, id, "recording.mp3");
 
   setStep("wav");
   if (hasAborted()) return;
@@ -108,7 +109,7 @@ const postProcessRecording = async (id: string) => {
 
   await whisper.processWavFile(
     wav,
-    path.join(getRecordingsFolder(), id, "transcript.json"),
+    path.join(recordingsFolder, id, "transcript.json"),
     await models.prepareConfiguredModel(),
   );
 
