@@ -124,28 +124,32 @@ export const useStopRecording = () => {
 };
 
 export const useMakeScreenshot = () => {
-  // TODO NOT WORKING
   const { recorder, addScreenshot } = useRecorderState();
   return useCallback(async () => {
     if (!recorder?.screen) return;
     const videoStream = recorder.screen.stream.getVideoTracks()[0];
     const imageCapturer = new ImageCapture(videoStream);
-    const constraints = videoStream.getConstraints();
-    console.log(
-      "!!",
-      await imageCapturer.getPhotoSettings(),
-      await imageCapturer.getPhotoCapabilities(),
-      {
-        imageWidth: videoStream.getSettings().width,
-        imageHeight: videoStream.getSettings().height,
-      },
-    );
-    const blob = await imageCapturer.takePhoto({
+
+    const frame = await imageCapturer.grabFrame();
+    const canvas = document.createElement("canvas");
+    canvas.width = frame.width;
+    canvas.height = frame.height;
+    const ctx = canvas.getContext("bitmaprenderer");
+    if (!ctx) throw new Error("no bitmaprenderer");
+    ctx.transferFromImageBitmap(frame);
+    const blob = await new Promise<Blob | null>((r) => {
+      canvas.toBlob(r);
+    });
+    canvas.remove();
+    if (!blob) throw new Error("no blob");
+
+    /* const blob = await imageCapturer.takePhoto({
       imageWidth: videoStream.getSettings().width,
       imageHeight: videoStream.getSettings().height,
-    });
+    }); */
+
     const buffer = await blobToBuffer(blob);
-    const fileName = `${new Date().toISOString()}.png`;
+    const fileName = `${new Date().getTime()}.png`;
     await historyApi.storeUnassociatedScreenshot(fileName, buffer);
     addScreenshot(fileName);
   }, [addScreenshot, recorder?.screen]);

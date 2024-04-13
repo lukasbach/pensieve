@@ -24,14 +24,13 @@ export const getUnassociatedImagesFolder = () => {
 
 export const storeUnassociatedScreenshot = async (
   fileName: string,
-  data: ArrayBuffer,
+  data: Uint8Array,
 ) => {
   if (!fileName.endsWith(".png")) {
     throw new Error("Only PNG files are supported");
   }
 
-  await fs.ensureDir(getUnassociatedImagesFolder());
-  await fs.writeFile(path.join(getUnassociatedImagesFolder(), fileName), data);
+  await fs.outputFile(path.join(getUnassociatedImagesFolder(), fileName), data);
 };
 
 export const saveRecording = async (recording: RecordingData) => {
@@ -47,7 +46,7 @@ export const saveRecording = async (recording: RecordingData) => {
 
   const folder = path.join(
     getRecordingsFolder(),
-    `${started.getFullYear()}-${started.getMonth()}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`,
+    `${started.getFullYear()}-${started.getMonth() + 1}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`,
   );
   await fs.ensureDir(folder);
   if (recording.mic) {
@@ -65,6 +64,14 @@ export const saveRecording = async (recording: RecordingData) => {
   await fs.writeJSON(path.join(folder, "meta.json"), meta, {
     spaces: 2,
   });
+
+  for (const screenshot of Object.values(recording.meta.screenshots ?? {})) {
+    await fs.move(
+      path.join(getUnassociatedImagesFolder(), screenshot),
+      path.join(folder, screenshot),
+    );
+  }
+
   searchIndex.updateRecordingName(folder, recording.meta.name);
   invalidateUiKeys(QueryKeys.History);
 

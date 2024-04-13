@@ -85,7 +85,7 @@ export const Recorder: FC = () => {
             <Text size="2" weight="bold">
               Screen
             </Text>
-            <ScreenSelector />
+            <ScreenSelector comingSoon />
           </Box>
           <Box flexBasis="100%" overflow="hidden">
             <Text size="2" weight="bold">

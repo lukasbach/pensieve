@@ -3,7 +3,9 @@ import { Select, Tooltip } from "@radix-ui/themes";
 import { useRecorderState } from "./state";
 import { useScreenSources } from "./hooks";
 
-export const ScreenSelector: FC = () => {
+export const ScreenSelector: FC<{ comingSoon?: boolean }> = ({
+  comingSoon,
+}) => {
   const screenSources = useScreenSources();
   const { setConfig, recordingConfig } = useRecorderState();
 
@@ -16,9 +18,19 @@ export const ScreenSelector: FC = () => {
         setConfig({ screen });
       }}
       // disabled={!recordingConfig.screen}
-      disabled
+      disabled={comingSoon}
     >
-      <Tooltip content="Coming soon">
+      {comingSoon ? (
+        <Tooltip content="Coming soon">
+          <Select.Trigger
+            style={{
+              maxWidth: "-webkit-fill-available",
+              minWidth: "-webkit-fill-available",
+            }}
+            placeholder="Screen"
+          />
+        </Tooltip>
+      ) : (
         <Select.Trigger
           style={{
             maxWidth: "-webkit-fill-available",
@@ -26,7 +38,7 @@ export const ScreenSelector: FC = () => {
           }}
           placeholder="Screen"
         />
-      </Tooltip>
+      )}
       <Select.Content position="popper">
         {screenSources?.map((source) => (
           <Select.Item value={source.id} key={source.id}>
