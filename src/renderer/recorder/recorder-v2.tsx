@@ -1,20 +1,29 @@
-import { FC } from "react";
 import {
+  Badge,
   Box,
   Button,
   CheckboxCards,
   Flex,
+  IconButton,
   Text,
+  TextArea,
   TextField,
+  Tooltip,
 } from "@radix-ui/themes";
-import { HiOutlineStopCircle } from "react-icons/hi2";
+import {
+  HiMiniPause,
+  HiMiniPencilSquare,
+  HiOutlineStopCircle,
+} from "react-icons/hi2";
+import { forwardRef } from "react";
+import { MdScreenshotMonitor } from "react-icons/md";
 import { useMakeScreenshot, useRecorderState, useStopRecording } from "./state";
 import { ScreenSelector } from "./screen-selector";
 import { MicSelector } from "./mic-selector";
 import { useMicSources, useScreenSources } from "./hooks";
-import { EmptyState } from "../common/empty-state";
+import { EntityTitle } from "../common/entity-title";
 
-export const RecorderV2: FC = () => {
+export const RecorderV2 = forwardRef<HTMLDivElement>(({}, ref) => {
   const defaultMic = useMicSources()?.[0];
   const defaultScreen = useScreenSources()?.[0];
 
@@ -29,19 +38,54 @@ export const RecorderV2: FC = () => {
   const stopRecording = useStopRecording();
   const makeScreenshot = useMakeScreenshot();
 
-  if (recorder) {
+  if (recorder || true) {
     return (
-      <EmptyState title="Recording running">
-        <Button onClick={stopRecording}>
+      <Flex
+        maxWidth="32rem"
+        mx="auto"
+        my="1rem"
+        px="1rem"
+        direction="column"
+        gap="1rem"
+        flexGrow="1"
+        height="-webkit-fill-available"
+        ref={ref}
+      >
+        <EntityTitle icon={<Badge color="red">LIVE</Badge>}>
+          Recording running
+        </EntityTitle>
+        <Flex justify="center" gap=".5rem">
+          <Tooltip content="Pause recording">
+            <IconButton size="4" variant="soft" color="gray">
+              <HiMiniPause size="24" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip content="Take screenshot">
+            <IconButton
+              onClick={makeScreenshot}
+              size="4"
+              variant="soft"
+              color="gray"
+            >
+              <MdScreenshotMonitor size="24" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip content="Add note at current time">
+            <IconButton variant="soft" color="gray" size="4">
+              <HiMiniPencilSquare size="24" />
+            </IconButton>
+          </Tooltip>
+        </Flex>
+        <TextArea placeholder="Recording notes..." style={{ flexGrow: "1" }} />
+        <Button onClick={stopRecording} size="4">
           <HiOutlineStopCircle /> Stop recording
         </Button>
-        <Button onClick={makeScreenshot}>Make screenshot</Button>
-      </EmptyState>
+      </Flex>
     );
   }
 
   return (
-    <Flex direction="column" px=".5rem" py="1rem" gap=".5rem">
+    <Flex direction="column" px=".5rem" py="1rem" gap=".5rem" ref={ref}>
       <TextField.Root
         size="2"
         placeholder="Untitled Recording"
@@ -110,4 +154,4 @@ export const RecorderV2: FC = () => {
       </Flex>
     </Flex>
   );
-};
+});

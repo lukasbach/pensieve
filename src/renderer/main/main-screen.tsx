@@ -30,7 +30,7 @@ export const MainScreen: FC = () => {
         }
       >
         {/* TODO cant remember why i put asChild on the tabContent elements, but radix logs error if they exist, due to children not forwarding refs */}
-        <Tabs.Content value="record">
+        <Tabs.Content value="record" asChild>
           {(window as any).ipcApi.isDev ? <RecorderV2 /> : <Recorder />}
         </Tabs.Content>
 
