@@ -50,7 +50,7 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
             )}
 
             {dialog?.input?.type === "text" && (
-              <Flex direction="column" gap="3">
+              <Flex direction="column" gap="3" mb=".5rem">
                 <label>
                   <Text as="div" size="2" mb="1" weight="bold">
                     {dialog.input.label}

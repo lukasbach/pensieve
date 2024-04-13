@@ -1,27 +1,18 @@
 import {
-  Badge,
   Box,
   Button,
   CheckboxCards,
   Flex,
-  IconButton,
   Text,
-  TextArea,
   TextField,
-  Tooltip,
 } from "@radix-ui/themes";
-import {
-  HiMiniPause,
-  HiMiniPencilSquare,
-  HiOutlineStopCircle,
-} from "react-icons/hi2";
+
 import { forwardRef } from "react";
-import { MdScreenshotMonitor } from "react-icons/md";
-import { useMakeScreenshot, useRecorderState, useStopRecording } from "./state";
+import { useRecorderState } from "./state";
 import { ScreenSelector } from "./screen-selector";
 import { MicSelector } from "./mic-selector";
 import { useMicSources, useScreenSources } from "./hooks";
-import { EntityTitle } from "../common/entity-title";
+import { RecorderInsession } from "./recorder-insession";
 
 export const RecorderV2 = forwardRef<HTMLDivElement>(({}, ref) => {
   const defaultMic = useMicSources()?.[0];
@@ -35,53 +26,9 @@ export const RecorderV2 = forwardRef<HTMLDivElement>(({}, ref) => {
     meta,
     setMeta,
   } = useRecorderState();
-  const stopRecording = useStopRecording();
-  const makeScreenshot = useMakeScreenshot();
 
-  if (recorder || true) {
-    return (
-      <Flex
-        maxWidth="32rem"
-        mx="auto"
-        my="1rem"
-        px="1rem"
-        direction="column"
-        gap="1rem"
-        flexGrow="1"
-        height="-webkit-fill-available"
-        ref={ref}
-      >
-        <EntityTitle icon={<Badge color="red">LIVE</Badge>}>
-          Recording running
-        </EntityTitle>
-        <Flex justify="center" gap=".5rem">
-          <Tooltip content="Pause recording">
-            <IconButton size="4" variant="soft" color="gray">
-              <HiMiniPause size="24" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content="Take screenshot">
-            <IconButton
-              onClick={makeScreenshot}
-              size="4"
-              variant="soft"
-              color="gray"
-            >
-              <MdScreenshotMonitor size="24" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content="Add note at current time">
-            <IconButton variant="soft" color="gray" size="4">
-              <HiMiniPencilSquare size="24" />
-            </IconButton>
-          </Tooltip>
-        </Flex>
-        <TextArea placeholder="Recording notes..." style={{ flexGrow: "1" }} />
-        <Button onClick={stopRecording} size="4">
-          <HiOutlineStopCircle /> Stop recording
-        </Button>
-      </Flex>
-    );
+  if (recorder) {
+    return <RecorderInsession ref={ref} />;
   }
 
   return (
