@@ -4,6 +4,7 @@ import {
   HiMiniPause,
   HiMiniPencilSquare,
   HiMiniPlay,
+  HiOutlineClock,
   HiOutlineStar,
   HiOutlineStopCircle,
   HiOutlineTrash,
@@ -14,6 +15,7 @@ import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
 import { useConfirm, usePromptText } from "../dialog/context";
 import { PageContent } from "../common/page-content";
+import { Timer } from "./timer";
 
 export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
   const {
@@ -59,7 +61,11 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
           Recording running
         </EntityTitle>
       )}
-      <Flex justify="center" gap=".5rem">
+      <Flex justify="center" gap=".5rem" align="center">
+        <Badge style={{ width: "4.5rem" }}>
+          <HiOutlineClock />
+          <Timer isRunning={!isPaused} />
+        </Badge>
         {isPaused ? (
           <RecordingActionButton tooltip="Resume recording" onClick={resume}>
             <HiMiniPlay size="24" />

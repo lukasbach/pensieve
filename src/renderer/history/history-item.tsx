@@ -49,7 +49,7 @@ export const HistoryItem: FC<{
     );
   }, [priorItemDate, recording.started]);
 
-  const duration = humanizer(recording.duration || 0);
+  const duration = humanizer(recording.duration || 0, { maxDecimalPoints: 0 });
 
   return (
     <>
