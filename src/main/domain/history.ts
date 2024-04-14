@@ -166,6 +166,7 @@ export const updateRecording = async (
       ...meta,
       ...partial,
     },
+    { spaces: 2 },
   );
   searchIndex.updateRecordingName(recordingId, partial.name);
   invalidateUiKeys(QueryKeys.History, recordingId);

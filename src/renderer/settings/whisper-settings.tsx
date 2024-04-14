@@ -18,11 +18,6 @@ export const WhisperSettings: FC = () => {
     queryFn: modelsApi.listModels,
   });
 
-  console.log(
-    form.register("whisper.processors"),
-    form.getValues()?.whisper?.processors,
-  );
-
   return (
     <Tabs.Content value="whisper">
       <Heading>Whisper transcription model</Heading>

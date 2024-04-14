@@ -26,6 +26,8 @@ export const timeToDisplayString = (time: number) => {
   ).padStart(2, "0")}.${String(ms).padStart(1, "0")}`;
 };
 
+export const isNotNull = <T>(x: T | null): x is T => x !== null;
+
 export const isInRange = (value: number, range: readonly [number, number]) =>
   value >= range[0] && value < range[1];
 

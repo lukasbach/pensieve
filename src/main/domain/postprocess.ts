@@ -5,6 +5,7 @@ import * as history from "./history";
 import * as whisper from "./whisper";
 import * as models from "./models";
 import * as runner from "./runner";
+import * as llm from "./llm";
 import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
@@ -51,6 +52,10 @@ const updateUiProgress = () => {
 
 export const getCurrentItem = () => {
   return isRunning ? processingQueue[0] : null;
+};
+
+export const getProgress = (step: keyof typeof progress) => {
+  return progress[step];
 };
 
 export const setProgress = (step: keyof typeof progress, value: number) => {
@@ -126,9 +131,17 @@ const postProcessRecording = async (id: string) => {
     await history.updateRecording(id, { hasRawRecording: false });
   }
 
+  const transcript = await getRecordingTranscript(id);
+
+  if (settings.llm.enabled && transcript) {
+    setStep("summary");
+    const summary = await llm.summarize(transcript);
+    await history.updateRecording(id, { summary });
+  }
+
   await history.updateRecording(id, {
     isPostProcessed: true,
-    language: (await getRecordingTranscript(id))?.result.language,
+    language: transcript?.result.language,
   });
   searchIndex.addRecordingToIndex(id);
   updateUiProgress();

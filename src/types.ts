@@ -26,6 +26,11 @@ export type RecordingMeta = {
   timestampedNotes?: Record<number, string>;
   highlights?: number[];
   screenshots?: Record<number, string>;
+  summary?: {
+    summary?: string | null;
+    actionItems?: { isMe: boolean; action: string; time: number }[] | null;
+    sentenceSummary?: string | null;
+  };
 };
 
 export type RecordingTranscript = {
@@ -74,6 +79,35 @@ export const defaultSettings = {
     dark: true,
     autoStart: true,
     trayRunningNotificationShown: false,
+  },
+  llm: {
+    enabled: true,
+    features: {
+      summary: true,
+      actionItems: true,
+      sentenceSummary: true,
+    },
+    useEmbedding: true,
+    provider: "ollama" as "ollama" | "openai",
+    providerConfig: {
+      ollama: {
+        chatModel: {
+          baseUrl: "http://localhost:11434",
+          model: "llama2:latest",
+        },
+        embeddings: {
+          model: "nomic-embed-text",
+          maxConcurrency: 5,
+        },
+      },
+      openai: {
+        chatModel: {
+          apiKey: "YOUR_API_KEY",
+          model: "gpt-3.5-turbo",
+        },
+        embeddings: {},
+      },
+    },
   },
   ffmpeg: {
     removeRawRecordings: false,
