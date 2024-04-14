@@ -121,6 +121,16 @@ const postProcessRecording = async (id: string) => {
   await fs.rm(wav);
 
   const settings = await getSettings();
+
+  const transcript = await getRecordingTranscript(id);
+
+  if (settings.llm.enabled && transcript) {
+    if (hasAborted()) return;
+    setStep("summary");
+    const summary = await llm.summarize(transcript);
+    await history.updateRecording(id, { summary });
+  }
+
   if (settings.ffmpeg.removeRawRecordings) {
     if (fs.existsSync(mic)) {
       await fs.rm(mic);
@@ -129,14 +139,6 @@ const postProcessRecording = async (id: string) => {
       await fs.rm(screen);
     }
     await history.updateRecording(id, { hasRawRecording: false });
-  }
-
-  const transcript = await getRecordingTranscript(id);
-
-  if (settings.llm.enabled && transcript) {
-    setStep("summary");
-    const summary = await llm.summarize(transcript);
-    await history.updateRecording(id, { summary });
   }
 
   await history.updateRecording(id, {
