@@ -29,7 +29,19 @@ export const EntityTitle: FC<
             </Box>
           )}
         </Flex>
-        {subtitle && <Text mt="-.4rem">{subtitle}</Text>}
+        {subtitle && (
+          <Text
+            mt="-.4rem"
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              overflowWrap: "break-word",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {subtitle}
+          </Text>
+        )}
       </Flex>
     </Flex>
   );

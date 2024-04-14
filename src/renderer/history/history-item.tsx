@@ -15,6 +15,20 @@ import { EntityTitle } from "../common/entity-title";
 import { useConfirm } from "../dialog/context";
 import { HistoryItemIcon } from "./history-item-icon";
 
+const getSubtitle = ({
+  summary,
+  searchText,
+  duration,
+}: {
+  searchText?: string;
+  duration: string;
+  summary?: string | null;
+}) => {
+  if (searchText) return searchText;
+  if (summary) return `${summary} - ${duration}`;
+  return duration;
+};
+
 export const HistoryItem: FC<{
   recording: RecordingMeta;
   id: string;
@@ -35,6 +49,8 @@ export const HistoryItem: FC<{
     );
   }, [priorItemDate, recording.started]);
 
+  const duration = humanizer(recording.duration || 0);
+
   return (
     <>
       {isNewDate && (
@@ -47,7 +63,11 @@ export const HistoryItem: FC<{
         subtitle={
           isProcessing
             ? "Recording is processing..."
-            : searchText || humanizer(recording.duration || 0)
+            : getSubtitle({
+                summary: recording.summary?.sentenceSummary,
+                searchText,
+                duration,
+              })
         }
         onRename={(name) => historyApi.updateRecordingMeta(id, { name })}
         tags={
