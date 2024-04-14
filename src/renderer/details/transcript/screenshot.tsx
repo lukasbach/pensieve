@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */
 import { FC, useState } from "react";
 import * as styles from "./styles.module.css";
 

@@ -14,7 +14,7 @@ import { MicSelector } from "./mic-selector";
 import { useMicSources, useScreenSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
 
-export const RecorderV2 = forwardRef<HTMLDivElement>(({}, ref) => {
+export const RecorderV2 = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
   const defaultScreen = useScreenSources()?.[0];
 

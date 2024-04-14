@@ -23,7 +23,7 @@ export const removeRecordingFromIndex = (recordingId: string) => {
 
 export const initializeSearchIndex = async () => {
   const recordings = await history.listRecordings();
-  for (const recordingId in recordings) {
+  for (const recordingId of Object.keys(recordings)) {
     await addRecordingToIndex(recordingId);
     const { name } = recordings[recordingId];
     updateRecordingName(recordingId, name);
