@@ -13,6 +13,7 @@ import { useMakeScreenshot, useRecorderState, useStopRecording } from "./state";
 import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
 import { useConfirm, usePromptText } from "../dialog/context";
+import { PageContent } from "../common/page-content";
 
 export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
   const {
@@ -48,17 +49,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
   };
 
   return (
-    <Flex
-      maxWidth="32rem"
-      mx="auto"
-      my="1rem"
-      px="1rem"
-      direction="column"
-      gap="1rem"
-      flexGrow="1"
-      height="-webkit-fill-available"
-      ref={ref}
-    >
+    <PageContent ref={ref}>
       {isPaused ? (
         <EntityTitle icon={<Badge color="orange">PAUSED</Badge>}>
           Recording is paused
@@ -115,6 +106,6 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
       <Button onClick={stopRecording} size="4">
         <HiOutlineStopCircle /> Stop recording
       </Button>
-    </Flex>
+    </PageContent>
   );
 });

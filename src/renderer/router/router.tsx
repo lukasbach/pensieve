@@ -9,12 +9,14 @@ import { MainScreen } from "../main/main-screen";
 import { DetailsScreen } from "../details/details-screen";
 import { SettingsScreen } from "../settings/settings-screen";
 
+const validateSearch = (search: Record<string, unknown>) => ({
+  tray: !!search.tray,
+  isMainWindow: !!search.isMainWindow,
+});
+
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
-  validateSearch: (search: Record<string, unknown>) => ({
-    tray: !!search.tray,
-    isMainWindow: !!search.isMainWindow,
-  }),
+  validateSearch,
 });
 
 const indexRoute = createRoute({
@@ -33,6 +35,10 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
   component: SettingsScreen,
+  validateSearch: (search: Record<string, unknown>) => ({
+    ...validateSearch(search),
+    settingsTab: search.settingsTab as string | undefined,
+  }),
 });
 
 const routeTree = rootRoute.addChildren([

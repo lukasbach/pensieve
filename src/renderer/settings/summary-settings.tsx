@@ -8,6 +8,7 @@ import { SettingsTextField } from "./settings-text-field";
 import { SettingsSelectField } from "./settings-select-field";
 import { SettingsField } from "./settings-field";
 import { mainApi } from "../api";
+import { SettingsTab } from "./tabs";
 
 export const OpenAiSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -199,7 +200,7 @@ export const DetailedSummarySettings: FC = () => {
 export const SummarySettings: FC = () => {
   const form = useFormContext<Settings>();
   return (
-    <Tabs.Content value="summary" style={{ height: "100%" }}>
+    <Tabs.Content value={SettingsTab.Summary} style={{ height: "100%" }}>
       <Heading>Summarization</Heading>
       <Text as="p" mb="1rem">
         A LLM model can be used to summarize the transcript and extract action

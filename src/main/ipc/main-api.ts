@@ -2,6 +2,7 @@ import { BrowserWindow, app, desktopCapturer, shell } from "electron";
 import path from "path";
 import * as windows from "../domain/windows";
 import * as settings from "../domain/settings";
+import { SettingsTab } from "../../renderer/settings/tabs";
 
 const updateExe = path.resolve(
   path.dirname(process.execPath),
@@ -31,8 +32,10 @@ export const mainApi = {
     return desktopCapturer.getSources({ types: ["window"] });
   },
 
-  openSettingsWindow: async () => {
-    windows.openAppWindow("/settings");
+  openSettingsWindow: async (
+    settingsTab: SettingsTab = SettingsTab.General,
+  ) => {
+    windows.openAppWindow(`/settings`, { settingsTab });
   },
 
   openMainWindowNormally: async () => {

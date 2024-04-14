@@ -8,6 +8,7 @@ import { SettingsField } from "./settings-field";
 import { useConfirm } from "../dialog/context";
 import { mainApi } from "../api";
 import { SettingsTextField } from "./settings-text-field";
+import { SettingsTab } from "./tabs";
 
 export const GeneralSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -17,7 +18,7 @@ export const GeneralSettings: FC = () => {
   );
 
   return (
-    <Tabs.Content value="general">
+    <Tabs.Content value={SettingsTab.General}>
       <SettingsField label="Reset settings">
         <Button
           onClick={async () => {

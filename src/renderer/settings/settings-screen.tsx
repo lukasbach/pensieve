@@ -8,6 +8,7 @@ import {
   HiOutlineCheckCircle,
   HiOutlineWrenchScrewdriver,
 } from "react-icons/hi2";
+import { useSearch } from "@tanstack/react-router";
 import { PageContainer } from "../common/page-container";
 import { QueryKeys } from "../../query-keys";
 import { mainApi } from "../api";
@@ -20,14 +21,15 @@ import { SummarySettings } from "./summary-settings";
 import { HooksSettings } from "./hooks-settings";
 
 export const SettingsScreen: FC = () => {
+  const { settingsTab } = useSearch({
+    from: "/settings" as const,
+  });
   const { data: values } = useQuery({
     queryKey: [QueryKeys.Settings],
     queryFn: mainApi.getSettings,
   });
   const form = useForm<Settings>({ values, mode: "onChange" });
   const [hasSaved, setHasSaved] = useState(false);
-
-  console.log(values);
 
   const handleSubmit = useDebouncedCallback(
     () => {
@@ -57,7 +59,7 @@ export const SettingsScreen: FC = () => {
     >
       <Tabs.Root
         orientation="vertical"
-        defaultValue="general"
+        defaultValue={settingsTab ?? "general"}
         style={{ height: "100%" }}
       >
         <Flex height="100%">

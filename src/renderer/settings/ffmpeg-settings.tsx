@@ -4,11 +4,12 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { Settings } from "../../types";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTextField } from "./settings-text-field";
+import { SettingsTab } from "./tabs";
 
 export const FfmpegSettings: FC = () => {
   const form = useFormContext<Settings>();
   return (
-    <Tabs.Content value="ffmpeg">
+    <Tabs.Content value={SettingsTab.Ffmpeg}>
       <SettingsSwitchField
         form={form}
         field="ffmpeg.autoTriggerPostProcess"

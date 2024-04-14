@@ -9,6 +9,7 @@ import { QueryKeys } from "../../query-keys";
 import { modelsApi } from "../api";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsSwitchField } from "./settings-switch-field";
+import { SettingsTab } from "./tabs";
 
 export const WhisperSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -19,7 +20,7 @@ export const WhisperSettings: FC = () => {
   });
 
   return (
-    <Tabs.Content value="whisper">
+    <Tabs.Content value={SettingsTab.Whisper}>
       <Heading>Whisper transcription model</Heading>
       <Text as="p">
         The whisper AI model that is used to transcribe the audio file. If the

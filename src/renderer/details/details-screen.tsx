@@ -9,6 +9,8 @@ import { Transscript } from "./transcript/transscript";
 import { useManagedAudio } from "./use-managed-audio";
 import { AudioControls } from "./audio-controls";
 import { Notes } from "./notes";
+import { Summary } from "./summary";
+import { EmptyState } from "../common/empty-state";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
@@ -23,7 +25,13 @@ export const DetailsScreen: FC = () => {
 
   const audio = useManagedAudio();
 
-  if (!recording) return null;
+  if (!recording || !transcript) {
+    return (
+      <PageContainer title={recording?.name ?? "Untitled Recording"}>
+        <EmptyState>Loading...</EmptyState>
+      </PageContainer>
+    );
+  }
 
   return (
     <Tabs.Root defaultValue="transcript" style={{ height: "100%" }}>
@@ -32,6 +40,7 @@ export const DetailsScreen: FC = () => {
         tabs={
           <Tabs.List style={{ flexGrow: "1" }}>
             <Tabs.Trigger value="transcript">Transcript</Tabs.Trigger>
+            <Tabs.Trigger value="summary">Summary</Tabs.Trigger>
             <Tabs.Trigger value="notes">Notes</Tabs.Trigger>
           </Tabs.List>
         }
@@ -58,6 +67,9 @@ export const DetailsScreen: FC = () => {
                   historyApi.updateRecordingMeta(id, update)
                 }
               />
+            </Tabs.Content>
+            <Tabs.Content value="summary">
+              <Summary meta={recording} audio={audio} />
             </Tabs.Content>
           </Box>
           <Box>

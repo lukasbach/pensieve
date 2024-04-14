@@ -19,7 +19,7 @@ export const EmptyState: FC<
     >
       {icon && <Box mb=".2rem">{icon}</Box>}
       <Heading>{title}</Heading>
-      <Text>{description}</Text>
+      <Text mb="1rem">{description}</Text>
       {children}
     </Flex>
   );
