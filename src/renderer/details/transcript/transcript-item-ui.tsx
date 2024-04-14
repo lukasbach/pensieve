@@ -37,13 +37,10 @@ export const TranscriptItemUi = memo<{
     nextItems,
   }) => {
     const boxRef = useRef<HTMLDivElement | null>(null);
-    useResizeObserver(
-      boxRef,
-      ({ target, contentRect, contentBoxSize, borderBoxSize }) => {
-        const scrollPosition = target.getBoundingClientRect().top;
-        setScrollPosition(time, scrollPosition);
-      },
-    );
+    useResizeObserver(boxRef, ({ target }) => {
+      const scrollPosition = target.getBoundingClientRect().top;
+      setScrollPosition(time, scrollPosition);
+    });
 
     return (
       <>

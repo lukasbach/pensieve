@@ -13,7 +13,7 @@ export const getScrollPositionAt = (time: number) => {
 
   const closest = Object.entries(scrollPositions).reduce(
     (old, [exactTimeString, scrollPos]) => {
-      const exactTime = Number.parseInt(exactTimeString);
+      const exactTime = Number.parseInt(exactTimeString, 10);
       const dist = Math.abs(exactTime - time);
       return dist < old.dist ? { exactTime, scrollPos, dist } : old;
     },
