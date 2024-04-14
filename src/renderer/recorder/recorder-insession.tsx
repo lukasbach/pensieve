@@ -26,6 +26,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
     addHighlight,
     setMeta,
     reset,
+    meta,
   } = useRecorderState();
   const promptTimestampedNote = usePromptText(
     "Add note at current time",
@@ -62,9 +63,11 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
         </EntityTitle>
       )}
       <Flex justify="center" gap=".5rem" align="center">
-        <Badge style={{ width: "4.5rem" }}>
+        <Badge style={{ minWidth: "3.5rem" }}>
           <HiOutlineClock />
-          <Timer isRunning={!isPaused} />
+          <Timer
+            start={(Date.now() - new Date(meta.started).getTime()) / 1000}
+          />
         </Badge>
         {isPaused ? (
           <RecordingActionButton tooltip="Resume recording" onClick={resume}>

@@ -14,16 +14,17 @@ export const blobToBuffer = async (blob: Blob) => {
   });
 };
 
-export const timeToDisplayString = (time: number) => {
+export const timeToDisplayString = (time: number, withMs = true) => {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor((time % 3600) / 60);
   const seconds = Math.floor(time % 60);
   const ms = Math.floor((time % 1) * 10);
 
   const hoursString = hours > 0 ? `${hours}:` : "";
+  const msString = withMs ? `.${String(ms).padStart(1, "0")}` : "";
   return `${hoursString}${String(minutes).padStart(2, "0")}:${String(
     seconds,
-  ).padStart(2, "0")}.${String(ms).padStart(1, "0")}`;
+  ).padStart(2, "0")}${msString}`;
 };
 
 export const isNotNull = <T>(x: T | null): x is T => x !== null;

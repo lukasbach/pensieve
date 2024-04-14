@@ -1,18 +1,17 @@
 import { FC, useEffect, useState } from "react";
 import { timeToDisplayString } from "../../utils";
 
-export const Timer: FC<{ isRunning: boolean }> = ({ isRunning }) => {
-  const [time, setTime] = useState(0);
+export const Timer: FC<{ start: number }> = ({ start }) => {
+  const [time, setTime] = useState(start);
 
   useEffect(() => {
-    if (!isRunning) return () => {};
     const interval = setInterval(() => {
       setTime((prev) => prev + 1);
     }, 1000);
     return () => {
       clearInterval(interval);
     };
-  }, [isRunning]);
+  }, []);
 
-  return <>{timeToDisplayString(time)}</>;
+  return <>{timeToDisplayString(time, false)}</>;
 };
