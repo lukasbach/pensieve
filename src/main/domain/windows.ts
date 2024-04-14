@@ -25,6 +25,8 @@ export const openAppWindow = (
     frame: false,
     icon: getIconPath(),
     show: false,
+    minWidth: 300,
+    minHeight: 300,
     ...options,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),

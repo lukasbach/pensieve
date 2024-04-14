@@ -35,7 +35,11 @@ export const mainApi = {
   openSettingsWindow: async (
     settingsTab: SettingsTab = SettingsTab.General,
   ) => {
-    windows.openAppWindow(`/settings`, { settingsTab });
+    windows.openAppWindow(
+      `/settings`,
+      { settingsTab },
+      { minWidth: 650, minHeight: 400 },
+    );
   },
 
   openMainWindowNormally: async () => {
