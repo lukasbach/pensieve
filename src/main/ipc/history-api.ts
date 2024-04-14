@@ -27,7 +27,7 @@ export const historyApi = {
   clearPostProcessingQueue: async () => postprocess.clearList(),
 
   openRecordingDetailsWindow: async (id: string) => {
-    openAppWindow(`/history/${id}`);
+    openAppWindow(`/history/${id}`, {}, { minWidth: 400, minHeight: 400 });
   },
 
   showOpenImportDialog: async () => {

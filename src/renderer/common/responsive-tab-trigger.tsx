@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren, ReactNode } from "react";
-import { Tabs, Tooltip } from "@radix-ui/themes";
+import { Box, Tabs, Tooltip } from "@radix-ui/themes";
 import { useWindowSize } from "@react-hookz/web";
 
 export const ResponsiveTabTrigger: FC<
@@ -7,9 +7,11 @@ export const ResponsiveTabTrigger: FC<
 > = ({ icon, value, children }) => {
   const { width } = useWindowSize(undefined, true);
   return width < 450 ? (
-    <Tooltip content={children}>
-      <Tabs.Trigger value={value}>{icon}</Tabs.Trigger>
-    </Tooltip>
+    <Tabs.Trigger value={value}>
+      <Tooltip content={children}>
+        <Box mt="5px">{icon}</Box>
+      </Tooltip>
+    </Tabs.Trigger>
   ) : (
     <Tabs.Trigger value={value}>{children}</Tabs.Trigger>
   );

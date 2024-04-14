@@ -1,6 +1,8 @@
 import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Flex, Tabs } from "@radix-ui/themes";
+import { HiMiniPencilSquare, HiOutlineBars3BottomLeft } from "react-icons/hi2";
+import { RiRobot2Line } from "react-icons/ri";
 import { historyDetailsRoute } from "../router/router";
 import { QueryKeys } from "../../query-keys";
 import { historyApi } from "../api";
@@ -13,6 +15,7 @@ import { Summary } from "./summary";
 import { EmptyState } from "../common/empty-state";
 import { SCROLL_CONTAINER_ID, scrollToTime } from "./transcript/scrolling";
 import { SearchBar } from "./search-bar";
+import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
@@ -52,9 +55,18 @@ export const DetailsScreen: FC = () => {
         }
         tabs={
           <Tabs.List style={{ flexGrow: "1" }}>
-            <Tabs.Trigger value="transcript">Transcript</Tabs.Trigger>
-            <Tabs.Trigger value="summary">Summary</Tabs.Trigger>
-            <Tabs.Trigger value="notes">Notes</Tabs.Trigger>
+            <ResponsiveTabTrigger
+              value="transcript"
+              icon={<HiOutlineBars3BottomLeft />}
+            >
+              Transcript
+            </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger value="summary" icon={<RiRobot2Line />}>
+              Summary
+            </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger value="notes" icon={<HiMiniPencilSquare />}>
+              Notes
+            </ResponsiveTabTrigger>
           </Tabs.List>
         }
       >
