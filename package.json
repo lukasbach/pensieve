@@ -1,5 +1,5 @@
 {
-  "name": "notetaker",
+  "name": "pensieve",
   "version": "1.0.2",
   "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
   "author": "Lukas Bach <contact@lukasbach.com>",
@@ -94,21 +94,23 @@
     "node": "20.11.1",
     "yarn": "4.1.1"
   },
-  "productName": "notetaker",
+  "productName": "Pensieve",
   "funding": "https://github.com/sponsors/lukasbach",
   "keywords": [
     "notes",
     "notetaker",
+    "pensieve",
     "meeting",
     "note",
     "transcript",
     "transcribe",
     "llm",
     "record",
+    "recorder",
     "recording",
     "summarize",
     "audio",
     "mp3"
   ],
-  "repository": "https://github.com/lukasbach/notetaker.git"
+  "repository": "https://github.com/lukasbach/pensieve.git"
 }

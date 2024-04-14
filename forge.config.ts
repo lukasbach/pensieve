@@ -83,7 +83,7 @@ const config: ForgeConfig = {
       config: {
         repository: {
           owner: "lukasbach",
-          name: "notetaker",
+          name: "pensieve",
         },
         prerelease: false,
         draft: false,

@@ -68,9 +68,8 @@ export const hideMainWindow = () => {
     (async () => {
       if (!(await getSettings()).ui.trayRunningNotificationShown) {
         new Notification({
-          // TODO app name
-          title: "Notetaker is still running",
-          body: "Notetaker will continue running in the tray. You can close the app from there.",
+          title: "Pensieve is still running",
+          body: "Pensieve will continue running in the tray. You can close the app from there.",
         }).show();
         await saveSettings({ ui: { trayRunningNotificationShown: true } });
       }
