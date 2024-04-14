@@ -106,6 +106,18 @@ export const OllamaSettings: FC = () => {
         {...form.register("llm.providerConfig.ollama.chatModel.model")}
       />
 
+      <SettingsField label="Install Ollama">
+        <Button
+          type="button"
+          variant="surface"
+          onClick={async () => {
+            await mainApi.openWeb("https://ollama.com/library");
+          }}
+        >
+          Show available models
+        </Button>
+      </SettingsField>
+
       <SettingsTextField
         label="Embeddings Model"
         {...form.register("llm.providerConfig.ollama.embeddings.model")}
