@@ -105,7 +105,11 @@ export const defaultSettings = {
           apiKey: "YOUR_API_KEY",
           model: "gpt-3.5-turbo",
         },
-        embeddings: {},
+        embeddings: {
+          model: "text-embedding-3-large",
+          dimensions: 1536,
+          batchSize: 20,
+        },
       },
     },
   },
