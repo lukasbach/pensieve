@@ -119,6 +119,7 @@ export const TranscriptItem = memo<{
         item.speaker !== priorItem?.speaker || text.startsWith("- ")
       }
       timeText={timeText}
+      time={item.offsets.from}
       onTogglePlaying={onTogglePlaying}
       onToggleHighlight={onToggleHighlight}
       nextItems={nextItems}

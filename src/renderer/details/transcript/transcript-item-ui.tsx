@@ -1,4 +1,4 @@
-import { Fragment, ReactNode, memo } from "react";
+import { Fragment, ReactNode, memo, useRef } from "react";
 import { Box, Flex, IconButton, Text } from "@radix-ui/themes";
 import {
   HiMiniStar,
@@ -6,7 +6,9 @@ import {
   HiOutlinePlay,
   HiOutlineStar,
 } from "react-icons/hi2";
+import { useResizeObserver } from "@react-hookz/web";
 import { SpeakerTitle } from "./speaker-title";
+import { setScrollPosition } from "./scrolling";
 
 export const TranscriptItemUi = memo<{
   text: string;
@@ -16,6 +18,7 @@ export const TranscriptItemUi = memo<{
   isHighlighted: boolean;
   isNewSpeaker: boolean;
   timeText: string;
+  time: number;
   onTogglePlaying: () => void;
   onToggleHighlight: () => void;
   nextItems?: ReactNode;
@@ -28,14 +31,25 @@ export const TranscriptItemUi = memo<{
     isHighlighted,
     isNewSpeaker,
     timeText,
+    time,
     onTogglePlaying,
     onToggleHighlight,
     nextItems,
   }) => {
+    const boxRef = useRef<HTMLDivElement | null>(null);
+    useResizeObserver(
+      boxRef,
+      ({ target, contentRect, contentBoxSize, borderBoxSize }) => {
+        const scrollPosition = target.getBoundingClientRect().top;
+        setScrollPosition(time, scrollPosition);
+      },
+    );
+
     return (
       <>
         {isNewSpeaker && <SpeakerTitle speaker={speaker} timeText={timeText} />}
         <Box
+          ref={boxRef}
           pl="calc(32px + 0.5rem)"
           mt=".2rem"
           mb="1rem"

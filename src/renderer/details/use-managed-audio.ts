@@ -30,7 +30,7 @@ export const useManagedAudio = () => {
     if (!audioTag.current) return;
     audioTag.current.currentTime = Math.min(
       audioTag.current.duration,
-      audioTag.current.currentTime + 10,
+      audioTag.current.currentTime + 15,
     );
   }, []);
 
@@ -38,7 +38,7 @@ export const useManagedAudio = () => {
     if (!audioTag.current) return;
     audioTag.current.currentTime = Math.max(
       0,
-      audioTag.current.currentTime - 10,
+      audioTag.current.currentTime - 5,
     );
   }, []);
 

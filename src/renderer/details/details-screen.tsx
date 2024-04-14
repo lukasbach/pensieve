@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Flex, Tabs } from "@radix-ui/themes";
 import { historyDetailsRoute } from "../router/router";
@@ -11,9 +11,11 @@ import { AudioControls } from "./audio-controls";
 import { Notes } from "./notes";
 import { Summary } from "./summary";
 import { EmptyState } from "../common/empty-state";
+import { SCROLL_CONTAINER_ID, scrollToTime } from "./transcript/scrolling";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
+  const [tab, setTab] = useState("transcript");
   const { data: recording } = useQuery({
     queryKey: [QueryKeys.History, id],
     queryFn: () => historyApi.getRecordingMeta(id),
@@ -34,7 +36,7 @@ export const DetailsScreen: FC = () => {
   }
 
   return (
-    <Tabs.Root defaultValue="transcript" style={{ height: "100%" }}>
+    <Tabs.Root value={tab} onValueChange={setTab} style={{ height: "100%" }}>
       <PageContainer
         title={recording?.name ?? "Untitled Recording"}
         tabs={
@@ -46,7 +48,7 @@ export const DetailsScreen: FC = () => {
         }
       >
         <Flex direction="column" maxHeight="100%" height="100%">
-          <Box flexGrow="1" overflowY="auto">
+          <Box flexGrow="1" overflowY="auto" id={SCROLL_CONTAINER_ID}>
             <Tabs.Content value="transcript">
               {transcript && (
                 <Transscript
@@ -69,7 +71,15 @@ export const DetailsScreen: FC = () => {
               />
             </Tabs.Content>
             <Tabs.Content value="summary">
-              <Summary meta={recording} audio={audio} />
+              <Summary
+                meta={recording}
+                onJumpTo={(time) => {
+                  setTab("transcript");
+                  audio.jump(time / 1000 - 1);
+                  audio.play();
+                  setTimeout(() => scrollToTime(time));
+                }}
+              />
             </Tabs.Content>
           </Box>
           <Box>

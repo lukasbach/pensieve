@@ -16,7 +16,6 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
-import { useManagedAudio } from "./use-managed-audio";
 import { QueryKeys } from "../../query-keys";
 import { mainApi } from "../api";
 import { EmptyState } from "../common/empty-state";
@@ -24,9 +23,9 @@ import { SettingsTab } from "../settings/tabs";
 import { PageContent } from "../common/page-content";
 
 export const Summary: FC<{
-  audio: ReturnType<typeof useManagedAudio>;
   meta: RecordingMeta;
-}> = ({ meta, audio }) => {
+  onJumpTo: (time: number) => void;
+}> = ({ meta, onJumpTo }) => {
   const { data: settings } = useQuery({
     queryKey: [QueryKeys.Settings],
     queryFn: mainApi.getSettings,
@@ -83,8 +82,7 @@ export const Summary: FC<{
                   <IconButton
                     size="1"
                     onClick={() => {
-                      audio.jump(item.time / 1000 - 1);
-                      audio.play();
+                      onJumpTo(item.time);
                     }}
                   >
                     <HiOutlinePlay />
