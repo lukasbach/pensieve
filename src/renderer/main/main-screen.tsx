@@ -1,6 +1,11 @@
 import { FC } from "react";
 import { IconButton, Tabs } from "@radix-ui/themes";
-import { HiOutlineCog6Tooth } from "react-icons/hi2";
+import {
+  HiMiniListBullet,
+  HiOutlineCog6Tooth,
+  HiOutlineDocumentText,
+  HiOutlineVideoCamera,
+} from "react-icons/hi2";
 import { Recorder } from "../recorder/recorder";
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
@@ -8,6 +13,7 @@ import { Postprocess } from "../postprocess/postprocess";
 import { mainApi } from "../api";
 import { RecorderV2 } from "../recorder/recorder-v2";
 import { Fancybg } from "../common/fancybg";
+import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 
 export const MainScreen: FC = () => {
   return (
@@ -15,9 +21,21 @@ export const MainScreen: FC = () => {
       <PageContainer
         tabs={
           <Tabs.List style={{ flexGrow: "1" }}>
-            <Tabs.Trigger value="record">Record</Tabs.Trigger>
-            <Tabs.Trigger value="history">History</Tabs.Trigger>
-            <Tabs.Trigger value="postprocess">Postprocessing</Tabs.Trigger>
+            <ResponsiveTabTrigger
+              value="record"
+              icon={<HiOutlineVideoCamera />}
+            >
+              Record
+            </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger value="history" icon={<HiMiniListBullet />}>
+              History
+            </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger
+              value="postprocess"
+              icon={<HiOutlineDocumentText />}
+            >
+              Postprocessing
+            </ResponsiveTabTrigger>
           </Tabs.List>
         }
         statusButtons={
