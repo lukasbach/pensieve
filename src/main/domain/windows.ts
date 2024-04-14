@@ -24,6 +24,7 @@ export const openAppWindow = (
     height: 600,
     frame: false,
     icon: getIconPath(),
+    show: false,
     ...options,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -45,6 +46,7 @@ export const openAppWindow = (
       { hash, query },
     );
   }
+  setTimeout(() => win.show(), 200);
   return win;
 };
 

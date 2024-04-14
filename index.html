@@ -2,7 +2,16 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>Pensieve Meeting Recorder</title>
+    <script>
+      try {
+        if (localStorage.getItem("dark") === "true") {
+          document.body.style.background = "#111111";
+        }
+      } catch {
+        /* empty */
+      }
+    </script>
   </head>
   <body>
   <div id="root"></div>

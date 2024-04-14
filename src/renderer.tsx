@@ -10,7 +10,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./renderer/router/router";
 
 import "@radix-ui/themes/styles.css";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useEffect } from "react";
 import { QueryKeys } from "./query-keys";
 import { mainApi } from "./renderer/api";
 import { DialogProvider } from "./renderer/dialog/dialog-provider";
@@ -26,7 +26,22 @@ const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
     queryKey: [QueryKeys.Theme],
     queryFn: async () => (await mainApi.getSettings()).ui.dark,
   });
-  return <Theme appearance={dark ? "dark" : "light"}>{children}</Theme>;
+  useEffect(() => {
+    try {
+      localStorage.setItem("dark", dark ? "true" : "false");
+    } catch {
+      /* empty */
+    }
+  }, [dark]);
+  return (
+    <Theme
+      appearance={
+        dark ?? localStorage.getItem("dark") === "true" ? "dark" : "light"
+      }
+    >
+      {children}
+    </Theme>
+  );
 };
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
