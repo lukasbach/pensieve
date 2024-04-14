@@ -53,22 +53,25 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <PageContent ref={ref}>
-      {isPaused ? (
-        <EntityTitle icon={<Badge color="orange">PAUSED</Badge>}>
-          Recording is paused
-        </EntityTitle>
-      ) : (
-        <EntityTitle icon={<Badge color="red">LIVE</Badge>}>
-          Recording running
-        </EntityTitle>
-      )}
-      <Flex justify="center" gap=".5rem" align="center">
+      <Flex>
+        {isPaused ? (
+          <EntityTitle icon={<Badge color="orange">PAUSED</Badge>} flexGrow="1">
+            Recording is paused
+          </EntityTitle>
+        ) : (
+          <EntityTitle icon={<Badge color="red">LIVE</Badge>} flexGrow="1">
+            Recording running
+          </EntityTitle>
+        )}
         <Badge style={{ minWidth: "3.5rem" }}>
           <HiOutlineClock />
           <Timer
             start={(Date.now() - new Date(meta.started).getTime()) / 1000}
           />
         </Badge>
+      </Flex>
+
+      <Flex justify="center" gap=".5rem" align="center">
         {isPaused ? (
           <RecordingActionButton tooltip="Resume recording" onClick={resume}>
             <HiMiniPlay size="24" />
