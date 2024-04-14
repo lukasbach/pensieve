@@ -12,6 +12,7 @@ import { Notes } from "./notes";
 import { Summary } from "./summary";
 import { EmptyState } from "../common/empty-state";
 import { SCROLL_CONTAINER_ID, scrollToTime } from "./transcript/scrolling";
+import { SearchBar } from "./search-bar";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
@@ -39,6 +40,16 @@ export const DetailsScreen: FC = () => {
     <Tabs.Root value={tab} onValueChange={setTab} style={{ height: "100%" }}>
       <PageContainer
         title={recording?.name ?? "Untitled Recording"}
+        statusButtons={
+          <SearchBar
+            transcript={transcript}
+            onJumpTo={(time) => {
+              setTab("transcript");
+              audio.jump(time / 1000 - 1);
+              setTimeout(() => scrollToTime(time));
+            }}
+          />
+        }
         tabs={
           <Tabs.List style={{ flexGrow: "1" }}>
             <Tabs.Trigger value="transcript">Transcript</Tabs.Trigger>
