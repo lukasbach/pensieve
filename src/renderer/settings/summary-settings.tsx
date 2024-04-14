@@ -1,11 +1,13 @@
 import { FC } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Box, Flex, Heading, RadioCards, Text } from "@radix-ui/themes";
+import { Box, Button, Flex, Heading, RadioCards, Text } from "@radix-ui/themes";
 import { Settings } from "../../types";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsSelectField } from "./settings-select-field";
+import { SettingsField } from "./settings-field";
+import { mainApi } from "../api";
 
 export const OpenAiSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -82,6 +84,17 @@ export const OllamaSettings: FC = () => {
         You need to make sure that Ollama is installed locally, running and
         reachable.
       </Text>
+
+      <SettingsField label="Install">
+        <Button
+          type="button"
+          onClick={async () => {
+            await mainApi.openWeb("https://ollama.com/download");
+          }}
+        >
+          Download and install Ollama
+        </Button>
+      </SettingsField>
 
       <SettingsTextField
         label="Base URL"
@@ -187,11 +200,27 @@ export const SummarySettings: FC = () => {
         If enabled, summarization will happen as part of the postprocessing,
         after the transcription has finished.
       </Text>
+      <Text as="p" mb="1rem">
+        If you want all your data to stay locally, using Ollama for
+        summarization is a good choice. It will download and run LLM models
+        offline only. You need to install Ollama on your machine and configure
+        it here.
+      </Text>
       <SettingsSwitchField
         label="Enable summarization"
         form={form}
         field="llm.enabled"
       />
+      <SettingsField label="Install Ollama">
+        <Button
+          type="button"
+          onClick={async () => {
+            await mainApi.openWeb("https://ollama.com/download");
+          }}
+        >
+          Download and install Ollama
+        </Button>
+      </SettingsField>
       {form.watch("llm.enabled") && <DetailedSummarySettings />}
     </Tabs.Content>
   );

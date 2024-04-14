@@ -1,4 +1,4 @@
-import { BrowserWindow, app, desktopCapturer } from "electron";
+import { BrowserWindow, app, desktopCapturer, shell } from "electron";
 import path from "path";
 import * as windows from "../domain/windows";
 import * as settings from "../domain/settings";
@@ -54,6 +54,10 @@ export const mainApi = {
         "--autostart",
       ],
     });
+  },
+
+  openWeb: async (url: string) => {
+    await shell.openExternal(url);
   },
 
   getSettings: settings.getSettings,
