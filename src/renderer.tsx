@@ -38,6 +38,7 @@ const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
       appearance={
         dark ?? localStorage.getItem("dark") === "true" ? "dark" : "light"
       }
+      accentColor="violet"
     >
       {children}
     </Theme>

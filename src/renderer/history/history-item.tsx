@@ -76,7 +76,7 @@ export const HistoryItem: FC<{
               <Badge color="orange">Unprocessed</Badge>
             )}
             {recording.language && (
-              <Badge color="blue">{recording.language.toUpperCase()}</Badge>
+              <Badge>{recording.language.toUpperCase()}</Badge>
             )}
           </>
         }
