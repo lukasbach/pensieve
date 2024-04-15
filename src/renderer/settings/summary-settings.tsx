@@ -224,6 +224,13 @@ export const SummarySettings: FC = () => {
         form={form}
         field="llm.enabled"
       />
+      <SettingsSwitchField
+        label="Use Embeddings"
+        description="Create embeddings of the meeting transcript as context for the LLM. If disabled, the transcript will be passed in directly.
+          Using embeddings can improve the quality of the summarization, but increase execution time."
+        form={form}
+        field="llm.useEmbedding"
+      />
       <SettingsField label="Install Ollama">
         <Button
           type="button"

@@ -3,13 +3,16 @@ import { getSettings } from "./settings";
 const request = async <T = any>(target: string, body?: any) => {
   const { llm } = await getSettings();
   const [method, url] = target.split(" ", 2);
-  const result = await fetch(`${llm.providerConfig}${url}`, {
-    method,
-    body:
-      method === "GET"
-        ? undefined
-        : JSON.stringify({ ...body, format: "json", stream: false }),
-  });
+  const result = await fetch(
+    `${llm.providerConfig.ollama.chatModel.baseUrl}${url}`,
+    {
+      method,
+      body:
+        method === "GET"
+          ? undefined
+          : JSON.stringify({ ...body, format: "json", stream: false }),
+    },
+  );
   if (!result.ok) {
     throw new Error(`Failed to fetch ${target}: ${result.statusText}`);
   }

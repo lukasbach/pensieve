@@ -21,7 +21,7 @@ const emptyProgress = {
   wav: null,
   mp3: null,
   whisper: 0,
-  summary: null,
+  summary: 0,
 } as Record<
   "modelDownload" | "wav" | "mp3" | "whisper" | "summary",
   null | number

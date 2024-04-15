@@ -53,7 +53,11 @@ export const openAppWindow = (
 };
 
 export const initializeMainWindow = () => {
-  mainWindow = openAppWindow("/", { isMainWindow: "true", tray: "false" }, {});
+  mainWindow = openAppWindow(
+    "/",
+    { isMainWindow: "true", tray: "false" },
+    { width: 500, height: 700 },
+  );
   mainWindow.hide();
 
   mainWindow.on("blur", () => {
@@ -108,13 +112,13 @@ export const openMainWindowAsTray = () => {
   const display = screen.getPrimaryDisplay();
   const width = 450;
   const height = 700;
-  mainWindow.show();
   mainWindow.setBounds({
     x: display.bounds.width - width - 5,
     y: display.bounds.height - height - 55,
     width,
     height,
   });
+  mainWindow.show();
   mainWindow.setResizable(false);
   mainWindow.setMaximizable(false);
   mainWindow.setAlwaysOnTop(true);
