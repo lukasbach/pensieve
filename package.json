@@ -1,6 +1,6 @@
 {
   "name": "pensieve",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM",
   "author": "Lukas Bach <contact@lukasbach.com>",
   "license": "MIT",
