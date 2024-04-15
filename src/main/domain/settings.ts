@@ -23,13 +23,18 @@ export const getSettings = async () => {
     return cachedSettings;
   }
 
-  const settings = fs.existsSync(settingsFile)
-    ? await fs.readJSON(settingsFile)
-    : {};
-  const merged = deepmerge(defaultSettings, settings);
+  try {
+    const settings = fs.existsSync(settingsFile)
+      ? await fs.readJSON(settingsFile)
+      : {};
+    const merged = deepmerge(defaultSettings, settings);
 
-  cachedSettings = merged;
-  return merged;
+    cachedSettings = merged;
+    return merged;
+  } catch (e) {
+    console.error("Error reading settings file, using default settings", e);
+    return defaultSettings;
+  }
 };
 
 export const saveSettings = async (partialSettings: DeepPartial<Settings>) => {
