@@ -4,6 +4,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  defaultParseSearch,
 } from "@tanstack/react-router";
 import { MainScreen } from "../main/main-screen";
 import { DetailsScreen } from "../details/details-screen";
@@ -23,12 +24,14 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: MainScreen,
+  validateSearch,
 });
 
 export const historyDetailsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/history/$id",
   component: DetailsScreen,
+  validateSearch,
 });
 
 const settingsRoute = createRoute({
@@ -47,7 +50,11 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
 ]);
 
-export const router = createRouter({ routeTree, history: createHashHistory() });
+export const router = createRouter({
+  routeTree,
+  history: createHashHistory(),
+  parseSearch: () => defaultParseSearch(window.location.search),
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
