@@ -26,8 +26,8 @@ export const AudioControls: FC<{
       }
     },
     [audio.progress],
+    1000,
     2000,
-    4000,
   );
 
   return (
