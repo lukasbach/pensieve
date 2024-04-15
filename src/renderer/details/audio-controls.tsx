@@ -48,7 +48,7 @@ export const AudioControls: FC<{
           {timeToDisplayString(audio.progress)}
         </Flex>
         <Flex width="30%" justify="center" align="center" gap=".7rem">
-          <Tooltip content="Scroll to audio position">
+          <Tooltip content="Sync scroll position with currently playing text">
             <IconButton
               variant="ghost"
               size="2"
