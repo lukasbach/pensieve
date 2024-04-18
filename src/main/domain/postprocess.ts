@@ -69,56 +69,92 @@ export const addToQueue = (job: PostProcessingJob) => {
   updateUiProgress();
 };
 
-const postProcessRecording = async (job: PostProcessingJob) => {
+const getFilePaths = async (job: PostProcessingJob) => {
   const recordingsFolder = await getRecordingsFolder();
   const mic = path.join(recordingsFolder, job.recordingId, "mic.webm");
   const screen = path.join(recordingsFolder, job.recordingId, "screen.webm");
   const wav = path.join(recordingsFolder, job.recordingId, "whisper-input.wav");
   const mp3 = path.join(recordingsFolder, job.recordingId, "recording.mp3");
+  return { mic, screen, wav, mp3, recordingsFolder };
+};
 
+const hasStep = (job: PostProcessingJob, step: PostProcessingStep) => {
+  return !job.steps || job.steps?.includes(step);
+};
+
+const doWavStep = async (job: PostProcessingJob) => {
+  if (hasAborted() || !hasStep(job, "wav")) return;
   setStep("wav");
-  if (hasAborted()) return;
+  const { mic, screen, wav } = await getFilePaths(job);
 
   if (fs.existsSync(mic) && fs.existsSync(screen)) {
     await ffmpeg.toStereoWavFile(mic, screen, wav);
-    if (hasAborted()) return;
-    setStep("mp3");
-    await ffmpeg.toJoinedFile(mic, screen, mp3);
   } else if (fs.existsSync(mic)) {
     await ffmpeg.toWavFile(mic, wav);
-    if (hasAborted()) return;
-    setStep("mp3");
-    await ffmpeg.toJoinedFile(mic, null, mp3);
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toWavFile(screen, wav);
-    if (hasAborted()) return;
-    setStep("mp3");
+  } else {
+    throw new Error("No recording found");
+  }
+};
+
+const doMp3Step = async (job: PostProcessingJob) => {
+  if (hasAborted() || !hasStep(job, "mp3")) return;
+  setStep("mp3");
+  const { mic, screen, mp3 } = await getFilePaths(job);
+
+  if (fs.existsSync(mic) && fs.existsSync(screen)) {
+    await ffmpeg.toJoinedFile(mic, screen, mp3);
+  } else if (fs.existsSync(mic)) {
+    await ffmpeg.toJoinedFile(mic, null, mp3);
+  } else if (fs.existsSync(screen)) {
     await ffmpeg.toJoinedFile(screen, null, mp3);
   } else {
     throw new Error("No recording found");
   }
+};
 
-  if (hasAborted()) return;
+const doWhisperStep = async (job: PostProcessingJob) => {
+  if (hasAborted() || !hasStep(job, "whisper")) return;
+  const { wav, recordingsFolder } = await getFilePaths(job);
+
+  const model = await models.prepareConfiguredModel();
 
   await whisper.processWavFile(
     wav,
     path.join(recordingsFolder, job.recordingId, "transcript.json"),
-    await models.prepareConfiguredModel(),
+    model,
   );
 
   await fs.rm(wav);
+};
+
+const doSummaryStep = async (job: PostProcessingJob) => {
+  const settings = await getSettings();
+  const transcript = await getRecordingTranscript(job.recordingId);
+
+  if (
+    hasAborted() ||
+    !hasStep(job, "summary") ||
+    !settings.llm.enabled ||
+    !transcript
+  )
+    return;
+  setStep("summary");
+
+  const summary = await llm.summarize(transcript);
+  await history.updateRecording(job.recordingId, { summary });
+};
+
+const postProcessRecording = async (job: PostProcessingJob) => {
+  await doWavStep(job);
+  await doMp3Step(job);
+  await doWhisperStep(job);
+  await doSummaryStep(job);
 
   const settings = await getSettings();
 
-  const transcript = await getRecordingTranscript(job.recordingId);
-
-  if (settings.llm.enabled && transcript) {
-    if (hasAborted()) return;
-    setStep("summary");
-    const summary = await llm.summarize(transcript);
-    await history.updateRecording(job.recordingId, { summary });
-  }
-
+  const { mic, screen } = await getFilePaths(job);
   if (settings.ffmpeg.removeRawRecordings) {
     if (fs.existsSync(mic)) {
       await fs.rm(mic);
@@ -129,6 +165,7 @@ const postProcessRecording = async (job: PostProcessingJob) => {
     await history.updateRecording(job.recordingId, { hasRawRecording: false });
   }
 
+  const transcript = await getRecordingTranscript(job.recordingId);
   await history.updateRecording(job.recordingId, {
     isPostProcessed: true,
     language: transcript?.result.language,
