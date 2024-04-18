@@ -94,7 +94,7 @@ const doWavStep = async (job: PostProcessingJob) => {
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toWavFile(screen, wav);
   } else {
-    throw new Error("No recording found");
+    throw new Error("Recording source files missing");
   }
 };
 
@@ -110,7 +110,7 @@ const doMp3Step = async (job: PostProcessingJob) => {
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toJoinedFile(screen, null, mp3);
   } else {
-    throw new Error("No recording found");
+    throw new Error("Recording source files missing");
   }
 };
 
@@ -202,7 +202,6 @@ export const startQueue = () => {
       job.isRunning = false;
     }
 
-    processingQueue.shift();
     next();
   };
 
