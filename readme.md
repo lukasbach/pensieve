@@ -9,7 +9,11 @@
 </div>
 <br />
 
-![preview.png](images/preview.png)
+
+<div align="center">
+    <img src="images/preview.png" alt="Preview image of Pensieve" />
+</div>
+<br />
 
 Pensieve is a local-only desktop app for recording meetings, discussions or other audio
 snippets from locally running applications for you to always go back and review your
