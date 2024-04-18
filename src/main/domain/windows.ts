@@ -129,3 +129,16 @@ export const openMainWindowAsTray = () => {
   mainWindow.webContents.send("setIsTray", true);
   mainWindowMode = MainWindowModeValue.Tray;
 };
+
+export const closeCurrentWindow = () => {
+  const win = BrowserWindow.getFocusedWindow();
+
+  if (!win) return;
+
+  if (win.id === mainWindow?.id) {
+    hideMainWindow();
+    return;
+  }
+
+  win.close();
+};

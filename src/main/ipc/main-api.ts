@@ -13,8 +13,9 @@ const exeName = path.basename(process.execPath);
 
 export const mainApi = {
   closeCurrentWindow: async () => {
-    BrowserWindow.getFocusedWindow()?.close();
+    windows.closeCurrentWindow();
   },
+
   restoreMaximizeWindow: async () => {
     const win = BrowserWindow.getFocusedWindow();
     if (win?.isMaximized()) {

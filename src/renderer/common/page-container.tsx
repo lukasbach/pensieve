@@ -42,9 +42,7 @@ const AppControls = () => {
         className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
         type="button"
         aria-label="Close"
-        onClick={() =>
-          isMainWindow ? mainApi.hideMainWindow() : mainApi.closeCurrentWindow()
-        }
+        onClick={() => mainApi.closeCurrentWindow()}
       >
         <VscChromeClose />
       </button>
