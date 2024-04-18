@@ -88,7 +88,7 @@ app.whenReady().then(async () => {
   });
 
   windows.initializeMainWindow();
-  if (!process.argv.includes("--autostart")) {
+  if (!process.argv.join(" ").includes("--autostart")) {
     windows.openMainWindowNormally();
   }
   await registerTray();

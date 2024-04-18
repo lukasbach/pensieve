@@ -57,8 +57,7 @@ export const mainApi = {
         "--processStart",
         `"${exeName}"`,
         "--process-start-args",
-        '"--hidden"',
-        "--autostart",
+        '"--hidden --autostart"',
       ],
     });
   },
