@@ -7,6 +7,7 @@
         Download the latest release
     </a>
 </div>
+<br />
 
 ![preview.png](images/preview.png)
 
