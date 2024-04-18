@@ -1,4 +1,4 @@
-# Pensieve
+# ![icon.svg](icon.svg | width=24) Pensieve
 
 > Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM
 
