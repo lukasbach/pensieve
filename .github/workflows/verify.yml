@@ -15,4 +15,5 @@ jobs:
       - uses: volta-cli/action@v4
       - run: yarn install
       - run: yarn run lint
+      - run: yarn run typecheck
       - run: yarn run make

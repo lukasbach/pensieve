@@ -12,7 +12,7 @@ export const registerTray = () => {
     {
       label: "Settings",
       type: "normal",
-      click: mainApi.openSettingsWindow,
+      click: () => mainApi.openSettingsWindow(),
     },
     { label: "Close", type: "normal", click: app.quit },
   ]);
