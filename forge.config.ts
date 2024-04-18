@@ -35,7 +35,9 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({
+      loadingGif: path.join(__dirname, "splash.gif"),
+    }),
     // new MakerAppX({}),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
