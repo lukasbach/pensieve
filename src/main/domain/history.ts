@@ -76,7 +76,7 @@ export const saveRecording = async (recording: RecordingData) => {
   invalidateUiKeys(QueryKeys.History);
 
   if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue(folder);
+    postprocess.addToQueue({ recordingId: folder });
     postprocess.startQueue();
   }
 };
@@ -101,7 +101,7 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   invalidateUiKeys(QueryKeys.History);
 
   if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue(folder);
+    postprocess.addToQueue({ recordingId: folder });
     postprocess.startQueue();
   }
 };

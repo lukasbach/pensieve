@@ -11,21 +11,17 @@ import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
 import { getSettings } from "./settings";
+import { PostProcessingJob, PostProcessingStep } from "../../types";
 
 let isRunning = false;
-let processingQueue: string[] = [];
-let doneList: string[] = [];
-let errors: Record<string, string> = {};
-const emptyProgress = {
+let processingQueue: PostProcessingJob[] = [];
+const emptyProgress: Record<PostProcessingStep, null | number> = {
   modelDownload: 0,
   wav: null,
   mp3: null,
   whisper: 0,
   summary: 0,
-} as Record<
-  "modelDownload" | "wav" | "mp3" | "whisper" | "summary",
-  null | number
->;
+};
 const progress = { ...emptyProgress };
 let lastUiUpdate = 0;
 let currentStep: keyof typeof progress | "notstarted" = "notstarted";
@@ -68,25 +64,17 @@ export const setStep = (step: keyof typeof progress | "notstarted") => {
   updateUiProgress();
 };
 
-export const addToQueue = (recordingId: string) => {
-  if (processingQueue.includes(recordingId)) {
-    return;
-  }
-
-  if (doneList.includes(recordingId)) {
-    doneList.splice(doneList.indexOf(recordingId), 1);
-  }
-
-  processingQueue.push(recordingId);
+export const addToQueue = (job: PostProcessingJob) => {
+  processingQueue.push(job);
   updateUiProgress();
 };
 
-const postProcessRecording = async (id: string) => {
+const postProcessRecording = async (job: PostProcessingJob) => {
   const recordingsFolder = await getRecordingsFolder();
-  const mic = path.join(recordingsFolder, id, "mic.webm");
-  const screen = path.join(recordingsFolder, id, "screen.webm");
-  const wav = path.join(recordingsFolder, id, "whisper-input.wav");
-  const mp3 = path.join(recordingsFolder, id, "recording.mp3");
+  const mic = path.join(recordingsFolder, job.recordingId, "mic.webm");
+  const screen = path.join(recordingsFolder, job.recordingId, "screen.webm");
+  const wav = path.join(recordingsFolder, job.recordingId, "whisper-input.wav");
+  const mp3 = path.join(recordingsFolder, job.recordingId, "recording.mp3");
 
   setStep("wav");
   if (hasAborted()) return;
@@ -114,7 +102,7 @@ const postProcessRecording = async (id: string) => {
 
   await whisper.processWavFile(
     wav,
-    path.join(recordingsFolder, id, "transcript.json"),
+    path.join(recordingsFolder, job.recordingId, "transcript.json"),
     await models.prepareConfiguredModel(),
   );
 
@@ -122,13 +110,13 @@ const postProcessRecording = async (id: string) => {
 
   const settings = await getSettings();
 
-  const transcript = await getRecordingTranscript(id);
+  const transcript = await getRecordingTranscript(job.recordingId);
 
   if (settings.llm.enabled && transcript) {
     if (hasAborted()) return;
     setStep("summary");
     const summary = await llm.summarize(transcript);
-    await history.updateRecording(id, { summary });
+    await history.updateRecording(job.recordingId, { summary });
   }
 
   if (settings.ffmpeg.removeRawRecordings) {
@@ -138,14 +126,14 @@ const postProcessRecording = async (id: string) => {
     if (fs.existsSync(screen)) {
       await fs.rm(screen);
     }
-    await history.updateRecording(id, { hasRawRecording: false });
+    await history.updateRecording(job.recordingId, { hasRawRecording: false });
   }
 
-  await history.updateRecording(id, {
+  await history.updateRecording(job.recordingId, {
     isPostProcessed: true,
     language: transcript?.result.language,
   });
-  searchIndex.addRecordingToIndex(id);
+  searchIndex.addRecordingToIndex(job.recordingId);
   updateUiProgress();
 };
 
@@ -157,20 +145,21 @@ export const startQueue = () => {
   abortedFlag = false;
   isRunning = true;
   const next = async () => {
-    if (processingQueue.length === 0) {
+    const job = processingQueue.find((job) => !job.isDone);
+
+    if (!job) {
       isRunning = false;
       return;
     }
 
-    const id = processingQueue[0];
     try {
-      await postProcessRecording(id);
-      doneList.push(id);
+      await postProcessRecording(job);
+      job.isDone = true;
     } catch (err) {
       if (hasAborted()) return;
-      console.error("Failed to process recording", id, err);
-      errors[id] = err instanceof Error ? err.message : String(err);
-      doneList.push(id);
+      console.error("Failed to process recording", job.recordingId, err);
+      job.error = err instanceof Error ? err.message : String(err);
+      job.isDone = true;
     }
 
     processingQueue.shift();
@@ -195,8 +184,6 @@ export const stop = () => {
 
 export const clearList = () => {
   processingQueue = [];
-  doneList = [];
-  errors = {};
   updateUiProgress();
 };
 
@@ -207,7 +194,5 @@ export const getProgressData = () => {
     currentlyProcessing: isRunning ? processingQueue[0] : null,
     isRunning,
     currentStep,
-    errors,
-    doneList,
   };
 };

@@ -5,10 +5,11 @@ import {
   HiOutlineEllipsisHorizontalCircle,
   HiOutlineExclamationTriangle,
 } from "react-icons/hi2";
-import type { getProgressData } from "../../main/domain/postprocess";
 import { ProgressStep } from "./progress-step";
 import { useHistoryRecordings } from "../history/state";
 import { ProgressCardWrapper } from "./progress-card-wrapper";
+import { PostProcessingJob } from "../../types";
+import type { getProgressData } from "../../main/domain/postprocess";
 
 const allSteps = ["wav", "mp3", "modelDownload", "whisper", "summary"] as const;
 const stepLabels = {
@@ -20,14 +21,14 @@ const stepLabels = {
 };
 
 export const ProgressCard: FC<{
-  id: string;
+  job: PostProcessingJob;
   data: Awaited<ReturnType<typeof getProgressData>>;
-}> = ({ id, data }) => {
+}> = ({ job, data }) => {
   const { data: recordings } = useHistoryRecordings();
-  const recording = recordings?.[id];
+  const recording = recordings?.[job.recordingId];
   const name = recording?.name ?? "Untitled recording";
 
-  if (data.errors[id]) {
+  if (job.error) {
     return (
       <ProgressCardWrapper
         header={<Text color="red">{name}</Text>}
@@ -36,13 +37,13 @@ export const ProgressCard: FC<{
         <pre
           style={{ overflowX: "auto", overflowY: "auto", maxHeight: "400px" }}
         >
-          {data.errors[id]}
+          {job.error}
         </pre>
       </ProgressCardWrapper>
     );
   }
 
-  if (data.doneList.includes(id)) {
+  if (job.isDone) {
     return (
       <ProgressCardWrapper
         header={
@@ -53,7 +54,7 @@ export const ProgressCard: FC<{
     );
   }
 
-  if (data.currentlyProcessing === id) {
+  if (job.isRunning) {
     return (
       <ProgressCardWrapper
         icon={<Spinner size="3" />}

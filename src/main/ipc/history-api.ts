@@ -4,6 +4,7 @@ import * as history from "../domain/history";
 import * as postprocess from "../domain/postprocess";
 import * as searchIndex from "../domain/search";
 import { openAppWindow } from "../domain/windows";
+import { PostProcessingJob } from "../../types";
 
 export const historyApi = {
   storeUnassociatedScreenshot: history.storeUnassociatedScreenshot,
@@ -21,8 +22,8 @@ export const historyApi = {
 
   startPostProcessing: async () => postprocess.startQueue(),
   stopPostProcessing: async () => postprocess.stop(),
-  addToPostProcessingQueue: async (modelId: string) =>
-    postprocess.addToQueue(modelId),
+  addToPostProcessingQueue: async (job: PostProcessingJob) =>
+    postprocess.addToQueue(job),
   getPostProcessingProgress: async () => postprocess.getProgressData(),
   clearPostProcessingQueue: async () => postprocess.clearList(),
 

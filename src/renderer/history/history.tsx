@@ -27,6 +27,16 @@ export const History: FC = () => {
     [recordings],
   );
 
+  const processingRecordings = useMemo(
+    () =>
+      new Set(
+        ...(postprocessing?.processingQueue
+          .filter(({ isDone }) => !isDone)
+          .map(({ recordingId }) => recordingId) ?? []),
+      ),
+    [postprocessing?.processingQueue],
+  );
+
   const askImportName = usePromptText(
     "Import audio file",
     "Name of the recording",
@@ -81,7 +91,7 @@ export const History: FC = () => {
           recording={meta}
           priorItemDate={arr[idx - 1]?.[1].started}
           searchText={searchResults?.[id] as string}
-          isProcessing={postprocessing?.processingQueue.includes(id) ?? false}
+          isProcessing={processingRecordings.has(id)}
         />
       ))}
     </Box>

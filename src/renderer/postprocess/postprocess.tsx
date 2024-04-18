@@ -56,8 +56,9 @@ export const Postprocess: FC = () => {
         )}
       </Flex>
 
-      {[...data.doneList, ...data.processingQueue].map((item) => (
-        <ProgressCard key={item} id={item} data={data} />
+      {data.processingQueue.map((job, idx) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <ProgressCard key={`${job.recordingId} ${idx}`} data={data} job={job} />
       ))}
     </Flex>
   );

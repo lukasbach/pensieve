@@ -107,7 +107,7 @@ export const HistoryItem: FC<{
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={async () => {
-                await historyApi.addToPostProcessingQueue(id);
+                await historyApi.addToPostProcessingQueue({ recordingId: id });
                 await historyApi.startPostProcessing();
               }}
               disabled={!recording.hasRawRecording || isProcessing}
@@ -136,7 +136,9 @@ export const HistoryItem: FC<{
             <Tooltip content="Postprocess recording">
               <IconButton
                 onClick={async () => {
-                  await historyApi.addToPostProcessingQueue(id);
+                  await historyApi.addToPostProcessingQueue({
+                    recordingId: id,
+                  });
                   await historyApi.startPostProcessing();
                 }}
               >

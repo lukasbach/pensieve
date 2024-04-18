@@ -45,33 +45,20 @@ export type RecordingTranscriptItem = {
   speaker: string;
 };
 
-/* export type Settings = {
-  ui: {
-    dark: boolean;
-  };
-  ffmpeg: {
-    stereoWavFilter: string;
-    mp3Filter: string;
-  };
-  whisper: {
-    model: string;
-    threads: number;
-    processors: number;
-    maxContext: number;
-    maxLen: number;
-    splitOnWord: boolean;
-    bestOf: number;
-    beamSize: number;
-    translate: boolean;
-    audioCtx: number;
-    wordThold: number;
-    entropyThold: number;
-    logprobThold: number;
-    diarize: boolean;
-    noFallback: boolean;
-    language: string;
-  };
-}; */
+export type PostProcessingStep =
+  | "modelDownload"
+  | "wav"
+  | "mp3"
+  | "whisper"
+  | "summary";
+
+export type PostProcessingJob = {
+  recordingId: string;
+  steps?: PostProcessingStep[];
+  error?: string;
+  isDone?: boolean;
+  isRunning?: boolean;
+};
 
 export const defaultSettings = {
   core: { recordingsFolder: path.join(app.getPath("userData"), "recordings") },
