@@ -6,12 +6,11 @@ import {
   HiOutlineDocumentText,
   HiOutlineVideoCamera,
 } from "react-icons/hi2";
-import { Recorder } from "../recorder/recorder";
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
 import { mainApi } from "../api";
-import { RecorderV2 } from "../recorder/recorder-v2";
+import { Recorder } from "../recorder/recorder";
 import { Fancybg } from "../common/fancybg";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 
@@ -51,7 +50,7 @@ export const MainScreen: FC = () => {
         <Fancybg />
         {/* TODO cant remember why i put asChild on the tabContent elements, but radix logs error if they exist, due to children not forwarding refs */}
         <Tabs.Content value="record" asChild>
-          {(window as any).ipcApi.isDev ? <RecorderV2 /> : <Recorder />}
+          <Recorder />
         </Tabs.Content>
 
         <Tabs.Content value="history">

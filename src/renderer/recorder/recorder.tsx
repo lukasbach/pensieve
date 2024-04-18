@@ -1,4 +1,3 @@
-import { FC } from "react";
 import {
   Box,
   Button,
@@ -7,14 +6,15 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
-import { HiOutlineStopCircle } from "react-icons/hi2";
-import { useRecorderState, useStopRecording } from "./state";
+
+import { forwardRef } from "react";
+import { useRecorderState } from "./state";
 import { ScreenSelector } from "./screen-selector";
 import { MicSelector } from "./mic-selector";
 import { useMicSources, useScreenSources } from "./hooks";
-import { EmptyState } from "../common/empty-state";
+import { RecorderInsession } from "./recorder-insession";
 
-export const Recorder: FC = () => {
+export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
   const defaultScreen = useScreenSources()?.[0];
 
@@ -26,20 +26,13 @@ export const Recorder: FC = () => {
     meta,
     setMeta,
   } = useRecorderState();
-  const stopRecording = useStopRecording();
 
   if (recorder) {
-    return (
-      <EmptyState title="Recording running">
-        <Button onClick={stopRecording}>
-          <HiOutlineStopCircle /> Stop recording
-        </Button>
-      </EmptyState>
-    );
+    return <RecorderInsession ref={ref} />;
   }
 
   return (
-    <Flex direction="column" px=".5rem" py="1rem" gap=".5rem">
+    <Flex direction="column" px=".5rem" py="1rem" gap=".5rem" ref={ref}>
       <TextField.Root
         size="2"
         placeholder="Untitled Recording"
@@ -85,7 +78,7 @@ export const Recorder: FC = () => {
             <Text size="2" weight="bold">
               Screen
             </Text>
-            <ScreenSelector comingSoon />
+            <ScreenSelector />
           </Box>
           <Box flexBasis="100%" overflow="hidden">
             <Text size="2" weight="bold">
@@ -108,4 +101,4 @@ export const Recorder: FC = () => {
       </Flex>
     </Flex>
   );
-};
+});
