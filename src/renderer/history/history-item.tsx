@@ -8,6 +8,7 @@ import {
   HiOutlineTrash,
 } from "react-icons/hi2";
 import humanizer from "humanize-duration";
+import { RiRobot2Line } from "react-icons/ri";
 import { RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
@@ -97,6 +98,7 @@ export const HistoryItem: FC<{
           <DropdownMenu.Content>
             <DropdownMenu.Item
               onClick={() => historyApi.openRecordingDetailsWindow(id)}
+              disabled={!recording.isPostProcessed || isProcessing}
             >
               <HiArrowTopRightOnSquare /> Open Recording
             </DropdownMenu.Item>
@@ -113,6 +115,15 @@ export const HistoryItem: FC<{
               disabled={!recording.hasRawRecording || isProcessing}
             >
               <HiOutlineDocumentText /> Postprocess
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              onClick={async () => {
+                await historyApi.addToPostProcessingQueue({ recordingId: id });
+                await historyApi.startPostProcessing();
+              }}
+              disabled={!recording.isPostProcessed || isProcessing}
+            >
+              <RiRobot2Line /> Trigger summarization
             </DropdownMenu.Item>
             <DropdownMenu.Item
               color="red"

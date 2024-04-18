@@ -190,13 +190,16 @@ export const startQueue = () => {
     }
 
     try {
+      job.isRunning = true;
       await postProcessRecording(job);
       job.isDone = true;
+      job.isRunning = false;
     } catch (err) {
       if (hasAborted()) return;
       console.error("Failed to process recording", job.recordingId, err);
       job.error = err instanceof Error ? err.message : String(err);
       job.isDone = true;
+      job.isRunning = false;
     }
 
     processingQueue.shift();
@@ -228,7 +231,6 @@ export const getProgressData = () => {
   return {
     progress,
     processingQueue,
-    currentlyProcessing: isRunning ? processingQueue[0] : null,
     isRunning,
     currentStep,
   };
