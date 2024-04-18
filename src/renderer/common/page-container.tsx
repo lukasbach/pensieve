@@ -6,13 +6,11 @@ import {
   VscChromeRestore,
 } from "react-icons/vsc";
 import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
-import { useSearch } from "@tanstack/react-router";
 import * as styles from "./page-container.module.css";
 import { mainApi } from "../api";
 import { useIsTray } from "./use-is-tray";
 
 const AppControls = () => {
-  const { isMainWindow } = useSearch({ strict: false });
   return (
     <Box
       position="absolute"
