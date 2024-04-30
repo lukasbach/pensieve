@@ -30,9 +30,9 @@ export const History: FC = () => {
   const processingRecordings = useMemo(
     () =>
       new Set(
-        ...(postprocessing?.processingQueue
+        postprocessing?.processingQueue
           .filter(({ isDone }) => !isDone)
-          .map(({ recordingId }) => recordingId) ?? []),
+          .map(({ recordingId }) => recordingId) ?? [],
       ),
     [postprocessing?.processingQueue],
   );
