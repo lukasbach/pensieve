@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { Button, Flex, Text } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
 import { HiOutlineCheckCircle } from "react-icons/hi2";
@@ -12,6 +12,11 @@ export const Postprocess: FC = () => {
     queryKey: [QueryKeys.PostProcessing],
     queryFn: historyApi.getPostProcessingProgress,
   });
+
+  const hasQueueCompleted = useMemo(
+    () => data?.processingQueue.every((item) => item.isDone || item.error),
+    [data?.processingQueue],
+  );
 
   if (!data) return null;
 
@@ -38,7 +43,9 @@ export const Postprocess: FC = () => {
         <Text as="div" size="1" style={{ flexGrow: "1" }}>
           {data.isRunning
             ? "Sessions are being processed..."
-            : "Postprocessing was cancelled. You can start it again."}
+            : hasQueueCompleted
+              ? "Postprocessing is finished."
+              : "Postprocessing was cancelled. You can start it again."}
         </Text>
         <Button
           onClick={() => historyApi.clearPostProcessingQueue()}
@@ -47,9 +54,10 @@ export const Postprocess: FC = () => {
         >
           Clear list
         </Button>
-        {data.isRunning ? (
+        {data.isRunning && (
           <Button onClick={() => historyApi.stopPostProcessing()}>Stop</Button>
-        ) : (
+        )}
+        {!data.isRunning && !hasQueueCompleted && (
           <Button onClick={() => historyApi.startPostProcessing()}>
             Start
           </Button>

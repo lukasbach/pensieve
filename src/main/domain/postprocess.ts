@@ -174,6 +174,14 @@ const postProcessRecording = async (job: PostProcessingJob) => {
   updateUiProgress();
 };
 
+const resetProgress = () => {
+  progress.modelDownload = 0;
+  progress.wav = 0;
+  progress.mp3 = 0;
+  progress.whisper = 0;
+  progress.summary = 0;
+};
+
 export const startQueue = () => {
   if (isRunning) {
     return;
@@ -191,6 +199,7 @@ export const startQueue = () => {
 
     try {
       job.isRunning = true;
+      resetProgress();
       await postProcessRecording(job);
       job.isDone = true;
       job.isRunning = false;
@@ -201,7 +210,6 @@ export const startQueue = () => {
       job.isDone = true;
       job.isRunning = false;
     }
-
     next();
   };
 
@@ -212,11 +220,7 @@ export const stop = () => {
   abortedFlag = true;
   runner.abortAllExecutions();
   isRunning = false;
-  progress.modelDownload = 0;
-  progress.wav = 0;
-  progress.mp3 = 0;
-  progress.whisper = 0;
-  progress.summary = 0;
+  resetProgress();
   setStep("notstarted");
   updateUiProgress();
 };

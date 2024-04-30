@@ -118,7 +118,10 @@ export const HistoryItem: FC<{
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={async () => {
-                await historyApi.addToPostProcessingQueue({ recordingId: id });
+                await historyApi.addToPostProcessingQueue({
+                  recordingId: id,
+                  steps: ["summary"],
+                });
                 await historyApi.startPostProcessing();
               }}
               disabled={!recording.isPostProcessed || isProcessing}

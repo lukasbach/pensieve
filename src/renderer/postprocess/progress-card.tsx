@@ -65,15 +65,17 @@ export const ProgressCard: FC<{
           </>
         }
       >
-        {allSteps.map((item, index) => (
-          <ProgressStep
-            key={item}
-            label={stepLabels[item]}
-            isRunning={item === data.currentStep}
-            isDone={allSteps.indexOf(data.currentStep as any) > index}
-            progress={data.progress[item]}
-          />
-        ))}
+        {allSteps
+          .filter((step) => !job.steps || job.steps.includes(step))
+          .map((item, index) => (
+            <ProgressStep
+              key={item}
+              label={stepLabels[item]}
+              isRunning={item === data.currentStep}
+              isDone={allSteps.indexOf(data.currentStep as any) > index}
+              progress={data.progress[item]}
+            />
+          ))}
       </ProgressCardWrapper>
     );
   }
