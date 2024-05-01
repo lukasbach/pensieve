@@ -28,6 +28,13 @@ Handlebars.registerHelper(
   "keydate",
   (value: string) => new Date(value).toISOString().split("T")[0],
 );
+Handlebars.registerHelper("year", (value: string) =>
+  new Date(value).getFullYear(),
+);
+Handlebars.registerHelper("month", (value: string) =>
+  new Date(value).getMonth(),
+);
+Handlebars.registerHelper("day", (value: string) => new Date(value).getDate());
 Handlebars.registerHelper(
   "ifEquals",
   function Handler(this: any, arg1, arg2, options) {
