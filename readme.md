@@ -1,6 +1,6 @@
 # <img src="icon.svg" width="24"> Pensieve
 
-> Desktop app for recording meetings from locally running apps and transcribing and summarizing them with a local LLM
+> Desktop app for recording meetings or memos from locally running apps and transcribing and summarizing them with a local LLM
 
 <div align="center">
     <a href="https://github.com/lukasbach/pensieve/releases/latest">
@@ -15,7 +15,7 @@
 </div>
 <br />
 
-Pensieve is a local-only desktop app for recording meetings, discussions or other audio
+Pensieve is a local-only desktop app for recording meetings, discussions, memos or other audio
 snippets from locally running applications for you to always go back and review your
 previous discussions.
 
