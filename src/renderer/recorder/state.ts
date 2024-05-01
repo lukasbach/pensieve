@@ -175,25 +175,35 @@ export const useMakeRegionScreenshot = () => {
         },
       },
     });
-    // displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
-    const screen = new MediaRecorder(displayMedia, {
-      mimeType: "video/webm",
-    });
-    screen.start();
-    const videoStream = screen.stream.getVideoTracks()[0];
-    const imageCapturer = new ImageCapture(videoStream);
-
-    const frame = await imageCapturer.grabFrame();
     const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const video = document.createElement("video");
+
+    if (!ctx) throw new Error("no 2d context");
+
+    video.srcObject = displayMedia;
     canvas.width = area.width;
     canvas.height = area.height;
-    const ctx = canvas.getContext("bitmaprenderer");
-    if (!ctx) throw new Error("no bitmaprenderer");
-    ctx.transferFromImageBitmap(frame);
+    video.play();
+    await new Promise((r) => video.requestVideoFrameCallback(r));
+
+    ctx.drawImage(
+      video,
+      area.x,
+      area.y,
+      area.width,
+      area.height,
+      0,
+      0,
+      area.width,
+      area.height,
+    );
     const blob = await new Promise<Blob | null>((r) => {
       canvas.toBlob(r);
     });
     canvas.remove();
+    video.remove();
+    displayMedia.getTracks().forEach((t) => t.stop());
     if (!blob) throw new Error("no blob");
 
     const buffer = await blobToBuffer(blob);

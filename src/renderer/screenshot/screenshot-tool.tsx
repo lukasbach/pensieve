@@ -35,6 +35,7 @@ export const ScreenshotTool: FC = () => {
         setClickMode(true);
       }}
       onMouseDown={(e) => {
+        if (clickMode) return;
         setStart({ x: e.clientX, y: e.clientY });
         setDragStartTime(Date.now());
       }}
@@ -56,7 +57,6 @@ export const ScreenshotTool: FC = () => {
       }}
     >
       Drag an area to take a screenshot
-      {JSON.stringify(start)}
       {start && (
         <Box
           ref={box}

@@ -11,8 +11,8 @@ import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
 import { mainApi } from "../api";
 import { Recorder } from "../recorder/recorder";
-import { Fancybg } from "../common/fancybg";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
+import { Fancybg } from "../common/fancybg";
 
 export const MainScreen: FC = () => {
   return (

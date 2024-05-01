@@ -14,6 +14,7 @@ import { useSearch } from "./use-search";
 import { historyApi } from "../api";
 import { usePromptText } from "../dialog/context";
 import { QueryKeys } from "../../query-keys";
+import { EmptyState } from "../common/empty-state";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
@@ -84,6 +85,14 @@ export const History: FC = () => {
           </DropdownMenu.Content>
         </DropdownMenu.Root>
       </Flex>
+
+      {recordingList.length === 0 && (
+        <EmptyState
+          title="No recordings yet"
+          description='Record your first item under the "Record" tab.'
+        />
+      )}
+
       {recordingList.filter(filter).map(([id, meta], idx, arr) => (
         <HistoryItem
           key={id}

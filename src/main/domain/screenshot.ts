@@ -20,7 +20,6 @@ export const requestScreenshot = async () => {
         opacity: 0.8,
         hasShadow: false,
         skipTaskbar: true,
-        fullscreen: true,
         frame: false,
         transparent: true,
         alwaysOnTop: true,

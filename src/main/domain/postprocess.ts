@@ -94,7 +94,7 @@ const doWavStep = async (job: PostProcessingJob) => {
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toWavFile(screen, wav);
   } else {
-    throw new Error("Recording source files missing");
+    // No recording files, skipping step
   }
 };
 
@@ -110,7 +110,7 @@ const doMp3Step = async (job: PostProcessingJob) => {
   } else if (fs.existsSync(screen)) {
     await ffmpeg.toJoinedFile(screen, null, mp3);
   } else {
-    throw new Error("Recording source files missing");
+    // No recording files, skipping step
   }
 };
 
