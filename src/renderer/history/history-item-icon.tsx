@@ -5,6 +5,7 @@ import {
   HiOutlineComputerDesktop,
   HiOutlineMicrophone,
   HiOutlinePhone,
+  HiOutlineStar,
 } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
 
@@ -13,6 +14,7 @@ export const HistoryItemIcon: FC<{
   isProcessing: boolean;
 }> = ({ isProcessing, recording }) => {
   if (isProcessing) return <Spinner />;
+  if (recording.isPinned) return <HiOutlineStar />;
   if (recording.isImported) return <HiOutlineArrowDownOnSquare />;
   if (recording.hasMic && recording.hasScreen) return <HiOutlinePhone />;
   if (recording.hasMic) return <HiOutlineMicrophone />;

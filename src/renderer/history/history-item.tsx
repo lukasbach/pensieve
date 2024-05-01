@@ -7,10 +7,13 @@ import {
   HiOutlineDocumentText,
   HiOutlineFolderOpen,
   HiOutlineServerStack,
+  HiOutlineStar,
   HiOutlineTrash,
+  HiStar,
 } from "react-icons/hi2";
 import humanizer from "humanize-duration";
 import { RiRobot2Line } from "react-icons/ri";
+import { LuMouse } from "react-icons/lu";
 import { PostProcessingStep, RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
@@ -38,7 +41,15 @@ export const HistoryItem: FC<{
   priorItemDate: string;
   searchText?: string;
   isProcessing?: boolean;
-}> = ({ recording, searchText, id, priorItemDate, isProcessing }) => {
+  isPinnedItem?: boolean;
+}> = ({
+  recording,
+  searchText,
+  id,
+  priorItemDate,
+  isProcessing,
+  isPinnedItem,
+}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const confirmDeletion = useConfirm(
     "Delete recording",
@@ -67,12 +78,14 @@ export const HistoryItem: FC<{
 
   return (
     <>
-      {isNewDate && (
+      {isNewDate && !isPinnedItem && (
         <EntityTitle mb=".5rem" mt="1rem">
           {new Date(recording.started).toDateString()}
         </EntityTitle>
       )}
       <ListItem
+        id={!isPinnedItem ? id : undefined}
+        isHighlighted={recording.isPinned && !isPinnedItem}
         title={recording.name || "Untitled"}
         subtitle={
           isProcessing
@@ -102,6 +115,22 @@ export const HistoryItem: FC<{
         }
         forceHoverState={dropdownOpen}
       >
+        {isPinnedItem && (
+          <Tooltip content="Jump to item">
+            <IconButton
+              variant="outline"
+              color="gray"
+              onClick={async () => {
+                document.getElementById(id)?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }}
+            >
+              <LuMouse />
+            </IconButton>
+          </Tooltip>
+        )}
         <DropdownMenu.Root onOpenChange={setDropdownOpen}>
           <DropdownMenu.Trigger>
             <IconButton variant="outline" color="gray">
@@ -114,6 +143,23 @@ export const HistoryItem: FC<{
               disabled={!recording.isPostProcessed || isProcessing}
             >
               <HiArrowTopRightOnSquare /> Open Recording
+            </DropdownMenu.Item>
+            <DropdownMenu.Item
+              onClick={() =>
+                historyApi.updateRecordingMeta(id, {
+                  isPinned: !recording.isPinned,
+                })
+              }
+            >
+              {recording.isPinned ? (
+                <>
+                  <HiStar /> Unpin recording
+                </>
+              ) : (
+                <>
+                  <HiOutlineStar /> Pin recording
+                </>
+              )}
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={async () => historyApi.openRecordingFolder(id)}

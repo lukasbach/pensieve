@@ -32,6 +32,7 @@ export type RecordingMeta = {
     actionItems?: { isMe: boolean; action: string; time: number }[] | null;
     sentenceSummary?: string | null;
   };
+  isPinned?: boolean;
 };
 
 export type RecordingTranscript = {

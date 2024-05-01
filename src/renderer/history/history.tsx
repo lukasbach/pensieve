@@ -15,6 +15,7 @@ import { historyApi } from "../api";
 import { usePromptText } from "../dialog/context";
 import { QueryKeys } from "../../query-keys";
 import { EmptyState } from "../common/empty-state";
+import { EntityTitle } from "../common/entity-title";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
@@ -46,6 +47,10 @@ export const History: FC = () => {
     "Import audio file",
     "Date of the recording",
   );
+
+  const pinnedItems = recordingList
+    .filter(([, meta]) => meta.isPinned)
+    .filter(filter);
 
   return (
     <Box p="1rem">
@@ -91,6 +96,26 @@ export const History: FC = () => {
           title="No recordings yet"
           description='Record your first item under the "Record" tab.'
         />
+      )}
+
+      {pinnedItems.length > 0 && (
+        <>
+          <EntityTitle mb=".5rem" mt="1rem">
+            Pinned recordings
+          </EntityTitle>
+          {pinnedItems.map(([id, meta], idx, arr) => (
+            <HistoryItem
+              key={id}
+              id={id}
+              recording={meta}
+              priorItemDate={arr[idx - 1]?.[1].started}
+              searchText={searchResults?.[id] as string}
+              isProcessing={processingRecordings.has(id)}
+              isPinnedItem
+            />
+          ))}
+          <Box mb="3rem" />
+        </>
       )}
 
       {recordingList.filter(filter).map(([id, meta], idx, arr) => (
