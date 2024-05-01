@@ -58,6 +58,7 @@
     "ffmpeg-static-electron": "^2.0.3",
     "follow-redirects": "^1.15.6",
     "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
     "humanize-duration": "^3.32.0",
     "langchain": "^0.1.33",
     "react-hook-form": "^7.51.2",

@@ -6,6 +6,7 @@ import * as whisper from "./whisper";
 import * as models from "./models";
 import * as runner from "./runner";
 import * as llm from "./llm";
+import * as datahooks from "./datahooks";
 import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
@@ -21,6 +22,7 @@ const emptyProgress: Record<PostProcessingStep, null | number> = {
   mp3: null,
   whisper: 0,
   summary: 0,
+  datahooks: null,
 };
 const progress = { ...emptyProgress };
 let lastUiUpdate = 0;
@@ -146,11 +148,21 @@ const doSummaryStep = async (job: PostProcessingJob) => {
   await history.updateRecording(job.recordingId, { summary });
 };
 
+const doDataHooksStep = async (job: PostProcessingJob) => {
+  const settings = await getSettings();
+
+  if (hasAborted() || !hasStep(job, "datahooks") || !settings.datahooks.enabled)
+    return;
+  setStep("datahooks");
+  await datahooks.runDatahooks(job);
+};
+
 const postProcessRecording = async (job: PostProcessingJob) => {
   await doWavStep(job);
   await doMp3Step(job);
   await doWhisperStep(job);
   await doSummaryStep(job);
+  await doDataHooksStep(job);
 
   const settings = await getSettings();
 

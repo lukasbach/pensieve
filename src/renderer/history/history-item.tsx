@@ -1,15 +1,17 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { Badge, DropdownMenu, IconButton, Tooltip } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
+  HiOutlineCog8Tooth,
   HiOutlineDocumentText,
   HiOutlineFolderOpen,
+  HiOutlineServerStack,
   HiOutlineTrash,
 } from "react-icons/hi2";
 import humanizer from "humanize-duration";
 import { RiRobot2Line } from "react-icons/ri";
-import { RecordingMeta } from "../../types";
+import { PostProcessingStep, RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
 import { EntityTitle } from "../common/entity-title";
@@ -49,6 +51,17 @@ export const HistoryItem: FC<{
       new Date(recording.started).toDateString()
     );
   }, [priorItemDate, recording.started]);
+
+  const process = useCallback(
+    async (steps?: PostProcessingStep[]) => {
+      await historyApi.addToPostProcessingQueue({
+        recordingId: id,
+        steps,
+      });
+      await historyApi.startPostProcessing();
+    },
+    [id],
+  );
 
   const duration = humanizer(recording.duration || 0, { maxDecimalPoints: 0 });
 
@@ -108,26 +121,36 @@ export const HistoryItem: FC<{
               <HiOutlineFolderOpen /> Open Folder
             </DropdownMenu.Item>
             <DropdownMenu.Item
-              onClick={async () => {
-                await historyApi.addToPostProcessingQueue({ recordingId: id });
-                await historyApi.startPostProcessing();
-              }}
+              onClick={() => process()}
               disabled={!recording.hasRawRecording || isProcessing}
             >
               <HiOutlineDocumentText /> Postprocess
             </DropdownMenu.Item>
-            <DropdownMenu.Item
-              onClick={async () => {
-                await historyApi.addToPostProcessingQueue({
-                  recordingId: id,
-                  steps: ["summary"],
-                });
-                await historyApi.startPostProcessing();
-              }}
-              disabled={!recording.isPostProcessed || isProcessing}
-            >
-              <RiRobot2Line /> Trigger summarization
-            </DropdownMenu.Item>
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger>
+                <HiOutlineCog8Tooth /> Custom postprocessing...
+              </DropdownMenu.SubTrigger>
+              <DropdownMenu.SubContent>
+                <DropdownMenu.Item
+                  onClick={() => process(["mp3", "wav", "whisper"])}
+                  disabled={!recording.hasRawRecording}
+                >
+                  <HiOutlineDocumentText /> Audio and transcription
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={() => process(["summary"])}
+                  disabled={!recording.isPostProcessed}
+                >
+                  <RiRobot2Line /> Summarization
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={() => process(["datahooks"])}
+                  disabled={!recording.isPostProcessed}
+                >
+                  <HiOutlineServerStack /> Data hooks
+                </DropdownMenu.Item>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Sub>
             <DropdownMenu.Item
               color="red"
               onClick={async () => {

@@ -1,5 +1,6 @@
 import { app } from "electron";
 import path from "path";
+import { datahookMarkdownTemplate } from "./datahooks-defaults";
 
 export type RecordingConfig = {
   recordScreenAudio?: boolean;
@@ -50,7 +51,8 @@ export type PostProcessingStep =
   | "wav"
   | "mp3"
   | "whisper"
-  | "summary";
+  | "summary"
+  | "datahooks";
 
 export type PostProcessingJob = {
   recordingId: string;
@@ -125,6 +127,26 @@ export const defaultSettings = {
     diarize: true,
     noFallback: false,
     language: "auto",
+  },
+  datahooks: {
+    enabled: false,
+    features: {
+      exportMarkdown: true,
+      exportJson: false,
+      exportMp3: true,
+      exportAssets: true,
+      callCmdlet: false,
+    },
+    markdownTemplate: datahookMarkdownTemplate,
+    markdownPath:
+      "{{homedir}}\\Desktop\\Pensieve Recordings\\\\{{keydate date}} - {{pathsafe name}}.md",
+    jsonPath:
+      "{{homedir}}\\Desktop\\Pensieve Recordings\\\\{{keydate date}}.json",
+    mp3Path:
+      "{{homedir}}\\Desktop\\Pensieve Recordings\\\\{{keydate date}} - {{pathsafe name}}.mp3",
+    assetPath:
+      "{{homedir}}\\Desktop\\Pensieve Recordings\\assets\\\\{{keydate date}}_{{timestamp}}{{ext}}",
+    callCmdlet: 'echo "Recording stored to {{date}}."',
   },
 };
 
