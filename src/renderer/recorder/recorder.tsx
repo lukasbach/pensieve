@@ -7,16 +7,14 @@ import {
   TextField,
 } from "@radix-ui/themes";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useRecorderState } from "./state";
-import { ScreenSelector } from "./screen-selector";
 import { MicSelector } from "./mic-selector";
-import { useMicSources, useScreenSources } from "./hooks";
+import { useMicSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
-  const defaultScreen = useScreenSources()?.[0];
 
   const {
     setConfig,
@@ -25,7 +23,12 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     recorder,
     meta,
     setMeta,
+    reset,
   } = useRecorderState();
+
+  useEffect(() => {
+    reset();
+  }, []);
 
   if (recorder) {
     return <RecorderInsession ref={ref} />;
@@ -36,26 +39,26 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
       <TextField.Root
         size="2"
         placeholder="Untitled Recording"
-        value={meta?.name}
+        value={meta?.name ?? ""}
         onChange={(e) => {
           setMeta({ name: e.currentTarget.value });
         }}
       />
 
       <CheckboxCards.Root
-        defaultValue={[
+        value={[
           recordingConfig.mic ? "mic" : "",
-          recordingConfig.screen ? "screen" : "",
+          recordingConfig.recordScreenAudio ? "screen" : "",
         ]}
         columns={{ initial: "1" }}
         onValueChange={(value) => {
+          if (value.filter((v) => !!v).length === 0) return;
+
           setConfig({
             mic: value.includes("mic")
               ? recordingConfig.mic ?? defaultMic
               : undefined,
-            screen: value.includes("screen")
-              ? recordingConfig.screen ?? defaultScreen
-              : undefined,
+            recordScreenAudio: value.includes("screen"),
           });
         }}
       >
@@ -72,14 +75,7 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
       </CheckboxCards.Root>
 
       <Box mt="1rem">
-        <Text weight="bold">Device configuration</Text>
         <Flex maxWidth="100%" gap="1rem">
-          <Box flexBasis="100%" overflow="hidden">
-            <Text size="2" weight="bold">
-              Screen
-            </Text>
-            <ScreenSelector />
-          </Box>
           <Box flexBasis="100%" overflow="hidden">
             <Text size="2" weight="bold">
               Microphone

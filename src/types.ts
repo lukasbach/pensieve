@@ -1,8 +1,8 @@
-import { DesktopCapturerSource, app } from "electron";
+import { app } from "electron";
 import path from "path";
 
 export type RecordingConfig = {
-  screen?: DesktopCapturerSource;
+  recordScreenAudio?: boolean;
   mic?: MediaDeviceInfo;
 };
 

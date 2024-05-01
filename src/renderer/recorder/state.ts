@@ -25,7 +25,7 @@ type RecorderState = {
 };
 
 export const useRecorderState = create<RecorderState>()((set, get) => ({
-  recordingConfig: {},
+  recordingConfig: { recordScreenAudio: true },
   meta: { started: new Date().toISOString() },
   isRecording: false,
   isPaused: false,
@@ -45,8 +45,14 @@ export const useRecorderState = create<RecorderState>()((set, get) => ({
       isPaused: false,
     });
   },
-  reset: () =>
+  reset: async () =>
     set({
+      recordingConfig: {
+        recordScreenAudio: true,
+        mic: (await navigator.mediaDevices.enumerateDevices()).find(
+          (d) => d.kind === "audioinput",
+        ),
+      },
       recorder: undefined,
       meta: undefined,
       isRecording: false,
