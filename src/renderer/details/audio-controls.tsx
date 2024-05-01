@@ -11,7 +11,6 @@ import { LuMouse } from "react-icons/lu";
 import { useDebouncedEffect } from "@react-hookz/web";
 import { useManagedAudio } from "./use-managed-audio";
 import { timeToDisplayString } from "../../utils";
-import { scrollToTime } from "./transcript/scrolling";
 
 export const AudioControls: FC<{
   audio: ReturnType<typeof useManagedAudio>;
@@ -22,7 +21,7 @@ export const AudioControls: FC<{
   useDebouncedEffect(
     () => {
       if (syncScroll) {
-        scrollToTime(audio.progress * 1000);
+        audio.scrollTo(audio.progress * 1000);
       }
     },
     [audio.progress],
@@ -95,7 +94,7 @@ export const AudioControls: FC<{
               variant="ghost"
               size="2"
               radius="full"
-              onClick={() => scrollToTime(audio.progress * 1000)}
+              onClick={() => audio.scrollTo(audio.progress * 1000)}
             >
               <LuMouse />
             </IconButton>

@@ -13,7 +13,6 @@ import { AudioControls } from "./audio-controls";
 import { Notes } from "./notes";
 import { Summary } from "./summary";
 import { EmptyState } from "../common/empty-state";
-import { SCROLL_CONTAINER_ID, scrollToTime } from "./transcript/scrolling";
 import { SearchBar } from "./search-bar";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 
@@ -29,7 +28,7 @@ export const DetailsScreen: FC = () => {
     queryFn: () => historyApi.getRecordingTranscript(id),
   });
 
-  const audio = useManagedAudio();
+  const audio = useManagedAudio(transcript);
 
   if (!recording || !transcript) {
     return (
@@ -49,7 +48,7 @@ export const DetailsScreen: FC = () => {
             onJumpTo={(time) => {
               setTab("transcript");
               audio.jump(time / 1000 - 1);
-              setTimeout(() => scrollToTime(time));
+              setTimeout(() => audio.scrollTo(time));
             }}
           />
         }
@@ -71,7 +70,7 @@ export const DetailsScreen: FC = () => {
         }
       >
         <Flex direction="column" maxHeight="100%" height="100%">
-          <Box flexGrow="1" overflowY="auto" id={SCROLL_CONTAINER_ID}>
+          <Box flexGrow="1" overflowY="auto">
             <Tabs.Content value="transcript">
               {transcript && (
                 <Transscript
@@ -100,7 +99,7 @@ export const DetailsScreen: FC = () => {
                   setTab("transcript");
                   audio.jump(time / 1000 - 1);
                   audio.play();
-                  setTimeout(() => scrollToTime(time));
+                  setTimeout(() => audio.scrollTo(time));
                 }}
               />
             </Tabs.Content>

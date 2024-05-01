@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { RecordingTranscript } from "../../types";
 
-export const useManagedAudio = () => {
+export const useManagedAudio = (
+  transcript: RecordingTranscript | undefined | null,
+) => {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,6 +17,27 @@ export const useManagedAudio = () => {
       // audioTag.current.play();
     },
     [audioTag],
+  );
+
+  const scrollTo = useCallback(
+    (time: number) => {
+      if (!transcript) return;
+
+      const closest = transcript.transcription.reduce(
+        (old, { offsets }) => {
+          const dist = Math.abs(offsets.from - time);
+          return dist < old.dist ? { time: offsets.from, dist } : old;
+        },
+        { time: 0, dist: Number.MAX_SAFE_INTEGER },
+      );
+
+      const id = `transcript-item-${closest.time}`;
+      const element = document.getElementById(id);
+      if (!element) return;
+
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    [transcript],
   );
 
   const pause = useCallback(() => {
@@ -80,5 +104,6 @@ export const useManagedAudio = () => {
     play,
     jumpBackward,
     duration,
+    scrollTo,
   };
 };
