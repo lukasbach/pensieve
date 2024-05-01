@@ -11,13 +11,21 @@ import { ProgressCardWrapper } from "./progress-card-wrapper";
 import { PostProcessingJob } from "../../types";
 import type { getProgressData } from "../../main/domain/postprocess";
 
-const allSteps = ["wav", "mp3", "modelDownload", "whisper", "summary"] as const;
+const allSteps = [
+  "wav",
+  "mp3",
+  "modelDownload",
+  "whisper",
+  "summary",
+  "datahooks",
+] as const;
 const stepLabels = {
   modelDownload: "Downloading model",
   wav: "Preparing audio",
   mp3: "Generating MP3 file",
   whisper: "Transcribing audio",
   summary: "Generating summary",
+  datahooks: "Running datahooks",
 };
 
 export const ProgressCard: FC<{
