@@ -88,7 +88,10 @@ export const TranscriptItem = memo<{
   const screenshots = useMemo(
     () =>
       (Object.entries(meta.screenshots ?? {}) as any as [number, string][])
-        .filter(([time]) => isInRange(time, nextRange))
+        .filter(
+          ([time], idx) =>
+            isInRange(time, nextRange) || (idx === 0 && time < nextRange[0]),
+        )
         .map(([time, file]) => ({ time, file })),
     [meta.screenshots, nextRange],
   );
