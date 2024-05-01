@@ -131,6 +131,7 @@ export const defaultSettings = {
 export type Settings = typeof defaultSettings;
 
 export type ScreenshotArea = {
+  displayId: string;
   x: number;
   y: number;
   width: number;

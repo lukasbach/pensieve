@@ -1,16 +1,18 @@
 import { FC, useRef, useState } from "react";
 import { Box, Flex } from "@radix-ui/themes";
 import { useKeyboardEvent } from "@react-hookz/web";
+import { useSearch } from "@tanstack/react-router";
 import { mainApi } from "../api";
 
 export const ScreenshotTool: FC = () => {
+  const { displayId } = useSearch({ from: "/screenshot" as const });
   const [start, setStart] = useState<{ x: number; y: number } | undefined>();
   const [clickMode, setClickMode] = useState(false);
   const [dragStartTime, setDragStartTime] = useState<number>(0);
   const box = useRef<HTMLDivElement>(null);
 
   useKeyboardEvent("Escape", () => {
-    mainApi.abortScreenshot();
+    mainApi.abortScreenshotArea();
   });
 
   return (
@@ -22,7 +24,8 @@ export const ScreenshotTool: FC = () => {
       style={{ cursor: "crosshair", userSelect: "none" }}
       onClick={(e) => {
         if (clickMode && start) {
-          mainApi.completeScreenshot({
+          mainApi.completeScreenshotArea({
+            displayId: displayId ?? "",
             ...start,
             width: e.clientX - start.x,
             height: e.clientY - start.y,
@@ -43,7 +46,8 @@ export const ScreenshotTool: FC = () => {
       }}
       onMouseUp={(e) => {
         if (Date.now() - dragStartTime > 200 && start) {
-          mainApi.completeScreenshot({
+          mainApi.completeScreenshotArea({
+            displayId: displayId ?? "",
             ...start,
             width: e.clientX - start.x,
             height: e.clientY - start.y,

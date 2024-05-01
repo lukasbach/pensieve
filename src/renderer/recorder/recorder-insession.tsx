@@ -10,7 +10,11 @@ import {
   HiOutlineTrash,
 } from "react-icons/hi2";
 import { MdScreenshotMonitor } from "react-icons/md";
-import { useMakeScreenshot, useRecorderState, useStopRecording } from "./state";
+import {
+  useMakeRegionScreenshot,
+  useRecorderState,
+  useStopRecording,
+} from "./state";
 import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
 import { useConfirm, usePromptText } from "../dialog/context";
@@ -38,7 +42,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
     "Are you sure you want to abort the current recording?",
   );
   const stopRecording = useStopRecording();
-  const makeScreenshot = useMakeScreenshot();
+  const makeScreenshot = useMakeRegionScreenshot();
 
   const onAddTimestampedNote = async () => {
     const content = await promptTimestampedNote();

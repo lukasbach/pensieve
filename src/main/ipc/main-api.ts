@@ -68,9 +68,9 @@ export const mainApi = {
     await shell.openExternal(url);
   },
 
-  requestScreenshot: screenshot.requestScreenshot,
-  completeScreenshot: screenshot.completeScreenshot,
-  abortScreenshot: screenshot.abortScreenshot,
+  requestScreenshotArea: screenshot.requestScreenshot,
+  completeScreenshotArea: screenshot.completeScreenshot,
+  abortScreenshotArea: screenshot.abortScreenshot,
 
   getSettings: settings.getSettings,
   saveSettings: settings.saveSettings,

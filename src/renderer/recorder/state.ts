@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { useCallback } from "react";
-import { historyApi } from "../api";
+import { historyApi, mainApi } from "../api";
 import { blobToBuffer } from "../../utils";
 import { RecordingConfig, RecordingMeta } from "../../types";
 import { createRecorder } from "./create-recorder";
@@ -153,4 +153,52 @@ export const useMakeScreenshot = () => {
     await historyApi.storeUnassociatedScreenshot(fileName, buffer);
     addScreenshot(fileName);
   }, [addScreenshot, recorder?.screen]);
+};
+
+export const useMakeRegionScreenshot = () => {
+  const { addScreenshot } = useRecorderState();
+  return useCallback(async () => {
+    const area = await mainApi.requestScreenshotArea();
+    if (!area) return;
+
+    // @ts-ignore
+    const displayMedia = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        // @ts-ignore
+        mandatory: {
+          chromeMediaSource: "screen",
+          chromeMediaSourceId: area.displayId,
+          minWidth: 1280,
+          minHeight: 720,
+          maxFrameRate: 1,
+        },
+      },
+    });
+    // displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
+    const screen = new MediaRecorder(displayMedia, {
+      mimeType: "video/webm",
+    });
+    screen.start();
+    const videoStream = screen.stream.getVideoTracks()[0];
+    const imageCapturer = new ImageCapture(videoStream);
+
+    const frame = await imageCapturer.grabFrame();
+    const canvas = document.createElement("canvas");
+    canvas.width = area.width;
+    canvas.height = area.height;
+    const ctx = canvas.getContext("bitmaprenderer");
+    if (!ctx) throw new Error("no bitmaprenderer");
+    ctx.transferFromImageBitmap(frame);
+    const blob = await new Promise<Blob | null>((r) => {
+      canvas.toBlob(r);
+    });
+    canvas.remove();
+    if (!blob) throw new Error("no blob");
+
+    const buffer = await blobToBuffer(blob);
+    const fileName = `${new Date().getTime()}.png`;
+    await historyApi.storeUnassociatedScreenshot(fileName, buffer);
+    addScreenshot(fileName);
+  }, [addScreenshot]);
 };

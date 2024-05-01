@@ -49,6 +49,9 @@ const screenshotRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/screenshot",
   component: () => <ScreenshotTool />,
+  validateSearch: (search: Record<string, unknown>) => ({
+    displayId: search.displayId as string | undefined,
+  }),
 });
 
 const routeTree = rootRoute.addChildren([
@@ -61,7 +64,10 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   history: createHashHistory(),
-  parseSearch: () => defaultParseSearch(window.location.search),
+  parseSearch: () =>
+    defaultParseSearch(
+      (window.location.search || window.location.href.split("?", 2)[1]) ?? "",
+    ),
 });
 
 declare module "@tanstack/react-router" {
