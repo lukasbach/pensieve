@@ -2,6 +2,7 @@ import { BrowserWindow, app, desktopCapturer, shell } from "electron";
 import path from "path";
 import * as windows from "../domain/windows";
 import * as settings from "../domain/settings";
+import * as screenshot from "../domain/screenshot";
 import { SettingsTab } from "../../renderer/settings/tabs";
 
 const updateExe = path.resolve(
@@ -66,6 +67,10 @@ export const mainApi = {
   openWeb: async (url: string) => {
     await shell.openExternal(url);
   },
+
+  requestScreenshot: screenshot.requestScreenshot,
+  completeScreenshot: screenshot.completeScreenshot,
+  abortScreenshot: screenshot.abortScreenshot,
 
   getSettings: settings.getSettings,
   saveSettings: settings.saveSettings,

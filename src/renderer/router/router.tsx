@@ -9,6 +9,7 @@ import {
 import { MainScreen } from "../main/main-screen";
 import { DetailsScreen } from "../details/details-screen";
 import { SettingsScreen } from "../settings/settings-screen";
+import { ScreenshotTool } from "../screenshot/screenshot-tool";
 
 const validateSearch = (search: Record<string, unknown>) => ({
   tray: !!search.tray,
@@ -44,10 +45,17 @@ const settingsRoute = createRoute({
   }),
 });
 
+const screenshotRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/screenshot",
+  component: () => <ScreenshotTool />,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   historyDetailsRoute,
   settingsRoute,
+  screenshotRoute,
 ]);
 
 export const router = createRouter({

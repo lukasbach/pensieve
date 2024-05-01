@@ -13,6 +13,7 @@ import { ScreenSelector } from "./screen-selector";
 import { MicSelector } from "./mic-selector";
 import { useMicSources, useScreenSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
+import { mainApi } from "../api";
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
@@ -33,6 +34,13 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <Flex direction="column" px=".5rem" py="1rem" gap=".5rem" ref={ref}>
+      <button
+        onClick={() => {
+          mainApi.requestScreenshot().then(console.log);
+        }}
+      >
+        Screenshot tool test
+      </button>
       <TextField.Root
         size="2"
         placeholder="Untitled Recording"

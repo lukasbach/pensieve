@@ -129,3 +129,10 @@ export const defaultSettings = {
 };
 
 export type Settings = typeof defaultSettings;
+
+export type ScreenshotArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
