@@ -15,6 +15,7 @@ jobs:
       - run: yarn install
       - run: yarn lint
       - run: yarn run typecheck
+      - run: yarn run build:docs
       - run: yarn make
       - uses: 'paramsinghvc/gh-action-bump-version@master'
         env:
