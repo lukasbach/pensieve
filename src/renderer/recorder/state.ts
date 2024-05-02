@@ -191,7 +191,9 @@ export const useMakeRegionScreenshot = () => {
     canvas.width = area.width;
     canvas.height = area.height;
     video.play();
-    await new Promise((r) => video.requestVideoFrameCallback(r));
+    await new Promise<any>((r) => {
+      video.requestVideoFrameCallback(r);
+    });
 
     ctx.drawImage(
       video,

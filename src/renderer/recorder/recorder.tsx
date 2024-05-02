@@ -28,6 +28,7 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
 
   useEffect(() => {
     reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (recorder) {

@@ -17,6 +17,7 @@ export const Screenshot: FC<{ url: string }> = ({ url }) => {
       </div>
       {isFullscreen && (
         <Portal>
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             className={styles.screenshotThumbnailFullscreenContainer}
             onClick={() => setIsFullscreen(!isFullscreen)}
