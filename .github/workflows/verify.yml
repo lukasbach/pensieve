@@ -25,4 +25,4 @@ jobs:
           path: dist-docs
       - uses: actions/deploy-pages@v4
         with:
-          artifact_name: ${{ steps.artifact.outputs.artifact_id }}
+          artifact_name: github-pages
