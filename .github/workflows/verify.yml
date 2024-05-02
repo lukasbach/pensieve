@@ -9,6 +9,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
@@ -18,7 +19,7 @@ jobs:
       - run: yarn run typecheck
       - run: yarn run build:docs
       - run: yarn run make
-      - uses: actions/upload-pages-artifact@v2
+      - uses: actions/upload-pages-artifact@v3
         id: artifact
         with:
           path: dist-docs
