@@ -1,15 +1,12 @@
 import { RecordingConfig } from "../../types";
 
-const createScreenRecorder = async (config: RecordingConfig) => {
-  if (!config.screen) return null;
-
+const createScreenRecorder = async () => {
   // @ts-ignore
   const displayMedia = await navigator.mediaDevices.getUserMedia({
     audio: {
       // @ts-ignore
       mandatory: {
         chromeMediaSource: "desktop",
-        chromeMediaSourceId: config.screen.id,
         sampleRate: 48000,
         sampleSize: 16,
         channelCount: 2,
@@ -19,7 +16,6 @@ const createScreenRecorder = async (config: RecordingConfig) => {
       // @ts-ignore
       mandatory: {
         chromeMediaSource: "desktop",
-        chromeMediaSourceId: config.screen.id,
         minWidth: 1280,
         maxWidth: 1280,
         minHeight: 720,
@@ -49,7 +45,7 @@ const createMicRecorder = async (config: RecordingConfig) => {
 };
 
 export const createRecorder = async (config: RecordingConfig) => {
-  const screen = await createScreenRecorder(config);
+  const screen = await createScreenRecorder();
   const mic = await createMicRecorder(config);
   return { screen, mic };
 };

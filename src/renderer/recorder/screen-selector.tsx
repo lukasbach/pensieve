@@ -1,3 +1,4 @@
+/*
 import { FC } from "react";
 import { Select, Tooltip } from "@radix-ui/themes";
 import { useRecorderState } from "./state";
@@ -42,7 +43,7 @@ export const ScreenSelector: FC<{ comingSoon?: boolean }> = ({
       <Select.Content position="popper">
         {screenSources?.map((source) => (
           <Select.Item value={source.id} key={source.id}>
-            {/* `${source.name.slice(0, 50)}${source.name.length > 50 ? "..." : ""}` */}
+            {/* `${source.name.slice(0, 50)}${source.name.length > 50 ? "..." : ""}` */ /* }
             {source.name}
           </Select.Item>
         ))}
@@ -50,3 +51,4 @@ export const ScreenSelector: FC<{ comingSoon?: boolean }> = ({
     </Select.Root>
   );
 };
+*/
