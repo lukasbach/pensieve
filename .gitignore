@@ -107,3 +107,6 @@ yarn-error.log
 
 extra__
 extra
+dist-docs
+docs/index.md
+docs/images

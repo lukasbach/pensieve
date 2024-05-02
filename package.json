@@ -12,7 +12,10 @@
     "publish": "electron-forge publish",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build:docs": "markbase build ./docs",
+    "start:docs": "markbase watch ./docs",
+    "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs/images"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
@@ -50,6 +53,7 @@
     "@types/fs-extra": "^11",
     "@types/humanize-duration": "^3.27.4",
     "@types/w3c-image-capture": "^1.0.10",
+    "cpy-cli": "^5.0.0",
     "deepmerge": "^4.3.1",
     "electron": "29.1.5",
     "eslint": "^8.57.0",
@@ -61,6 +65,7 @@
     "handlebars": "^4.7.8",
     "humanize-duration": "^3.32.0",
     "langchain": "^0.1.33",
+    "markbase": "^0.0.5",
     "react-hook-form": "^7.51.2",
     "react-icons": "^5.0.1",
     "react-markdown": "^9.0.1",

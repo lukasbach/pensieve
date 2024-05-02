@@ -1,0 +1,5 @@
+title: Pensieve
+description: Desktop app for recording meetings or memos from locally running apps and transcribing and summarizing them with a local LLM
+documents: ["**/*.md"]
+assets: ["**/*.png", "**/*.jpg"]
+out: ../dist-docs
