@@ -10,6 +10,7 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import fs from "fs-extra";
 import path from "path";
 import { Resvg } from "@resvg/resvg-js";
+import pngToIco from "png-to-ico";
 
 const createIcon = async (factor: number, base = 32) => {
   const source = await fs.readFile(path.join(__dirname, "./icon.svg"), "utf-8");
@@ -32,7 +33,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     extraResource: "./extra",
-    icon: "./extra/icon@4x.png",
+    icon: "./extra/icon@8x",
   },
   rebuildConfig: {},
   makers: [
@@ -150,6 +151,10 @@ const config: ForgeConfig = {
       await createIcon(2);
       await createIcon(3);
       await createIcon(4);
+      await createIcon(8);
+      await pngToIco(path.join(__dirname, "extra/icon@8x.png")).then((buf) =>
+        fs.writeFileSync(path.join(__dirname, "extra/icon@8x.ico"), buf),
+      );
     },
   },
 };

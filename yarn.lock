@@ -3752,6 +3752,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^17.0.36":
+  version: 17.0.45
+  resolution: "@types/node@npm:17.0.45"
+  checksum: 10/b45fff7270b5e81be19ef91a66b764a8b21473a97a8d211218a52e3426b79ad48f371819ab9153370756b33ba284e5c875463de4d2cf48a472e9098d7f09e8a2
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^18.11.18, @types/node@npm:^18.7.18":
   version: 18.19.31
   resolution: "@types/node@npm:18.19.31"
@@ -10647,6 +10654,7 @@ __metadata:
     humanize-duration: "npm:^3.32.0"
     langchain: "npm:^0.1.33"
     markbase: "npm:^0.0.5"
+    png-to-ico: "npm:^2.1.8"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-hook-form: "npm:^7.51.2"
@@ -10723,6 +10731,26 @@ __metadata:
     base64-js: "npm:^1.5.1"
     xmlbuilder: "npm:^15.1.1"
   checksum: 10/f513beecc01a021b4913d4e5816894580b284335ae437e7ed2d5e78f8b6f0d2e0f874ec57bab9c9d424cc49e77b8347efa75abcfa8ac138dbfb63a045e1ce559
+  languageName: node
+  linkType: hard
+
+"png-to-ico@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "png-to-ico@npm:2.1.8"
+  dependencies:
+    "@types/node": "npm:^17.0.36"
+    minimist: "npm:^1.2.6"
+    pngjs: "npm:^6.0.0"
+  bin:
+    png-to-ico: bin/cli.js
+  checksum: 10/a8eb1da5f8ad58414a03d5fce3440ad746a5a7bfd13f3dcba4c43d73b2becf6421e35f3a5a1fb9bc3450fdfaeaa1909d288ee18c31f5a00c678f5008b09b1642
+  languageName: node
+  linkType: hard
+
+"pngjs@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "pngjs@npm:6.0.0"
+  checksum: 10/692751ccd5e762623103900922caac982caa90258d9c6c04a6e2bc3397b1dedbaf9db826fc0fa068a29d607cad3df1d1eded0dec2ee35a0015c65cb5ef33ad18
   languageName: node
   linkType: hard
 
