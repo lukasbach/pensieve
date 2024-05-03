@@ -37,6 +37,10 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <Flex direction="column" px=".5rem" py="1rem" gap=".5rem" ref={ref}>
+      {/* <DatePicker
+        label="Appointment date"
+        // minValue={today(getLocalTimeZone())}
+      /> */}
       <TextField.Root
         size="2"
         placeholder="Untitled Recording"
