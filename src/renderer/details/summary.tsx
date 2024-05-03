@@ -17,7 +17,7 @@ import {
 } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
 import { QueryKeys } from "../../query-keys";
-import { mainApi } from "../api";
+import { mainApi, windowsApi } from "../api";
 import { EmptyState } from "../common/empty-state";
 import { SettingsTab } from "../settings/tabs";
 import { PageContent } from "../common/page-content";
@@ -39,7 +39,7 @@ export const Summary: FC<{
       >
         <Button
           onClick={() => {
-            mainApi.openSettingsWindow(SettingsTab.Summary);
+            windowsApi.openSettingsWindow(SettingsTab.Summary);
           }}
         >
           Go to settings

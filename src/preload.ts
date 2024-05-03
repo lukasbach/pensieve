@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld("ipcApi", {
   main: {
     invoke: (payload: any) => ipcRenderer.invoke("main", payload),
   },
+  windows: {
+    invoke: (payload: any) => ipcRenderer.invoke("windows", payload),
+  },
   models: {
     invoke: (payload: any) => ipcRenderer.invoke("models", payload),
   },

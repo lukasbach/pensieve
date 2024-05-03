@@ -9,7 +9,7 @@ import {
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
-import { mainApi } from "../api";
+import { windowsApi } from "../api";
 import { Recorder } from "../recorder/recorder";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 import { Fancybg } from "../common/fancybg";
@@ -41,7 +41,7 @@ export const MainScreen: FC = () => {
           <IconButton
             variant="outline"
             color="gray"
-            onClick={() => mainApi.openSettingsWindow()}
+            onClick={() => windowsApi.openSettingsWindow()}
           >
             <HiOutlineCog6Tooth />
           </IconButton>

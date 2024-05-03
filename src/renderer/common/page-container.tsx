@@ -7,7 +7,7 @@ import {
 } from "react-icons/vsc";
 import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
 import * as styles from "./page-container.module.css";
-import { mainApi } from "../api";
+import { mainApi, windowsApi } from "../api";
 import { useIsTray } from "./use-is-tray";
 
 const AppControls = () => {
@@ -24,7 +24,7 @@ const AppControls = () => {
         className={styles.windowBtn}
         type="button"
         aria-label="Minimize"
-        onClick={() => mainApi.minimizeWindow()}
+        onClick={() => windowsApi.minimizeWindow()}
       >
         <VscChromeMinimize />
       </button>
@@ -32,7 +32,7 @@ const AppControls = () => {
         className={styles.windowBtn}
         type="button"
         aria-label="Restore"
-        onClick={() => mainApi.restoreMaximizeWindow()}
+        onClick={() => windowsApi.restoreMaximizeWindow()}
       >
         <VscChromeRestore />
       </button>
@@ -40,7 +40,7 @@ const AppControls = () => {
         className={`${styles.windowBtn} ${styles.windowCloseBtn}`}
         type="button"
         aria-label="Close"
-        onClick={() => mainApi.closeCurrentWindow()}
+        onClick={() => windowsApi.closeCurrentWindow()}
       >
         <VscChromeClose />
       </button>
@@ -92,7 +92,7 @@ export const PageContainer: FC<
                 <IconButton
                   color="gray"
                   variant="outline"
-                  onClick={() => mainApi.openMainWindowNormally()}
+                  onClick={() => windowsApi.openMainWindowNormally()}
                 >
                   <HiMiniArrowTopRightOnSquare />
                 </IconButton>

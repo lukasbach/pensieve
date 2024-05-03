@@ -11,6 +11,7 @@ import * as searchIndex from "./main/domain/search";
 import * as settings from "./main/domain/settings";
 import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
+import { windowsApi } from "./main/ipc/windows-api";
 
 updateElectronApp();
 
@@ -41,6 +42,7 @@ protocol.registerSchemesAsPrivileged([
 app.whenReady().then(async () => {
   await history.init();
   loadIpcInterfaceInMain("main", mainApi);
+  loadIpcInterfaceInMain("windows", windowsApi);
   loadIpcInterfaceInMain("history", historyApi);
   loadIpcInterfaceInMain("models", modelsApi);
 
@@ -91,5 +93,5 @@ app.whenReady().then(async () => {
   if (!process.argv.join(" ").includes("--autostart")) {
     windows.openMainWindowNormally();
   }
-  await registerTray();
+  registerTray();
 });

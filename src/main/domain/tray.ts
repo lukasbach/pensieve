@@ -1,7 +1,7 @@
 import { Menu, Tray, app } from "electron";
 import { getIconPath } from "../../main-utils";
-import { mainApi } from "../ipc/main-api";
 import * as windows from "./windows";
+import { windowsApi } from "../ipc/windows-api";
 
 export const registerTray = () => {
   const tray = new Tray(getIconPath());
@@ -12,7 +12,7 @@ export const registerTray = () => {
     {
       label: "Settings",
       type: "normal",
-      click: () => mainApi.openSettingsWindow(),
+      click: () => windowsApi.openSettingsWindow(),
     },
     { label: "Close", type: "normal", click: app.quit },
   ]);
