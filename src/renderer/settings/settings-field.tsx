@@ -1,8 +1,12 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, ReactNode } from "react";
 import { Box, Flex, Text } from "@radix-ui/themes";
 
 export const SettingsField: FC<
-  PropsWithChildren<{ label: string; description?: string; textTop?: string }>
+  PropsWithChildren<{
+    label: string | ReactNode;
+    description?: string;
+    textTop?: string;
+  }>
 > = ({ label, description, children, textTop }) => {
   return (
     <Flex gap="1.5rem" align="start" mt="1.2rem" asChild>

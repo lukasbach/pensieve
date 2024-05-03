@@ -40,5 +40,10 @@ export const SettingsTabs: FC = () => (
         Data Hooks
       </Button>
     </Tabs.Trigger>
+    <Tabs.Trigger value={SettingsTab.About} asChild>
+      <Button variant="ghost" className={styles.tab}>
+        About Pensieve
+      </Button>
+    </Tabs.Trigger>
   </Flex>
 );

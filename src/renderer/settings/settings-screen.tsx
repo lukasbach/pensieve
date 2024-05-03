@@ -19,6 +19,7 @@ import { SettingsTabs } from "./settings-tabs";
 import { FfmpegSettings } from "./ffmpeg-settings";
 import { SummarySettings } from "./summary-settings";
 import { HooksSettings } from "./hooks-settings";
+import { AboutSettings } from "./about-settings";
 
 export const SettingsScreen: FC = () => {
   const { settingsTab } = useSearch({
@@ -74,6 +75,7 @@ export const SettingsScreen: FC = () => {
                 <WhisperSettings />
                 <SummarySettings />
                 <HooksSettings />
+                <AboutSettings />
               </FormProvider>
             </form>
           </Box>

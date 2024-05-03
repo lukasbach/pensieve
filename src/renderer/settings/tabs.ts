@@ -4,4 +4,5 @@ export enum SettingsTab {
   Whisper = "whisper",
   Summary = "summary",
   Hooks = "hooks",
+  About = "about",
 }
