@@ -17,7 +17,7 @@ import {
 } from "./state";
 import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
-import { useConfirm, usePromptText } from "../dialog/context";
+import { useWindowedConfirm, useWindowedPromptText } from "../dialog/context";
 import { PageContent } from "../common/page-content";
 import { Timer } from "./timer";
 
@@ -32,12 +32,12 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
     reset,
     meta,
   } = useRecorderState();
-  const promptTimestampedNote = usePromptText(
+  const promptTimestampedNote = useWindowedPromptText(
     "Add note at current time",
     "Add note",
     "Note content",
   );
-  const confirmAbort = useConfirm(
+  const confirmAbort = useWindowedConfirm(
     "Abort recording",
     "Are you sure you want to abort the current recording?",
   );

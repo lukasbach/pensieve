@@ -5,14 +5,14 @@ import { Button } from "@radix-ui/themes";
 import { Settings } from "../../types";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsField } from "./settings-field";
-import { useConfirm } from "../dialog/context";
+import { useWindowedConfirm } from "../dialog/context";
 import { mainApi } from "../api";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsTab } from "./tabs";
 
 export const GeneralSettings: FC = () => {
   const form = useFormContext<Settings>();
-  const confirmReset = useConfirm(
+  const confirmReset = useWindowedConfirm(
     "Reset settings",
     "Are you sure you want to reset all settings to default settings?",
   );

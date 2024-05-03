@@ -71,7 +71,7 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
                     defaultChecked={dialog.defaultValue === true}
                     onCheckedChange={setValue}
                   />
-                  Agree to Terms and Conditions
+                  {dialog.input.label}
                 </Flex>
               </Text>
             )}

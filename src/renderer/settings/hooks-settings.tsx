@@ -15,7 +15,7 @@ import { Settings } from "../../types";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsField } from "./settings-field";
 import { mainApi } from "../api";
-import { useConfirm } from "../dialog/context";
+import { useWindowedConfirm } from "../dialog/context";
 import { datahookMarkdownTemplate } from "../../datahooks-defaults";
 
 const JsonSettings: FC = () => {
@@ -123,7 +123,7 @@ const CmdletSettings: FC = () => {
 };
 
 const MarkdownSettings: FC = () => {
-  const confirmReset = useConfirm(
+  const confirmReset = useWindowedConfirm(
     "Reset Markdown Template",
     "Are you sure you want to reset the markdown template?",
   );

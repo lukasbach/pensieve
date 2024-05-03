@@ -18,7 +18,7 @@ import { PostProcessingStep, RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
 import { EntityTitle } from "../common/entity-title";
-import { useConfirm } from "../dialog/context";
+import { useWindowedConfirm } from "../dialog/context";
 import { HistoryItemIcon } from "./history-item-icon";
 
 const getSubtitle = ({
@@ -51,7 +51,7 @@ export const HistoryItem: FC<{
   isPinnedItem,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const confirmDeletion = useConfirm(
+  const confirmDeletion = useWindowedConfirm(
     "Delete recording",
     "Are you sure you want to delete this recording?",
   );

@@ -12,7 +12,7 @@ import { useHistoryRecordings } from "./state";
 import { HistoryItem } from "./history-item";
 import { useSearch } from "./use-search";
 import { historyApi } from "../api";
-import { usePromptText } from "../dialog/context";
+import { useWindowedPromptText } from "../dialog/context";
 import { QueryKeys } from "../../query-keys";
 import { EmptyState } from "../common/empty-state";
 import { EntityTitle } from "../common/entity-title";
@@ -39,11 +39,11 @@ export const History: FC = () => {
     [postprocessing?.processingQueue],
   );
 
-  const askImportName = usePromptText(
+  const askImportName = useWindowedPromptText(
     "Import audio file",
     "Name of the recording",
   );
-  const askImportDate = usePromptText(
+  const askImportDate = useWindowedPromptText(
     "Import audio file",
     "Date of the recording",
   );

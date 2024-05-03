@@ -10,6 +10,7 @@ import { MainScreen } from "../main/main-screen";
 import { DetailsScreen } from "../details/details-screen";
 import { SettingsScreen } from "../settings/settings-screen";
 import { ScreenshotTool } from "../screenshot/screenshot-tool";
+import { WindowedDialog } from "../dialog/windowed-dialog";
 
 const validateSearch = (search: Record<string, unknown>) => ({
   tray: !!search.tray,
@@ -54,11 +55,21 @@ const screenshotRoute = createRoute({
   }),
 });
 
+const dialogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dialog",
+  component: () => <WindowedDialog />,
+  validateSearch: (search: Record<string, unknown>) => ({
+    dialogId: search.dialogId as string | undefined,
+  }),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   historyDetailsRoute,
   settingsRoute,
   screenshotRoute,
+  dialogRoute,
 ]);
 
 export const router = createRouter({

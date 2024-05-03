@@ -8,4 +8,5 @@ export enum QueryKeys {
   PostProcessing = "postprocessing",
   ScreenSources = "screensources",
   MicrophoneSources = "microphonesources",
+  DialogData = "dialogdata",
 }
