@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      pages: write
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
