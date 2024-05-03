@@ -3,3 +3,4 @@ description: Desktop app for recording meetings or memos from locally running ap
 documents: ["**/*.md"]
 assets: ["**/*.png", "**/*.jpg"]
 out: ../dist-docs
+rootDocument: /index

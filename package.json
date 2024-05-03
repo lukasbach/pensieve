@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --fix",
     "build:docs": "markbase build ./docs",
     "start:docs": "markbase watch ./docs",
-    "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs/images"
+    "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
@@ -65,7 +65,7 @@
     "handlebars": "^4.7.8",
     "humanize-duration": "^3.32.0",
     "langchain": "^0.1.33",
-    "markbase": "^0.0.5",
+    "markbase": "^0.0.6",
     "png-to-ico": "^2.1.8",
     "react-hook-form": "^7.51.2",
     "react-icons": "^5.0.1",

@@ -8939,9 +8939,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markbase@npm:^0.0.5":
-  version: 0.0.5
-  resolution: "markbase@npm:0.0.5"
+"markbase@npm:^0.0.6":
+  version: 0.0.6
+  resolution: "markbase@npm:0.0.6"
   dependencies:
     commander: "npm:^11.1.0"
     favicons: "npm:^7.1.5"
@@ -8967,7 +8967,7 @@ __metadata:
     yaml: "npm:^2.3.4"
   bin:
     markbase: lib/index.js
-  checksum: 10/601bdc75f2d293ffbb281cc2c84bb38b8f872a6511d83be277c8d8e272e2edb5c7d11d6fdba51a908b29f2de8817b458ca91c2be02ecdd12837b98eff77972ce
+  checksum: 10/801d207dad99dbcb61d85095c79e0d13067b13e34793bb5216fadbed7a34f9e0111c6252c38e1f802e7b9b1363e06bc0e1d2476fcf9c3828f64424bd6ccd9032
   conditions: (os=linux | os=win32) & (cpu=x64 | cpu=arm64)
   languageName: node
   linkType: hard
@@ -10653,7 +10653,7 @@ __metadata:
     handlebars: "npm:^4.7.8"
     humanize-duration: "npm:^3.32.0"
     langchain: "npm:^0.1.33"
-    markbase: "npm:^0.0.5"
+    markbase: "npm:^0.0.6"
     png-to-ico: "npm:^2.1.8"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"

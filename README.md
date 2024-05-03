@@ -1,4 +1,4 @@
-# <img src="icon.svg" width="24"> Pensieve
+# Pensieve
 
 > Desktop app for recording meetings or memos from locally running apps and transcribing and summarizing them with a local LLM
 
@@ -11,7 +11,7 @@
 
 
 <div align="center">
-    <img src="images/preview.png" alt="Preview image of Pensieve" />
+    <img src="https://github.com/lukasbach/pensieve/raw/main/images/preview.png" alt="Preview image of Pensieve" />
 </div>
 <br />
 
