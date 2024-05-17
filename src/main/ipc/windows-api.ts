@@ -32,6 +32,11 @@ export const windowsApi = {
     );
   },
 
+  openRecorderOverlayWindow: windows.openRecorderOverlayWindow,
+  closeRecorderOverlayWindow: windows.closeRecorderOverlayWindow,
+  mouseEnterRecordingOverlay: windows.mouseEnterRecordingOverlay,
+  mouseLeaveRecordingOverlay: windows.mouseLeaveRecordingOverlay,
+
   openMainWindowNormally: async () => {
     windows.openMainWindowNormally();
   },

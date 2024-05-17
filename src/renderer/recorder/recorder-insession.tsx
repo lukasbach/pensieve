@@ -10,50 +10,26 @@ import {
   HiOutlineTrash,
 } from "react-icons/hi2";
 import { MdScreenshotMonitor } from "react-icons/md";
-import {
-  useMakeRegionScreenshot,
-  useRecorderState,
-  useStopRecording,
-} from "./state";
+
 import { EntityTitle } from "../common/entity-title";
 import { RecordingActionButton } from "./recording-action-button";
-import { useWindowedConfirm, useWindowedPromptText } from "../dialog/context";
 import { PageContent } from "../common/page-content";
 import { Timer } from "./timer";
+import { useInsessionControls } from "./use-insession-controls";
 
 export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
   const {
-    pause,
     isPaused,
+    meta,
     resume,
-    addTimestampedNote,
+    pause,
+    makeScreenshot,
+    onAddTimestampedNote,
     addHighlight,
     setMeta,
-    reset,
-    meta,
-  } = useRecorderState();
-  const promptTimestampedNote = useWindowedPromptText(
-    "Add note at current time",
-    "Add note",
-    "Note content",
-  );
-  const confirmAbort = useWindowedConfirm(
-    "Abort recording",
-    "Are you sure you want to abort the current recording?",
-  );
-  const stopRecording = useStopRecording();
-  const makeScreenshot = useMakeRegionScreenshot();
-
-  const onAddTimestampedNote = async () => {
-    const content = await promptTimestampedNote();
-    if (!content) return;
-    addTimestampedNote(content);
-  };
-
-  const onAbort = async () => {
-    await confirmAbort();
-    reset();
-  };
+    stopRecording,
+    onAbort,
+  } = useInsessionControls();
 
   return (
     <PageContent ref={ref}>

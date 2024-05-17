@@ -12,6 +12,7 @@ enum MainWindowModeValue {
 let mainWindow: BrowserWindow | null = null;
 let mainWindowMode = MainWindowModeValue.Minimized as MainWindowModeValue;
 let oldBounds: Rectangle;
+let recordingOverlay: BrowserWindow | null = null;
 
 export const openAppWindow = (
   hash: string,
@@ -141,4 +142,42 @@ export const closeCurrentWindow = () => {
   }
 
   win.close();
+};
+
+export const openRecorderOverlayWindow = async () => {
+  const width = 340;
+
+  if (recordingOverlay && !recordingOverlay.isDestroyed()) {
+    recordingOverlay.show();
+    recordingOverlay.focus();
+    return;
+  }
+
+  recordingOverlay = openAppWindow(
+    `/recorder-overlay`,
+    {},
+    {
+      width,
+      height: 400,
+      x: screen.getPrimaryDisplay().bounds.width - width - 20,
+      y: 20,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: false,
+    },
+  );
+  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
+};
+
+export const closeRecorderOverlayWindow = async () => {
+  recordingOverlay?.close();
+};
+
+export const mouseEnterRecordingOverlay = async () => {
+  recordingOverlay?.setIgnoreMouseEvents(false);
+  console.log("enter");
+};
+export const mouseLeaveRecordingOverlay = async (e: any) => {
+  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
+  console.log("leave", e);
 };

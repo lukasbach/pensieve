@@ -1,0 +1,11 @@
+.draggable {
+    cursor: grab;
+    -webkit-app-region: drag;
+}
+.draggable:active {
+    cursor: grabbing;
+}
+
+html, body, #root {
+    overflow: hidden;
+}

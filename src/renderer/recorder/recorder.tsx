@@ -37,6 +37,13 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <Flex direction="column" px=".5rem" py="1rem" gap=".5rem" ref={ref}>
+      {/* <button
+        onClick={() => {
+          windowsApi.openRecorderOverlayWindow();
+        }}
+      >
+        Overlay
+      </button> */}
       {/* <DatePicker
         label="Appointment date"
         // minValue={today(getLocalTimeZone())}

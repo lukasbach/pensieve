@@ -35,6 +35,7 @@ const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   }, [dark]);
   return (
     <Theme
+      hasBackground={false}
       appearance={
         dark ?? localStorage.getItem("dark") === "true" ? "dark" : "light"
       }

@@ -11,6 +11,7 @@ import { DetailsScreen } from "../details/details-screen";
 import { SettingsScreen } from "../settings/settings-screen";
 import { ScreenshotTool } from "../screenshot/screenshot-tool";
 import { WindowedDialog } from "../dialog/windowed-dialog";
+import { RecorderOverlay } from "../overlay/recorder-overlay";
 
 const validateSearch = (search: Record<string, unknown>) => ({
   tray: !!search.tray,
@@ -64,12 +65,19 @@ const dialogRoute = createRoute({
   }),
 });
 
+const recorderOverlayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/recorder-overlay",
+  component: () => <RecorderOverlay />,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   historyDetailsRoute,
   settingsRoute,
   screenshotRoute,
   dialogRoute,
+  recorderOverlayRoute,
 ]);
 
 export const router = createRouter({
