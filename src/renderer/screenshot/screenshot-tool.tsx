@@ -21,7 +21,11 @@ export const ScreenshotTool: FC = () => {
       align="center"
       justify="center"
       height="100%"
-      style={{ cursor: "crosshair", userSelect: "none" }}
+      style={{
+        cursor: "crosshair",
+        userSelect: "none",
+        background: "rgba(0, 0, 0, .4)",
+      }}
       onClick={(e) => {
         if (clickMode && start) {
           mainApi.completeScreenshotArea({
