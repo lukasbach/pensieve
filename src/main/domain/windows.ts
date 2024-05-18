@@ -2,6 +2,7 @@ import { BrowserWindow, Notification, Rectangle, screen } from "electron";
 import path from "path";
 import { getIconPath } from "../../main-utils";
 import { getSettings, saveSettings } from "./settings";
+import * as recorderIpc from "./recorder-ipc";
 
 enum MainWindowModeValue {
   Open,
@@ -13,6 +14,11 @@ let mainWindow: BrowserWindow | null = null;
 let mainWindowMode = MainWindowModeValue.Minimized as MainWindowModeValue;
 let oldBounds: Rectangle;
 let recordingOverlay: BrowserWindow | null = null;
+
+export const getMainWindow = () => mainWindow;
+
+export const isMainWindowOpen = () =>
+  mainWindowMode === MainWindowModeValue.Open;
 
 export const openAppWindow = (
   hash: string,
@@ -53,6 +59,47 @@ export const openAppWindow = (
   return win;
 };
 
+export const openRecorderOverlayWindow = async () => {
+  const width = 360;
+
+  if (recordingOverlay && !recordingOverlay.isDestroyed()) {
+    recordingOverlay.show();
+    return;
+  }
+
+  recordingOverlay = openAppWindow(
+    `/recorder-overlay`,
+    {},
+    {
+      width,
+      height: 400,
+      x: screen.getPrimaryDisplay().bounds.width - width - 20,
+      y: 20,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: false,
+      focusable: false,
+      skipTaskbar: true,
+    },
+  );
+  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
+};
+
+export const closeRecorderOverlayWindow = async () => {
+  recordingOverlay?.close();
+  recordingOverlay = null;
+};
+export const isRecorderOverlayOpen = () => {
+  return recordingOverlay !== null;
+};
+
+export const mouseEnterRecordingOverlay = async () => {
+  recordingOverlay?.setIgnoreMouseEvents(false);
+};
+export const mouseLeaveRecordingOverlay = async () => {
+  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
+};
+
 export const initializeMainWindow = () => {
   mainWindow = openAppWindow(
     "/",
@@ -87,6 +134,10 @@ export const hideMainWindow = () => {
   mainWindow?.setSkipTaskbar(true);
   mainWindow?.hide();
   mainWindowMode = MainWindowModeValue.Minimized;
+
+  if (recorderIpc.getState().isRecording) {
+    openRecorderOverlayWindow();
+  }
 };
 
 export const openMainWindowNormally = () => {
@@ -101,6 +152,10 @@ export const openMainWindowNormally = () => {
   mainWindow?.webContents.send("setIsTray", false);
   mainWindow?.show();
   mainWindowMode = MainWindowModeValue.Open;
+
+  if (recordingOverlay) {
+    closeRecorderOverlayWindow();
+  }
 };
 
 export const openMainWindowAsTray = () => {
@@ -142,42 +197,4 @@ export const closeCurrentWindow = () => {
   }
 
   win.close();
-};
-
-export const openRecorderOverlayWindow = async () => {
-  const width = 340;
-
-  if (recordingOverlay && !recordingOverlay.isDestroyed()) {
-    recordingOverlay.show();
-    recordingOverlay.focus();
-    return;
-  }
-
-  recordingOverlay = openAppWindow(
-    `/recorder-overlay`,
-    {},
-    {
-      width,
-      height: 400,
-      x: screen.getPrimaryDisplay().bounds.width - width - 20,
-      y: 20,
-      transparent: true,
-      alwaysOnTop: true,
-      resizable: false,
-    },
-  );
-  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
-};
-
-export const closeRecorderOverlayWindow = async () => {
-  recordingOverlay?.close();
-};
-
-export const mouseEnterRecordingOverlay = async () => {
-  recordingOverlay?.setIgnoreMouseEvents(false);
-  console.log("enter");
-};
-export const mouseLeaveRecordingOverlay = async (e: any) => {
-  recordingOverlay?.setIgnoreMouseEvents(true, { forward: true });
-  console.log("leave", e);
 };

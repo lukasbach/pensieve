@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { useCallback } from "react";
-import { historyApi, mainApi } from "../api";
+import { historyApi, mainApi, recorderIpcApi } from "../api";
 import { blobToBuffer } from "../../utils";
 import { RecordingConfig, RecordingMeta } from "../../types";
 import { createRecorder } from "./create-recorder";
@@ -24,81 +24,108 @@ type RecorderState = {
   addScreenshot: (fileName: string) => void;
 };
 
-export const useRecorderState = create<RecorderState>()((set, get) => ({
-  recordingConfig: { recordScreenAudio: true },
-  meta: { started: new Date().toISOString() },
-  isRecording: false,
-  isPaused: false,
+export const useRecorderState = create<RecorderState>()((_set, get) => {
+  const set: typeof _set = (newState) => {
+    if (typeof newState === "function") {
+      _set((state) => {
+        const result = newState(state);
+        recorderIpcApi.setState({
+          meta: result.meta,
+          isRecording: result.isRecording,
+          isPaused: result.isPaused,
+        });
+        return result;
+      });
+      return;
+    }
 
-  getCurrentTime: () =>
-    new Date().getTime() - new Date(get().meta.started).getTime(),
+    _set(newState);
+    recorderIpcApi.setState({
+      meta: newState.meta,
+      isRecording: newState.isRecording,
+      isPaused: newState.isPaused,
+    });
+  };
 
-  setMeta: (meta: Partial<RecordingMeta>) =>
-    set({ meta: { ...get().meta, ...meta } }),
-  setConfig: (config) =>
-    set({ recordingConfig: { ...get().recordingConfig, ...config } }),
-  startRecording: async () => {
-    set({
-      recorder: await createRecorder(get().recordingConfig),
-      meta: { ...get().meta, started: new Date().toISOString() },
-      isRecording: true,
-      isPaused: false,
-    });
-  },
-  reset: async () =>
-    set({
-      recordingConfig: {
-        recordScreenAudio: true,
-        mic: (await navigator.mediaDevices.enumerateDevices()).find(
-          (d) => d.kind === "audioinput",
-        ),
-      },
-      recorder: undefined,
-      meta: undefined,
-      isRecording: false,
-      isPaused: false,
-    }),
-  pause: () => {
-    get().recorder?.mic?.pause();
-    get().recorder?.screen?.pause();
-    set({ isPaused: true });
-  },
-  resume: () => {
-    get().recorder?.mic?.resume();
-    get().recorder?.screen?.resume();
-    set({ isPaused: false });
-  },
-  addHighlight: () => {
-    set({
-      meta: {
-        ...get().meta,
-        highlights: [...(get().meta.highlights ?? []), get().getCurrentTime()],
-      },
-    });
-  },
-  addTimestampedNote: (note: string) => {
-    set({
-      meta: {
-        ...get().meta,
-        timestampedNotes: {
-          ...get().meta.timestampedNotes,
-          [get().getCurrentTime()]: note,
+  return {
+    recordingConfig: { recordScreenAudio: true },
+    meta: { started: new Date().toISOString() },
+    isRecording: false,
+    isPaused: false,
+
+    getCurrentTime: () =>
+      new Date().getTime() - new Date(get().meta.started).getTime(),
+
+    setMeta: (meta: Partial<RecordingMeta>) =>
+      set({ meta: { ...get().meta, ...meta } }),
+    setConfig: (config) =>
+      set({ recordingConfig: { ...get().recordingConfig, ...config } }),
+    startRecording: async () => {
+      set({
+        recorder: await createRecorder(get().recordingConfig),
+        meta: { ...get().meta, started: new Date().toISOString() },
+        isRecording: true,
+        isPaused: false,
+      });
+    },
+    reset: async () =>
+      set({
+        recordingConfig: {
+          recordScreenAudio: true,
+          mic: (await navigator.mediaDevices.enumerateDevices()).find(
+            (d) => d.kind === "audioinput",
+          ),
         },
-      },
-    });
-  },
-  addScreenshot: (url: string) => {
-    set({
-      meta: {
-        ...get().meta,
-        screenshots: {
-          ...get().meta.screenshots,
-          [get().getCurrentTime()]: url,
+        recorder: undefined,
+        meta: undefined,
+        isRecording: false,
+        isPaused: false,
+      }),
+    pause: () => {
+      get().recorder?.mic?.pause();
+      get().recorder?.screen?.pause();
+      set({ isPaused: true });
+    },
+    resume: () => {
+      get().recorder?.mic?.resume();
+      get().recorder?.screen?.resume();
+      set({ isPaused: false });
+    },
+    addHighlight: () => {
+      set({
+        meta: {
+          ...get().meta,
+          highlights: [
+            ...(get().meta.highlights ?? []),
+            get().getCurrentTime(),
+          ],
         },
-      },
-    });
-  },
-}));
+      });
+    },
+    addTimestampedNote: (note: string) => {
+      set({
+        meta: {
+          ...get().meta,
+          timestampedNotes: {
+            ...get().meta.timestampedNotes,
+            [get().getCurrentTime()]: note,
+          },
+        },
+      });
+    },
+    addScreenshot: (url: string) => {
+      set({
+        meta: {
+          ...get().meta,
+          screenshots: {
+            ...get().meta.screenshots,
+            [get().getCurrentTime()]: url,
+          },
+        },
+      });
+    },
+  };
+});
 
 const unpackMediaRecorder = async (
   recorder: MediaRecorder | null,

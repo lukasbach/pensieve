@@ -4,6 +4,7 @@ import {
   useStopRecording,
 } from "./state";
 import { useWindowedConfirm, useWindowedPromptText } from "../dialog/context";
+import { RecordingMeta } from "../../types";
 
 export const useInsessionControls = () => {
   const {
@@ -40,6 +41,7 @@ export const useInsessionControls = () => {
   };
 
   return {
+    // TODO rename to props of RecordingIpcEvents for consistency
     onAddTimestampedNote,
     onAbort,
     isPaused,
@@ -47,7 +49,7 @@ export const useInsessionControls = () => {
     resume,
     addHighlight,
     setMeta,
-    meta,
+    meta: meta as RecordingMeta | undefined,
     stopRecording,
     makeScreenshot,
   };

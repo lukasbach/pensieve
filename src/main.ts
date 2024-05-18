@@ -12,6 +12,7 @@ import * as settings from "./main/domain/settings";
 import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
+import { recorderIpcApi } from "./main/ipc/recorder-ipc";
 
 updateElectronApp();
 
@@ -45,6 +46,7 @@ app.whenReady().then(async () => {
   loadIpcInterfaceInMain("windows", windowsApi);
   loadIpcInterfaceInMain("history", historyApi);
   loadIpcInterfaceInMain("models", modelsApi);
+  loadIpcInterfaceInMain("recorderIpc", recorderIpcApi);
 
   searchIndex.initializeSearchIndex().then(() => {
     console.log("Search index initialized.");

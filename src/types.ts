@@ -69,7 +69,7 @@ export const defaultSettings = {
     dark: true,
     autoStart: true,
     trayRunningNotificationShown: false,
-    useOverlayTool: true,
+    useOverlayTool: true, // TODO setting and usage
   },
   llm: {
     enabled: true,
@@ -160,4 +160,21 @@ export type ScreenshotArea = {
   y: number;
   width: number;
   height: number;
+};
+
+export type RecordingIpcState = {
+  meta: RecordingMeta | undefined;
+  isRecording: boolean;
+  isPaused: boolean;
+};
+
+export type RecordingIpcEvents = {
+  addTimestampedNote: () => void;
+  addHighlight: () => void;
+  addScreenshot: () => void;
+  setMeta: (meta: Partial<RecordingMeta>) => void;
+  abort: () => void;
+  pause: () => void;
+  resume: () => void;
+  stop: () => void;
 };

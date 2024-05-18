@@ -16,8 +16,10 @@ import { RecordingActionButton } from "./recording-action-button";
 import { PageContent } from "../common/page-content";
 import { Timer } from "./timer";
 import { useInsessionControls } from "./use-insession-controls";
+import { useHostRecorderIpc } from "./use-host-recorder-ipc";
 
 export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
+  useHostRecorderIpc();
   const {
     isPaused,
     meta,
@@ -46,7 +48,7 @@ export const RecorderInsession = forwardRef<HTMLDivElement>((_, ref) => {
         <Badge style={{ minWidth: "3.5rem" }}>
           <HiOutlineClock />
           <Timer
-            start={(Date.now() - new Date(meta.started).getTime()) / 1000}
+            start={(Date.now() - new Date(meta?.started ?? 0).getTime()) / 1000}
           />
         </Badge>
       </Flex>

@@ -14,6 +14,20 @@ contextBridge.exposeInMainWorld("ipcApi", {
   history: {
     invoke: (payload: any) => ipcRenderer.invoke("history", payload),
   },
+  recorderIpc: {
+    invoke: (payload: any) => ipcRenderer.invoke("recorderIpc", payload),
+    onEvent: (type: string, listener: (...args: any[]) => void) => {
+      const handler = (_: unknown, event: { type: string; args: any[] }) => {
+        if (event.type === type) {
+          listener(...event.args);
+        }
+      };
+      ipcRenderer.on("recorderIpcEvent", handler);
+      return () => {
+        ipcRenderer.off("recorderIpcEvent", handler);
+      };
+    },
+  },
   onInvalidateUiKeys: (listener: (keys: string[]) => void) => {
     const handler = (_: unknown, keys: string[]) => {
       listener(keys);

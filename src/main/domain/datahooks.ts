@@ -13,7 +13,7 @@ Handlebars.registerHelper("relative", (value: string) =>
   relativeBase ? path.relative(path.dirname(relativeBase), value) : value,
 );
 Handlebars.registerHelper("pathsafe", (value: string) =>
-  value.replace(/[^a-z0-9]/gi, "_"),
+  value?.replace(/[^a-z0-9]/gi, "_"),
 );
 Handlebars.registerHelper("localeDateTime", (value: string) =>
   new Date(value).toLocaleString(),

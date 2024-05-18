@@ -25,7 +25,11 @@ export const History: FC = () => {
   });
   const { setSearch, searchResults, filter } = useSearch();
   const recordingList = useMemo(
-    () => Object.entries(recordings || {}),
+    () =>
+      Object.entries(recordings || {}).sort(
+        ([, a], [, b]) =>
+          new Date(b.started).getTime() - new Date(a.started).getTime(),
+      ),
     [recordings],
   );
 
@@ -48,9 +52,10 @@ export const History: FC = () => {
     "Date of the recording",
   );
 
-  const pinnedItems = recordingList
-    .filter(([, meta]) => meta.isPinned)
-    .filter(filter);
+  const pinnedItems = useMemo(
+    () => recordingList.filter(([, meta]) => meta.isPinned).filter(filter),
+    [filter, recordingList],
+  );
 
   return (
     <Box p="1rem">

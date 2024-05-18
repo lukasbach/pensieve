@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef } from "react";
 import { Badge, Box, Flex } from "@radix-ui/themes";
 import {
+  HiMiniArrowTopRightOnSquare,
   HiMiniPause,
   HiMiniPencilSquare,
   HiMiniPlay,
@@ -13,14 +14,14 @@ import {
 import { RiDraggable } from "react-icons/ri";
 import { MdScreenshotMonitor } from "react-icons/md";
 import { RecordingActionButton } from "../recorder/recording-action-button";
-import { useInsessionControls } from "../recorder/use-insession-controls";
 import styles from "./recorder-overlay.module.css";
 import { windowsApi } from "../api";
 import { Timer } from "../recorder/timer";
+import { useIpcInsessionControls } from "../recorder/use-ipc-insession-controls";
 
 export const RecorderOverlay: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const controls = useInsessionControls();
+  const controls = useIpcInsessionControls();
   useEffect(() => {
     document.body.style.background = "transparent";
     document.getElementById("root")!.style.background = "transparent";
@@ -43,7 +44,8 @@ export const RecorderOverlay: FC = () => {
         }}
         onMouseLeave={(e) => {
           if (containerRef.current?.contains(e.relatedTarget as Node)) return;
-          windowsApi.mouseLeaveRecordingOverlay(e.currentTarget.innerHTML);
+          windowsApi.mouseLeaveRecordingOverlay();
+          // TODO? windowsApi.mouseLeaveRecordingOverlay(e.currentTarget.innerHTML);
         }}
       >
         <Flex gap=".2rem" align="center">
@@ -95,6 +97,13 @@ export const RecorderOverlay: FC = () => {
             <HiOutlineStar size="24" />
           </RecordingActionButton>
           <RecordingActionButton
+            tooltip="Open the main window"
+            onClick={windowsApi.openMainWindowNormally}
+            inOverlay
+          >
+            <HiMiniArrowTopRightOnSquare size="24" />
+          </RecordingActionButton>
+          <RecordingActionButton
             tooltip="Abort the current recording without saving"
             onClick={controls.onAbort}
             inOverlay
@@ -113,8 +122,10 @@ export const RecorderOverlay: FC = () => {
             ) : (
               <Timer
                 start={
-                  (Date.now() - new Date(controls.meta.started).getTime()) /
-                  1000
+                  controls.meta &&
+                  (Date.now() -
+                    new Date(controls.meta?.started ?? 0).getTime()) /
+                    1000
                 }
               />
             )}
