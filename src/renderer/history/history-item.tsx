@@ -3,6 +3,7 @@ import { Badge, DropdownMenu, IconButton, Tooltip } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
+  HiMiniPencilSquare,
   HiOutlineCog8Tooth,
   HiOutlineDocumentText,
   HiOutlineFolderOpen,
@@ -18,7 +19,7 @@ import { PostProcessingStep, RecordingMeta } from "../../types";
 import { historyApi } from "../api";
 import { ListItem } from "../common/list-item";
 import { EntityTitle } from "../common/entity-title";
-import { useWindowedConfirm } from "../dialog/context";
+import { useWindowedConfirm, useWindowedPromptText } from "../dialog/context";
 import { HistoryItemIcon } from "./history-item-icon";
 
 const getSubtitle = ({
@@ -55,6 +56,11 @@ export const HistoryItem: FC<{
     "Delete recording",
     "Are you sure you want to delete this recording?",
   );
+  const promptRename = useWindowedPromptText(
+    "Rename recording",
+    "What should the name of the recording be?",
+    "Untitled Recording",
+  );
   const isNewDate = useMemo(() => {
     if (!priorItemDate) return true;
     return (
@@ -73,6 +79,13 @@ export const HistoryItem: FC<{
     },
     [id],
   );
+
+  const rename = useCallback(async () => {
+    const name = await promptRename(recording.name);
+    if (name) {
+      await historyApi.updateRecordingMeta(id, { name });
+    }
+  }, [id]);
 
   const duration = humanizer(recording.duration || 0, { maxDecimalPoints: 0 });
 
@@ -143,6 +156,9 @@ export const HistoryItem: FC<{
               disabled={!recording.isPostProcessed || isProcessing}
             >
               <HiArrowTopRightOnSquare /> Open Recording
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onClick={rename}>
+              <HiMiniPencilSquare /> Rename
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={() =>
