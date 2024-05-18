@@ -14,118 +14,139 @@ export const TranscriptItem = memo<{
   meta: RecordingMeta;
   updateMeta: (update: Partial<RecordingMeta>) => Promise<void>;
   recordingId: string;
-}>(({ item, priorItem, nextItem, audio, meta, updateMeta, recordingId }) => {
-  const text = item.text.trim();
-  const time = new Date();
-  time.setMilliseconds(item.offsets.from);
-  const isProgressAtItem =
-    audio.progress !== 0 &&
-    audio.progress * 1000 >= item.offsets.from &&
-    audio.progress * 1000 < item.offsets.to;
-  const priorRange = useMemo(
-    () =>
-      [
-        priorItem?.offsets.from ?? Number.MIN_SAFE_INTEGER,
-        item.offsets.from,
-      ] as const,
-    [item.offsets.from, priorItem?.offsets.from],
-  );
-  const nextRange = useMemo(
-    () =>
-      [
-        item.offsets.to,
-        nextItem?.offsets.to ?? Number.MAX_SAFE_INTEGER,
-      ] as const,
-    [item.offsets.to, nextItem?.offsets.to],
-  );
+  index: number;
+}>(
+  ({
+    index,
+    item,
+    priorItem,
+    nextItem,
+    audio,
+    meta,
+    updateMeta,
+    recordingId,
+  }) => {
+    const text = item.text.trim();
+    const time = new Date();
+    time.setMilliseconds(item.offsets.from);
+    const isProgressAtItem =
+      audio.progress !== 0 &&
+      audio.progress * 1000 >= item.offsets.from &&
+      audio.progress * 1000 < item.offsets.to;
+    const priorRange = useMemo(
+      () =>
+        [
+          priorItem?.offsets.from ?? Number.MIN_SAFE_INTEGER,
+          item.offsets.from,
+        ] as const,
+      [item.offsets.from, priorItem?.offsets.from],
+    );
+    const nextRange = useMemo(
+      () =>
+        [
+          item.offsets.to,
+          nextItem?.offsets.to ?? Number.MAX_SAFE_INTEGER,
+        ] as const,
+      [item.offsets.to, nextItem?.offsets.to],
+    );
 
-  const isHighlighted = useMemo(
-    () => meta.highlights?.some((time) => isInRange(time, priorRange)),
-    [meta.highlights, priorRange],
-  );
+    const isHighlighted = useMemo(
+      () => meta.highlights?.some((time) => isInRange(time, priorRange)),
+      [meta.highlights, priorRange],
+    );
 
-  const timeText = useMemo(() => {
-    const min = Math.floor(item.offsets.from / 60000)
-      .toString()
-      .padStart(2, "0");
-    const sec = Math.floor((item.offsets.from % 60000) / 1000)
-      .toString()
-      .padStart(2, "0");
-    return `${min}:${sec}`;
-  }, [item.offsets.from]);
+    const timeText = useMemo(() => {
+      const min = Math.floor(item.offsets.from / 60000)
+        .toString()
+        .padStart(2, "0");
+      const sec = Math.floor((item.offsets.from % 60000) / 1000)
+        .toString()
+        .padStart(2, "0");
+      return `${min}:${sec}`;
+    }, [item.offsets.from]);
 
-  const onTogglePlaying = useEvent(() => {
-    if (audio.isPlaying && isProgressAtItem) {
-      audio.pause();
-    } else {
-      audio.jump(item.offsets.from / 1000);
-      audio.play();
-    }
-  });
-
-  const onToggleHighlight = useEvent(() => {
-    if (isHighlighted) {
-      updateMeta({
-        highlights: meta.highlights?.filter(
-          (time) => !isInRange(time, priorRange),
-        ),
-      });
-    } else {
-      updateMeta({
-        highlights: [...(meta.highlights ?? []), item.offsets.from - 0.1],
-      });
-    }
-  });
-
-  const timestampedNotes = useMemo(
-    () =>
-      (Object.entries(meta.timestampedNotes ?? {}) as any as [number, string][])
-        .filter(([time]) => isInRange(time, nextRange))
-        .map(([time, note]) => ({ time, note })),
-    [meta.timestampedNotes, nextRange],
-  );
-
-  const screenshots = useMemo(
-    () =>
-      (Object.entries(meta.screenshots ?? {}) as any as [number, string][])
-        .filter(
-          ([time], idx) =>
-            isInRange(time, nextRange) || (idx === 0 && time < nextRange[0]),
-        )
-        .map(([time, file]) => ({ time, file })),
-    [meta.screenshots, nextRange],
-  );
-
-  const nextItems = useMemo(
-    () => (
-      <>
-        {timestampedNotes.map(({ time, note }) => (
-          <TimeframedComment note={note} key={time} />
-        ))}
-        {screenshots.map(({ file }) => (
-          <Screenshot url={`screenshot://${recordingId}/${file}`} key={file} />
-        ))}
-      </>
-    ),
-    [timestampedNotes, screenshots, recordingId],
-  );
-
-  return (
-    <TranscriptItemUi
-      key={item.timestamps.from}
-      text={text}
-      speaker={item.speaker}
-      isProgressAtItem={isProgressAtItem}
-      isAudioPlaying={audio.isPlaying}
-      isHighlighted={!!isHighlighted}
-      isNewSpeaker={
-        item.speaker !== priorItem?.speaker || text.startsWith("- ")
+    const onTogglePlaying = useEvent(() => {
+      if (audio.isPlaying && isProgressAtItem) {
+        audio.pause();
+      } else {
+        audio.jump(item.offsets.from / 1000);
+        audio.play();
       }
-      timeText={timeText}
-      time={item.offsets.from}
-      onTogglePlaying={onTogglePlaying}
-      onToggleHighlight={onToggleHighlight}
-      nextItems={nextItems}
-    />
-  );
-});
+    });
+
+    const onToggleHighlight = useEvent(() => {
+      if (isHighlighted) {
+        updateMeta({
+          highlights: meta.highlights?.filter(
+            (time) => !isInRange(time, priorRange),
+          ),
+        });
+      } else {
+        updateMeta({
+          highlights: [...(meta.highlights ?? []), item.offsets.from - 0.1],
+        });
+      }
+    });
+
+    const timestampedNotes = useMemo(
+      () =>
+        (
+          Object.entries(meta.timestampedNotes ?? {}) as any as [
+            number,
+            string,
+          ][]
+        )
+          .filter(([time]) => isInRange(time, nextRange))
+          .map(([time, note]) => ({ time, note })),
+      [meta.timestampedNotes, nextRange],
+    );
+
+    const screenshots = useMemo(
+      () =>
+        (Object.entries(meta.screenshots ?? {}) as any as [number, string][])
+          .filter(
+            ([time], idx) =>
+              isInRange(time, nextRange) ||
+              (idx === 0 && index === 0 && time < nextRange[0]),
+          )
+          .map(([time, file]) => ({ time, file })),
+      [meta.screenshots, nextRange],
+    );
+
+    const nextItems = useMemo(
+      () => (
+        <>
+          {timestampedNotes.map(({ time, note }) => (
+            <TimeframedComment note={note} key={time} />
+          ))}
+          {screenshots.map(({ file }) => (
+            <Screenshot
+              url={`screenshot://${recordingId}/${file}`}
+              key={file}
+            />
+          ))}
+        </>
+      ),
+      [timestampedNotes, screenshots, recordingId],
+    );
+
+    return (
+      <TranscriptItemUi
+        key={item.timestamps.from}
+        text={text}
+        speaker={item.speaker}
+        isProgressAtItem={isProgressAtItem}
+        isAudioPlaying={audio.isPlaying}
+        isHighlighted={!!isHighlighted}
+        isNewSpeaker={
+          item.speaker !== priorItem?.speaker || text.startsWith("- ")
+        }
+        timeText={timeText}
+        time={item.offsets.from}
+        onTogglePlaying={onTogglePlaying}
+        onToggleHighlight={onToggleHighlight}
+        nextItems={nextItems}
+      />
+    );
+  },
+);

@@ -24,6 +24,7 @@ export const Transscript: FC<{
           priorItem={transcript.transcription[index - 1]}
           nextItem={transcript.transcription[index + 1]}
           recordingId={recordingId}
+          index={index}
         />
       ))}
     </Box>
