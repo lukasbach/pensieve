@@ -69,7 +69,7 @@ export const defaultSettings = {
     dark: true,
     autoStart: true,
     trayRunningNotificationShown: false,
-    useOverlayTool: true, // TODO setting and usage
+    useOverlayTool: true,
   },
   llm: {
     enabled: true,

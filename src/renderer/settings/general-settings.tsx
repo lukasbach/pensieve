@@ -40,6 +40,13 @@ export const GeneralSettings: FC = () => {
         onCheckedChange={(value) => mainApi.setAutoStart(value)}
       />
 
+      <SettingsSwitchField
+        form={form}
+        field="ui.useOverlayTool"
+        label="Use Recording overlay"
+        description="When the Pensieve window is closed during recordings, a small overlay will be displayed to control the recording."
+      />
+
       <SettingsTextField
         label="Recordings folder"
         description="The folder on your computer where recording data is stored."

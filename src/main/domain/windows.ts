@@ -60,6 +60,10 @@ export const openAppWindow = (
 };
 
 export const openRecorderOverlayWindow = async () => {
+  if (!(await getSettings()).ui.useOverlayTool) {
+    return;
+  }
+
   const width = 360;
 
   if (recordingOverlay && !recordingOverlay.isDestroyed()) {
