@@ -24,9 +24,10 @@ const createScreenRecorder = async () => {
       },
     },
   });
-  // displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
+  displayMedia.getVideoTracks().forEach((t) => displayMedia.removeTrack(t));
   const screen = new MediaRecorder(displayMedia, {
-    mimeType: "video/webm",
+    mimeType: "audio/webm",
+    videoBitsPerSecond: 0,
   });
   screen.start();
   return screen;
