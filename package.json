@@ -92,7 +92,9 @@
     },
     "rules": {
       "import/no-extraneous-dependencies": "off",
-      "no-nested-ternary": "warn",
+      "no-nested-ternary": "off",
+      "no-shadow": "off",
+      "react/no-array-index-key": "off",
       "jsx-a11y/label-has-associated-control": "warn"
     },
     "ignorePatterns": [

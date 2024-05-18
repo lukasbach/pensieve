@@ -34,7 +34,6 @@ export const SettingsScreen: FC = () => {
 
   const handleSubmit = useDebouncedCallback(
     () => {
-      console.log("SAVE", form.getValues());
       mainApi.saveSettings(form.getValues());
       setHasSaved((old) => {
         if (!old) {

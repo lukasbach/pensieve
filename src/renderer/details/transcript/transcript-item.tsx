@@ -110,7 +110,7 @@ export const TranscriptItem = memo<{
               (idx === 0 && index === 0 && time < nextRange[0]),
           )
           .map(([time, file]) => ({ time, file })),
-      [meta.screenshots, nextRange],
+      [index, meta.screenshots, nextRange],
     );
 
     const nextItems = useMemo(

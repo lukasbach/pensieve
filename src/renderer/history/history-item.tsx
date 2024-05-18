@@ -85,7 +85,7 @@ export const HistoryItem: FC<{
     if (name) {
       await historyApi.updateRecordingMeta(id, { name });
     }
-  }, [id]);
+  }, [id, promptRename, recording.name]);
 
   const duration = humanizer(recording.duration || 0, { maxDecimalPoints: 0 });
 
