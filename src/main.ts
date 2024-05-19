@@ -105,7 +105,7 @@ app.whenReady().then(async () => {
   });
 
   windows.initializeMainWindow();
-  if (!process.argv.join(" ").includes("--autostart")) {
+  if (!process.argv.join(" ").includes("hidden")) {
     windows.openMainWindowNormally();
   }
   registerTray();
