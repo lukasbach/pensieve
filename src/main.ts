@@ -16,6 +16,19 @@ import { recorderIpcApi } from "./main/ipc/recorder-ipc";
 
 updateElectronApp();
 
+const lock = app.requestSingleInstanceLock();
+if (!lock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    const mainWindow = windows.getMainWindow();
+    if (!mainWindow) return;
+    if (!windows.isMainWindowOpen()) windows.openMainWindowNormally();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
+}
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // eslint-disable-next-line global-require
 if (require("electron-squirrel-startup")) {
