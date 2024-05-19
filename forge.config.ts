@@ -39,6 +39,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({
       loadingGif: path.join(__dirname, "splash.gif"),
+      setupIcon: "./extra/icon@8x.ico",
     }),
     // new MakerAppX({}),
     new MakerZIP({}, ["darwin"]),
