@@ -3,6 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import { app } from "electron";
 import { https } from "follow-redirects";
+import log from "electron-log/main";
 import { modelData } from "../../model-data";
 import { getSettings } from "./settings";
 import * as postprocess from "./postprocess";
@@ -28,15 +29,16 @@ export const downloadModel = async (url: string, modelFile: string) => {
       res.on("data", (chunk) => {
         downloaded += chunk.length;
         postprocess.setProgress("modelDownload", downloaded / length);
-        console.log("Downloading model", downloaded / length);
       });
       file.on("finish", () => {
         file.close();
+        log.info(`Downloaded model ${url} to ${modelFile}`);
         resolve();
       });
     });
     req.on("error", (err) => {
       fs.unlink(path.join(modelFolder, modelFile), () => {
+        log.error(`Failed to download model ${url} to ${modelFile}`);
         reject(err);
       });
     });

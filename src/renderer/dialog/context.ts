@@ -50,7 +50,6 @@ const useWindowedDialog: typeof useDialog = () => {
         ...dialog,
         onSubmit: undefined,
       });
-      console.log("!!", value);
       setDialog(null);
       setId(undefined);
       if (value) {

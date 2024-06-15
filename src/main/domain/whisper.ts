@@ -1,4 +1,5 @@
 import path from "path";
+import log from "electron-log/main";
 import {
   buildArgs,
   getExtraResourcesFolder,
@@ -49,7 +50,7 @@ export const processWavFile = async (
     m: getModelPath(modelId),
   });
 
-  console.log(whisperPath, args);
+  log.info("Processing wav file", whisperPath, args);
 
   const process = runner.execute(whisperPath, args);
   process.stdout?.on("data", (data) => {
@@ -62,7 +63,7 @@ export const processWavFile = async (
     if (duration > 0) {
       postprocess.setProgress("whisper", duration / inputTime);
     }
-    console.log("Whisper:", duration / inputTime);
   });
   await process;
+  log.info("Processed Wav File");
 };

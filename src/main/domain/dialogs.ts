@@ -1,4 +1,5 @@
 import { BrowserWindow } from "electron";
+import log from "electron-log/main";
 import * as windows from "./windows";
 import { DialogData } from "../../renderer/dialog/context";
 
@@ -32,7 +33,7 @@ export const createDialog = <T>(id: string, dialog: DialogData<T>) => {
 
 export const submitDialogData = (id: string, value: any) => {
   // dialogs[id].data.onSubmit?.(value);
-  console.log("submitDialogData: ", value);
+  log.info("submitDialogData: ", value);
   dialogs[id].resolve(value);
   dialogs[id].value = value;
   dialogs[id].win.close();

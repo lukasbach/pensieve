@@ -3,6 +3,7 @@ import path from "path";
 import fsExtra from "fs-extra";
 import { execaCommand } from "execa";
 import * as os from "node:os";
+import log from "electron-log/main";
 import { PostProcessingJob } from "../../types";
 import { getSettings } from "./settings";
 import * as history from "./history";
@@ -72,7 +73,7 @@ export const runDatahooks = async (job: PostProcessingJob) => {
   } as any;
   const assets: string[] = [];
 
-  console.log("Using parameters", globalParams);
+  log.info("Datahooks using parameters", globalParams);
 
   const mp3 = path.join(
     await history.getRecordingsFolder(),

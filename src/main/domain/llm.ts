@@ -7,6 +7,7 @@ import { Document } from "@langchain/core/documents";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { ChatOllama } from "@langchain/community/chat_models/ollama";
+import log from "electron-log/main";
 import * as settings from "./settings";
 import { RecordingTranscript, Settings } from "../../types";
 import { isNotNull } from "../../utils";
@@ -41,7 +42,7 @@ const parseActionItems = (text: string) => {
     .map((line) => {
       const match = line.match(/^(.*?): (.*) \((\d*)\)$/);
       if (!match) {
-        console.log("Ignoring invalid action item line:", line);
+        log.warn("Ignoring invalid action item line:", line);
         return null;
       }
       return {

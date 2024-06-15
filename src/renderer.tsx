@@ -7,8 +7,8 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
+import log from "electron-log/renderer";
 import { router } from "./renderer/router/router";
-
 import "@radix-ui/themes/styles.css";
 import { FC, PropsWithChildren, useEffect } from "react";
 import { QueryKeys } from "./query-keys";
@@ -17,7 +17,7 @@ import { DialogProvider } from "./renderer/dialog/dialog-provider";
 
 const queryClient = new QueryClient();
 (window as any).ipcApi.onInvalidateUiKeys((keys: string[]) => {
-  console.log("Update", keys);
+  log.info("UI Update", keys);
   queryClient.invalidateQueries({ queryKey: keys });
 });
 

@@ -7160,6 +7160,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"electron-log@npm:^5.1.5":
+  version: 5.1.5
+  resolution: "electron-log@npm:5.1.5"
+  checksum: 10/8a6f31f7c3f18fe7c594cb29d18bfb4ab100860170c579a3cdb1f710aa8e6283b9aee60ec7de9cd6f803e70831e00333298f48e74d69c089117d28b6e1506bef
+  languageName: node
+  linkType: hard
+
 "electron-squirrel-startup@npm:^1.0.0":
   version: 1.0.0
   resolution: "electron-squirrel-startup@npm:1.0.0"
@@ -12163,6 +12170,7 @@ __metadata:
     cpy-cli: "npm:^5.0.0"
     deepmerge: "npm:^4.3.1"
     electron: "npm:29.1.5"
+    electron-log: "npm:^5.1.5"
     electron-squirrel-startup: "npm:^1.0.0"
     eslint: "npm:^8.57.0"
     eslint-plugin-import: "npm:^2.25.0"

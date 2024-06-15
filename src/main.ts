@@ -2,6 +2,7 @@ import { app, protocol } from "electron";
 import path from "path";
 import fs from "fs-extra";
 import { updateElectronApp } from "update-electron-app";
+import log from "electron-log/main";
 import { loadIpcInterfaceInMain } from "./main/ipc/ipc-connector";
 import { mainApi } from "./main/ipc/main-api";
 import { modelsApi } from "./main/ipc/models-api";
@@ -13,6 +14,8 @@ import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
+
+log.initialize({ spyRendererConsole: true });
 
 updateElectronApp();
 
@@ -62,7 +65,7 @@ app.whenReady().then(async () => {
   loadIpcInterfaceInMain("recorderIpc", recorderIpcApi);
 
   searchIndex.initializeSearchIndex().then(() => {
-    console.log("Search index initialized.");
+    log.info("Search index initialized.");
   });
 
   if (!settings.existsSettingsFile()) {
