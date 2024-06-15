@@ -108,7 +108,12 @@ app.whenReady().then(async () => {
   });
 
   windows.initializeMainWindow();
-  if (!process.argv.join(" ").includes("hidden")) {
+
+  const hidden = process.argv.join(" ").includes("hidden");
+  log.info(
+    `App ready, running ${hidden ? "hidden" : "normally"}. Args: ${process.argv.join(" ")}`,
+  );
+  if (!hidden) {
     windows.openMainWindowNormally();
   }
   registerTray();
