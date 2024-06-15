@@ -7,16 +7,21 @@ export const registerTray = () => {
   const tray = new Tray(getIconPath());
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: "Open", type: "normal", click: windows.openMainWindowNormally },
+    {
+      label: "Open",
+      type: "normal",
+      click: () => windows.openMainWindowNormally(),
+    },
     // { label: "Start recording", type: "normal", click: () => {} },
     {
       label: "Settings",
       type: "normal",
       click: () => windowsApi.openSettingsWindow(),
     },
-    { label: "Close", type: "normal", click: app.quit },
+    { label: "Close", type: "normal", click: () => app.quit() },
   ]);
 
   tray.setContextMenu(contextMenu);
   tray.on("click", windows.openMainWindowAsTray);
+  tray.on("double-click", windows.openMainWindowNormally);
 };
