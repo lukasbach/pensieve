@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Box, Flex } from "@radix-ui/themes";
 import * as Tabs from "@radix-ui/react-tabs";
 import { useQuery } from "@tanstack/react-query";
@@ -32,6 +32,11 @@ export const SettingsScreen: FC = () => {
   const form = useForm<Settings>({ values, mode: "onChange" });
   const [hasSaved, setHasSaved] = useState(false);
 
+  const flushSubmit = useCallback(
+    () => mainApi.saveSettings(form.getValues()),
+    [form],
+  );
+
   const handleSubmit = useDebouncedCallback(
     () => {
       mainApi.saveSettings(form.getValues());
@@ -48,7 +53,10 @@ export const SettingsScreen: FC = () => {
     10000,
   );
 
-  useEffect(() => handleSubmit, [handleSubmit]);
+  useEffect(() => {
+    window.addEventListener("beforeunload", flushSubmit);
+    return () => window.removeEventListener("beforeunload", flushSubmit);
+  }, [flushSubmit]);
 
   return (
     <PageContainer
