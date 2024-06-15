@@ -39,3 +39,9 @@ and summarization, or various audio processing settings.
         Download the latest release
     </a>
 </div>
+
+## Issue reporting
+
+If you encounter any issues or bugs with Pensieve, please report them as issue.
+Please provide the log files from your local installation, which is stored in
+the `%USERPROFILE%\AppData\Roaming\Pensieve\logs\main.log` folder.
