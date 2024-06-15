@@ -44,10 +44,8 @@ export const saveRecording = async (recording: RecordingData) => {
     ...recording.meta,
   };
 
-  const folder = path.join(
-    await getRecordingsFolder(),
-    `${started.getFullYear()}-${started.getMonth() + 1}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`,
-  );
+  const recordingId = `${started.getFullYear()}-${started.getMonth() + 1}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`;
+  const folder = path.join(await getRecordingsFolder(), recordingId);
   await fs.ensureDir(folder);
   if (recording.mic) {
     await fs.writeFile(
@@ -76,17 +74,15 @@ export const saveRecording = async (recording: RecordingData) => {
   invalidateUiKeys(QueryKeys.History);
 
   if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue({ recordingId: folder });
+    postprocess.addToQueue({ recordingId });
     postprocess.startQueue();
   }
 };
 
 export const importRecording = async (file: string, meta: RecordingMeta) => {
   const date = new Date(meta.started);
-  const folder = path.join(
-    await getRecordingsFolder(),
-    `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`,
-  );
+  const recordingId = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+  const folder = path.join(await getRecordingsFolder(), recordingId);
   await fs.ensureDir(folder);
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
   const fullMeta: RecordingMeta = {
@@ -101,7 +97,7 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   invalidateUiKeys(QueryKeys.History);
 
   if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue({ recordingId: folder });
+    postprocess.addToQueue({ recordingId });
     postprocess.startQueue();
   }
 };

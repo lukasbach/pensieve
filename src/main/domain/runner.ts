@@ -1,4 +1,5 @@
 import { ExecaChildProcess, Options, execa } from "execa";
+import log from "electron-log/main";
 
 const processes = new Set<ExecaChildProcess<any>>();
 
@@ -13,6 +14,7 @@ export const execute = (
   args?: readonly string[],
   options?: Options,
 ): ExecaChildProcess => {
+  log.info(`Running execa on ${file}, with args: [${args?.join(",")}]`);
   const process = execa(file, args, options);
   processes.add(process);
   return process;
