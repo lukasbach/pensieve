@@ -11,7 +11,7 @@ const updateExe = path.resolve(
 const exeName = path.basename(process.execPath);
 
 export const mainApi = {
-  getAppVersion: async () => process.env.npm_package_version,
+  getAppVersion: async () => app.getVersion(),
 
   getSources: async () => {
     return desktopCapturer.getSources({ types: ["window"] });
