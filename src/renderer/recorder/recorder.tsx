@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 
-import { forwardRef, useEffect } from "react";
+import { forwardRef } from "react";
 import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
@@ -23,13 +23,13 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     recorder,
     meta,
     setMeta,
-    reset,
   } = useRecorderState();
 
-  useEffect(() => {
-    reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // not sure why that was needed?
+  // useEffect(() => {
+  //   reset();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   if (recorder) {
     return <RecorderInsession ref={ref} />;
