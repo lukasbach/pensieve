@@ -115,6 +115,8 @@ app.whenReady().then(async () => {
   );
   if (!hidden) {
     windows.openMainWindowNormally();
+  } else {
+    windows.hideMainWindow();
   }
   registerTray();
 });
