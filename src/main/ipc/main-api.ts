@@ -30,6 +30,11 @@ export const mainApi = {
     });
   },
 
+  openLogFiles: async () => {
+    const folder = path.join(app.getPath("userData"), "logs");
+    await shell.openPath(folder);
+  },
+
   openWeb: async (url: string) => {
     await shell.openExternal(url);
   },

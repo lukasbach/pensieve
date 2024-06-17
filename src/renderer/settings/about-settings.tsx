@@ -4,6 +4,7 @@ import { Box, Button, Heading } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
 import { SiGithub, SiGithubsponsors } from "react-icons/si";
 import { GoIssueOpened } from "react-icons/go";
+import { HiOutlineFolderOpen } from "react-icons/hi2";
 import { SettingsField } from "./settings-field";
 import { SettingsTab } from "./tabs";
 import { mainApi } from "../api";
@@ -53,7 +54,7 @@ export const AboutSettings: FC = () => {
 
       <SettingsField
         label="Bug Tracker"
-        description="If you experience issues with Pensieve, you can report them on GitHub."
+        description="If you experience issues with Pensieve, you can report them on GitHub. Please attach logs if possible."
       >
         <Box>
           <Button
@@ -65,6 +66,23 @@ export const AboutSettings: FC = () => {
             }}
           >
             <GoIssueOpened /> Report an Issue
+          </Button>
+        </Box>
+      </SettingsField>
+
+      <SettingsField
+        label="Log Files"
+        description="Open the folder containing the log files."
+      >
+        <Box>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              mainApi.openLogFiles();
+            }}
+          >
+            <HiOutlineFolderOpen /> Log Files
           </Button>
         </Box>
       </SettingsField>
