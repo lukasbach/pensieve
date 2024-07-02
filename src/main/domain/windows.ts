@@ -24,6 +24,7 @@ export const openAppWindow = (
   hash: string,
   query?: Record<string, string>,
   options?: Electron.BrowserWindowConstructorOptions,
+  hidden?: boolean,
 ) => {
   // Create the browser window.
   const win = new BrowserWindow({
@@ -55,7 +56,9 @@ export const openAppWindow = (
       { hash, query },
     );
   }
-  setTimeout(() => win.show(), 200);
+  if (!hidden) {
+    setTimeout(() => win.show(), 200);
+  }
   return win;
 };
 
@@ -109,6 +112,7 @@ export const initializeMainWindow = () => {
     "/",
     { isMainWindow: "true", tray: "false" },
     { width: 500, height: 700 },
+    true,
   );
   mainWindow.hide();
 
