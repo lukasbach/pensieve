@@ -10,9 +10,20 @@ import { QueryKeys } from "../../query-keys";
 const settingsFile = path.join(app.getPath("userData"), "settings.json");
 let cachedSettings: Settings | null = null;
 
+const readSettings = async (
+  fallback: Settings | {},
+): Promise<Settings | {}> => {
+  try {
+    return fs.existsSync(settingsFile) ? await fs.readJSON(settingsFile) : {};
+  } catch (e) {
+    console.error("Error reading settings file, using fallback", e);
+    return fallback;
+  }
+};
+
 export const initSettingsFile = async () => {
   if (!fs.existsSync(settingsFile)) {
-    await fs.writeJSON(settingsFile, {});
+    await fs.promises.writeFile(settingsFile, "{}", { encoding: "utf-8" });
   }
 };
 
@@ -24,15 +35,14 @@ export const getSettings = async () => {
   }
 
   try {
-    const settings = fs.existsSync(settingsFile)
-      ? await fs.readJSON(settingsFile)
-      : {};
-    const merged = deepmerge(defaultSettings, settings);
-
+    const merged = deepmerge(defaultSettings, await readSettings({}));
     cachedSettings = merged;
     return merged;
   } catch (e) {
-    console.error("Error reading settings file, using default settings", e);
+    console.error(
+      "Error merging settings while reading, using default settings",
+      e,
+    );
     return defaultSettings;
   }
 };
@@ -41,9 +51,7 @@ export const saveSettings = async (partialSettings: DeepPartial<Settings>) => {
   if (partialSettings.core?.recordingsFolder) {
     await fs.ensureDir(partialSettings.core.recordingsFolder);
   }
-  const settings = fs.existsSync(settingsFile)
-    ? await fs.readJSON(settingsFile)
-    : {};
+  const settings = await readSettings({});
   const merged = deepmerge(settings, partialSettings);
   await fs.writeJSON(settingsFile, merged, {
     spaces: 2,
