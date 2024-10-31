@@ -1,3 +1,4 @@
+import React from "react";
 import { FC } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -12,11 +13,39 @@ import { SettingsTab } from "./tabs";
 
 export const OpenAiSettings: FC = () => {
   const form = useFormContext<Settings>();
+
+  const useCustomUrl = form.watch("llm.providerConfig.openai.useCustomUrl");
+
+  // Set baseUrl to undefined when useCustomUrl is unselected
+  React.useEffect(() => {
+    if (!useCustomUrl) {
+      form.setValue("llm.providerConfig.openai.chatModel.baseUrl", undefined);
+    }
+  }, [useCustomUrl, form]);
+
   return (
     <>
       <Heading mt="4rem" as="h2" size="4">
         OpenAI ChatGPT Settings
       </Heading>
+
+      <SettingsSwitchField
+        label="Use Custom Endpoint"
+        description="Use a custom OpenAI compatible endpoint instead of the official OpenAI API"
+        form={form}
+        field="llm.providerConfig.openai.useCustomUrl"
+      />
+
+      {useCustomUrl && (
+        <SettingsTextField
+          label="Base URL"
+          {...form.register("llm.providerConfig.openai.chatModel.baseUrl", {
+            required: "Base URL is required when using a custom endpoint",
+            validate: (value) =>
+              value === "" ? "Base URL cannot be empty" : true,
+          })}
+        />
+      )}
 
       <SettingsTextField
         label="API Key"
@@ -24,40 +53,54 @@ export const OpenAiSettings: FC = () => {
         {...form.register("llm.providerConfig.openai.chatModel.apiKey")}
       />
 
-      <SettingsSelectField
-        label="Chat Model"
-        field="llm.providerConfig.openai.chatModel.model"
-        form={form}
-        values={[
-          "gpt-4o",
-          "gpt-4-turbo",
-          "gpt-4-turbo-preview",
-          "gpt-4-0125-preview",
-          "gpt-4-1106-preview",
-          "gpt-4",
-          "gpt-4-0613",
-          "gpt-4-32k",
-          "gpt-4-32k-0613",
-          "gpt-3.5-turbo",
-          "gpt-3.5-turbo-0125",
-          "gpt-3.5-turbo-1106",
-          "gpt-3.5-turbo-instruct",
-          "gpt-3.5-turbo-16k",
-          "gpt-3.5-turbo-0613",
-          "gpt-3.5-turbo-16k-0613",
-        ]}
-      />
+      {form.watch("llm.providerConfig.openai.useCustomUrl") ? (
+        <SettingsTextField
+          label="Chat Model"
+          {...form.register("llm.providerConfig.openai.chatModel.model")}
+        />
+      ) : (
+        <SettingsSelectField
+          label="Chat Model"
+          field="llm.providerConfig.openai.chatModel.model"
+          form={form}
+          values={[
+            "gpt-4o",
+            "gpt-4-turbo",
+            "gpt-4-turbo-preview",
+            "gpt-4-0125-preview",
+            "gpt-4-1106-preview",
+            "gpt-4",
+            "gpt-4-0613",
+            "gpt-4-32k",
+            "gpt-4-32k-0613",
+            "gpt-3.5-turbo",
+            "gpt-3.5-turbo-0125",
+            "gpt-3.5-turbo-1106",
+            "gpt-3.5-turbo-instruct",
+            "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-0613",
+            "gpt-3.5-turbo-16k-0613",
+          ]}
+        />
+      )}
 
-      <SettingsSelectField
-        label="Embeddings Model"
-        field="llm.providerConfig.openai.embeddings.model"
-        form={form}
-        values={[
-          "text-embedding-3-large",
-          "text-embedding-3-small",
-          "text-embedding-ada-002",
-        ]}
-      />
+      {form.watch("llm.providerConfig.openai.useCustomUrl") ? (
+        <SettingsTextField
+          label="Embeddings Model"
+          {...form.register("llm.providerConfig.openai.embeddings.model")}
+        />
+      ) : (
+        <SettingsSelectField
+          label="Embeddings Model"
+          field="llm.providerConfig.openai.embeddings.model"
+          form={form}
+          values={[
+            "text-embedding-3-large",
+            "text-embedding-3-small",
+            "text-embedding-ada-002",
+          ]}
+        />
+      )}
 
       <SettingsTextField
         label="Embedding Dimensions"

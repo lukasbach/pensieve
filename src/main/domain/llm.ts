@@ -60,8 +60,9 @@ const getChatModel = async () => {
     case "ollama":
       await pullModel(llm.providerConfig.ollama.chatModel.model);
       return new ChatOllama(llm.providerConfig.ollama.chatModel);
-    case "openai":
+    case "openai": {
       return new ChatOpenAI(llm.providerConfig.openai.chatModel);
+    }
     default:
       throw new Error(`Invalid LLM provider: ${llm.provider}`);
   }
