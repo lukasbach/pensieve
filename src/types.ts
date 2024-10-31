@@ -92,8 +92,10 @@ export const defaultSettings = {
         },
       },
       openai: {
+        useCustomUrl: false,
         chatModel: {
           apiKey: "YOUR_API_KEY",
+          baseUrl: undefined,
           model: "gpt-3.5-turbo",
         },
         embeddings: {
