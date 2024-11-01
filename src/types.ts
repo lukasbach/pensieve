@@ -95,8 +95,10 @@ export const defaultSettings = {
         useCustomUrl: false,
         chatModel: {
           apiKey: "YOUR_API_KEY",
-          baseUrl: undefined,
           model: "gpt-3.5-turbo",
+          configuration: {
+              baseURL: undefined
+          }
         },
         embeddings: {
           model: "text-embedding-3-large",
