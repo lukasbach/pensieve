@@ -14,6 +14,7 @@ import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
+import started from "electron-squirrel-startup";
 
 log.initialize({ spyRendererConsole: true });
 
@@ -34,7 +35,7 @@ if (!lock) {
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // eslint-disable-next-line global-require
-if (require("electron-squirrel-startup")) {
+if (started) {
   app.quit();
 }
 

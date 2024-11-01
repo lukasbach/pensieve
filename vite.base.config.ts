@@ -10,9 +10,6 @@ export const builtins = [
 
 export const external = [
   ...builtins,
-  ...Object.keys(
-    "dependencies" in pkg ? (pkg.dependencies as Record<string, unknown>) : {},
-  ),
 ];
 
 export function getBuildConfig(env: ConfigEnv<"build">): UserConfig {
