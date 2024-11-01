@@ -148,9 +148,7 @@ export const OllamaSettings: FC = () => {
 
       <SettingsTextField
         label="Base URL"
-        {...form.register(
-          "llm.providerConfig.ollama.chatModel.configuration.baseURL",
-        )}
+        {...form.register("llm.providerConfig.ollama.chatModel.baseUrl")}
       />
 
       <SettingsTextField
