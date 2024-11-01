@@ -19,7 +19,10 @@ export const OpenAiSettings: FC = () => {
   // Set baseURL to undefined when useCustomUrl is unselected
   React.useEffect(() => {
     if (!useCustomUrl) {
-      form.setValue("llm.providerConfig.openai.chatModel.configuration.baseURL", undefined);
+      form.setValue(
+        "llm.providerConfig.openai.chatModel.configuration.baseURL",
+        undefined,
+      );
     }
   }, [useCustomUrl, form]);
 
@@ -39,11 +42,14 @@ export const OpenAiSettings: FC = () => {
       {useCustomUrl && (
         <SettingsTextField
           label="Base URL"
-          {...form.register("llm.providerConfig.openai.chatModel.configuration.baseURL", {
-            required: "Base URL is required when using a custom endpoint",
-            validate: (value) =>
-              value === "" ? "Base URL cannot be empty" : true,
-          })}
+          {...form.register(
+            "llm.providerConfig.openai.chatModel.configuration.baseURL",
+            {
+              required: "Base URL is required when using a custom endpoint",
+              validate: (value) =>
+                value === "" ? "Base URL cannot be empty" : true,
+            },
+          )}
         />
       )}
 
@@ -142,7 +148,9 @@ export const OllamaSettings: FC = () => {
 
       <SettingsTextField
         label="Base URL"
-        {...form.register("llm.providerConfig.ollama.chatModel.configuration.baseURL")}
+        {...form.register(
+          "llm.providerConfig.ollama.chatModel.configuration.baseURL",
+        )}
       />
 
       <SettingsTextField
