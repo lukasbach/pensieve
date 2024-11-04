@@ -1,7 +1,8 @@
-name: Verify
+name: Docs Deploy
 on: 
   push:
-  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -19,4 +20,10 @@ jobs:
       - run: yarn run lint
       - run: yarn run typecheck
       - run: yarn run build:docs
-      - run: yarn run make
+      - uses: actions/upload-pages-artifact@v3
+        id: artifact
+        with:
+          path: dist-docs
+      - uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
