@@ -1,15 +1,25 @@
 import { FC } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Badge, Flex, Heading, RadioCards, Text } from "@radix-ui/themes";
+import {
+  Badge,
+  Button,
+  Flex,
+  Heading,
+  RadioCards,
+  Text,
+} from "@radix-ui/themes";
 import { useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { HiOutlineFolderOpen } from "react-icons/hi2";
+import { GoLinkExternal } from "react-icons/go";
 import { modelData } from "../../model-data";
 import { Settings } from "../../types";
 import { QueryKeys } from "../../query-keys";
-import { modelsApi } from "../api";
+import { mainApi, modelsApi } from "../api";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTab } from "./tabs";
+import { SettingsField } from "./settings-field";
 
 export const WhisperSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -57,6 +67,34 @@ export const WhisperSettings: FC = () => {
           </RadioCards.Item>
         ))}
       </RadioCards.Root>
+
+      <SettingsField
+        label="Custom model file"
+        description="You can also download one of the models listed above yourself, and place it in your models folder. It will then show up as installed in the list above."
+      >
+        <Flex gap="0.5rem">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              mainApi.openModelsFolder();
+            }}
+          >
+            <HiOutlineFolderOpen /> Models Folder
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={async () => {
+              await mainApi.openWeb(
+                "https://huggingface.co/ggerganov/whisper.cpp/tree/main",
+              );
+            }}
+          >
+            <GoLinkExternal /> huggingface.co/ggerganov/whisper.cpp
+          </Button>
+        </Flex>
+      </SettingsField>
 
       <Heading mt="2rem">Whisper configuration</Heading>
 
