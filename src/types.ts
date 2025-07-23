@@ -73,6 +73,7 @@ export const defaultSettings = {
   },
   llm: {
     enabled: true,
+    prompt: "",
     features: {
       summary: true,
       actionItems: true,

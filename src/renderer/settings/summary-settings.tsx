@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Box, Button, Flex, Heading, RadioCards, Text } from "@radix-ui/themes";
+import { Box, Button, Flex, Heading, RadioCards, Text, TextArea } from "@radix-ui/themes";
 import { Settings } from "../../types";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTextField } from "./settings-text-field";
@@ -221,6 +221,14 @@ export const DetailedSummarySettings: FC = () => {
   const form = useFormContext<Settings>();
   return (
     <>
+      <SettingsField label="Additional prompt">
+        <TextArea
+          resize="vertical"
+          rows={4}
+          placeholder="Create the summary in german, use short easy-to-understand sentences…"
+          {...form.register("llm.prompt")}
+        />
+      </SettingsField>
       <Heading mt="4rem" as="h2" size="4">
         Enabled Features
       </Heading>

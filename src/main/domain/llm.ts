@@ -28,12 +28,12 @@ Answer the following question based only on the provided text:
 Question: {input}`;
 
 const prompts = {
-  summary: "Generate a short summary of the meeting.",
+  summary: "Generate a short summary of the meeting. ",
   actionItems:
     "Extract action items from the meeting. Each action item should be a task that the user needs to follow up on after the meeting. " +
-    "Provide one action item per line, in the format '{Me/They}: {action item text} ({timestamp})'.",
+    "Provide one action item per line, in the format '{Me/They}: {action item text} ({timestamp})'. ",
   sentenceSummary:
-    "Summarize the meeting very briefly in a very short sentence of less than 10 words.",
+    "Summarize the meeting very briefly in a very short sentence of less than 10 words. ",
 };
 
 const parseActionItems = (text: string) => {
@@ -138,19 +138,19 @@ const summarizeWithEmbeddings = async (transcript: RecordingTranscript) => {
 
   const summary = llm.features.summary
     ? await retrievalChain.invoke({
-        input: prompts.summary,
+        input: prompts.summary + llm.prompt,
       })
     : null;
   updateProgress("summary");
   const actionItems = llm.features.actionItems
     ? await retrievalChain.invoke({
-        input: prompts.actionItems,
+        input: prompts.actionItems + llm.prompt,
       })
     : null;
   updateProgress("actionItems");
   const sentenceSummary = llm.features.sentenceSummary
     ? await retrievalChain.invoke({
-        input: prompts.sentenceSummary,
+        input: prompts.sentenceSummary + llm.prompt,
       })
     : null;
   updateProgress("sentenceSummary");
@@ -170,21 +170,21 @@ const summarizeWithContext = async (transcript: RecordingTranscript) => {
 
   const summary = llm.features.summary
     ? await chain.invoke({
-        input: prompts.summary,
+        input: prompts.summary + llm.prompt,
         context,
       })
     : null;
   updateProgress("summary");
   const actionItems = llm.features.actionItems
     ? await chain.invoke({
-        input: prompts.actionItems,
+        input: prompts.actionItems + llm.prompt,
         context,
       })
     : null;
   updateProgress("actionItems");
   const sentenceSummary = llm.features.sentenceSummary
     ? await chain.invoke({
-        input: prompts.sentenceSummary,
+        input: prompts.sentenceSummary + llm.prompt,
         context,
       })
     : null;
