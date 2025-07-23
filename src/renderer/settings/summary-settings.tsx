@@ -1,5 +1,4 @@
-import React from "react";
-import { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Box, Button, Flex, Heading, RadioCards, Text } from "@radix-ui/themes";
@@ -11,13 +10,29 @@ import { SettingsField } from "./settings-field";
 import { mainApi } from "../api";
 import { SettingsTab } from "./tabs";
 
+const openAiModels = [
+  "gpt-4.1",
+  "gpt-4o",
+  "o4-mini",
+  "o3",
+  "o3-pro",
+  "o3-mini",
+  "o1",
+  "o1-pro",
+  "gpt-4.1-mini",
+  "gpt-4.1-nano",
+  "gpt-4o-mini",
+  "Custom",
+];
+
 export const OpenAiSettings: FC = () => {
   const form = useFormContext<Settings>();
+  const [customModel, setCustomModel] = useState(false);
 
   const useCustomUrl = form.watch("llm.providerConfig.openai.useCustomUrl");
+  const model = form.watch("llm.providerConfig.openai.chatModel.model");
 
-  // Set baseURL to undefined when useCustomUrl is unselected
-  React.useEffect(() => {
+  useEffect(() => {
     if (!useCustomUrl) {
       form.setValue(
         "llm.providerConfig.openai.chatModel.configuration.baseURL",
@@ -25,6 +40,19 @@ export const OpenAiSettings: FC = () => {
       );
     }
   }, [useCustomUrl, form]);
+
+  useEffect(() => {
+    if (model === "Custom") {
+      form.setValue("llm.providerConfig.openai.chatModel.model", "");
+      setCustomModel(true);
+    }
+    // if (model === "") {
+    //   form.setValue(
+    //     "llm.providerConfig.openai.chatModel.model",
+    //     openAiModels[0],
+    //   );
+    // }
+  }, [form, model]);
 
   return (
     <>
@@ -59,35 +87,40 @@ export const OpenAiSettings: FC = () => {
         {...form.register("llm.providerConfig.openai.chatModel.apiKey")}
       />
 
-      {form.watch("llm.providerConfig.openai.useCustomUrl") ? (
+      {useCustomUrl ? (
         <SettingsTextField
           label="Chat Model"
           {...form.register("llm.providerConfig.openai.chatModel.model")}
         />
-      ) : (
+      ) : !customModel ? (
         <SettingsSelectField
           label="Chat Model"
           field="llm.providerConfig.openai.chatModel.model"
           form={form}
-          values={[
-            "gpt-4o",
-            "gpt-4-turbo",
-            "gpt-4-turbo-preview",
-            "gpt-4-0125-preview",
-            "gpt-4-1106-preview",
-            "gpt-4",
-            "gpt-4-0613",
-            "gpt-4-32k",
-            "gpt-4-32k-0613",
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-0125",
-            "gpt-3.5-turbo-1106",
-            "gpt-3.5-turbo-instruct",
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-0613",
-            "gpt-3.5-turbo-16k-0613",
-          ]}
+          values={openAiModels}
         />
+      ) : (
+        <>
+          <SettingsTextField
+            label="Chat Model"
+            {...form.register("llm.providerConfig.openai.chatModel.model")}
+          />
+
+          <SettingsField>
+            <Button
+              type="button"
+              onClick={async () => {
+                setCustomModel(false);
+                form.setValue(
+                  "llm.providerConfig.openai.chatModel.model",
+                  openAiModels[0],
+                );
+              }}
+            >
+              Use default OpenAI models
+            </Button>
+          </SettingsField>
+        </>
       )}
 
       {form.watch("llm.providerConfig.openai.useCustomUrl") ? (

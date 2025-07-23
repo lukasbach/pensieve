@@ -3,7 +3,7 @@ import { Box, Flex, Text } from "@radix-ui/themes";
 
 export const SettingsField: FC<
   PropsWithChildren<{
-    label: string | ReactNode;
+    label?: string | ReactNode;
     description?: string;
     textTop?: string;
   }>
@@ -12,7 +12,7 @@ export const SettingsField: FC<
     <Flex gap="1.5rem" align="start" mt="1.2rem" asChild>
       <label>
         <Box width="10rem" minWidth="10rem" pt={textTop}>
-          {label}
+          {label ?? ""}
         </Box>
         <Box flexGrow="1">
           {children}

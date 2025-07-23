@@ -110,3 +110,4 @@ extra
 dist-docs
 docs/index.md
 docs/images
+.vscode
