@@ -1,7 +1,15 @@
 import React, { FC, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Box, Button, Flex, Heading, RadioCards, Text, TextArea } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  RadioCards,
+  Text,
+  TextArea,
+} from "@radix-ui/themes";
 import { Settings } from "../../types";
 import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTextField } from "./settings-text-field";
