@@ -4840,10 +4840,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sindresorhus/chunkify@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@sindresorhus/chunkify@npm:0.2.0"
-  checksum: 10/a17d8a385f1c2381d98eaa69d7fb543b65445a4b990750f1e3e78e3ae5fbcb70ebd2e93da8c11a3ac0cbd7e496e72e594c4519967eb15b1abea5b101acee243e
+"@sindresorhus/chunkify@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@sindresorhus/chunkify@npm:1.0.0"
+  checksum: 10/1e875c137491be9d873d9703e1105fccc76cabb92ea80950959d8bb0025244d49ae57ef22b9123903dfd21e6dfaca0615a92ec5fc6a0623f198da0878fd92b97
   languageName: node
   linkType: hard
 
@@ -5234,7 +5234,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.11.30, @types/node@npm:^20.9.0":
+"@types/node@npm:*, @types/node@npm:^20.11.30":
   version: 20.11.30
   resolution: "@types/node@npm:20.11.30"
   dependencies:
@@ -5256,6 +5256,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10/654194d4f3cc5867e5525a39647773a12c0c7175972bc4d288cdc74991fc969be2a9689267a3dc1cc5c5c7617e8f7c4769ac4829525726cd3e2f60eb238c1ff4
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.7.7":
+  version: 22.16.5
+  resolution: "@types/node@npm:22.16.5"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/ba45b5c9113cbc5edb12960fcfe7e80db2c998af5c1931264240695b27d756570d92462150b95781bd67a03aa82111cc970ab0f4504eb99213edff8bf425354e
   languageName: node
   linkType: hard
 
@@ -7219,16 +7228,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:29.1.5":
-  version: 29.1.5
-  resolution: "electron@npm:29.1.5"
+"electron@npm:37.2.4":
+  version: 37.2.4
+  resolution: "electron@npm:37.2.4"
   dependencies:
     "@electron/get": "npm:^2.0.0"
-    "@types/node": "npm:^20.9.0"
+    "@types/node": "npm:^22.7.7"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 10/a6770fa1d2788cc3f51b5fc26b1f4bad324544f790a81888b0ebc807ea176ce2f5833060b9c58e4cc03cfb8240b0835f1d45d8c82d3290f5da32f522bff94d57
+  checksum: 10/b6b379043fe1801c69d4cf1969c0a61a5ce7f27e2474d18e6591baf51b0ff303122475d9f6c4686532187c8e90488789da2ecb0db6278a5b773e43321ffb55d2
   languageName: node
   linkType: hard
 
@@ -11312,7 +11321,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"move-file@npm:^3.0.0":
+"move-file@npm:^3.1.0":
   version: 3.1.0
   resolution: "move-file@npm:3.1.0"
   dependencies:
@@ -11921,6 +11930,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p-map@npm:^7.0.2":
+  version: 7.0.3
+  resolution: "p-map@npm:7.0.3"
+  checksum: 10/2ef48ccfc6dd387253d71bf502604f7893ed62090b2c9d73387f10006c342606b05233da0e4f29388227b61eb5aeface6197e166520c465c234552eeab2fe633
+  languageName: node
+  linkType: hard
+
 "p-queue@npm:^6.6.2":
   version: 6.6.2
   resolution: "p-queue@npm:6.6.2"
@@ -12169,7 +12185,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.2.1"
     cpy-cli: "npm:^5.0.0"
     deepmerge: "npm:^4.3.1"
-    electron: "npm:29.1.5"
+    electron: "npm:37.2.4"
     electron-log: "npm:^5.1.5"
     electron-squirrel-startup: "npm:^1.0.0"
     eslint: "npm:^8.57.0"
@@ -12190,7 +12206,7 @@ __metadata:
     react-icons: "npm:^5.0.1"
     react-markdown: "npm:^9.0.1"
     react-stately: "npm:^3.31.0"
-    trash: "npm:^8.1.1"
+    trash: "npm:^9.0.0"
     ts-node: "npm:^10.0.0"
     typescript: "npm:^5.4.3"
     update-electron-app: "npm:^3.0.0"
@@ -13998,19 +14014,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"trash@npm:^8.1.1":
-  version: 8.1.1
-  resolution: "trash@npm:8.1.1"
+"trash@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "trash@npm:9.0.0"
   dependencies:
-    "@sindresorhus/chunkify": "npm:^0.2.0"
+    "@sindresorhus/chunkify": "npm:^1.0.0"
     "@stroncium/procfs": "npm:^1.2.1"
     globby: "npm:^7.1.1"
     is-path-inside: "npm:^4.0.0"
-    move-file: "npm:^3.0.0"
-    p-map: "npm:^5.1.0"
-    uuid: "npm:^8.3.2"
+    move-file: "npm:^3.1.0"
+    p-map: "npm:^7.0.2"
     xdg-trashdir: "npm:^3.1.0"
-  checksum: 10/0f432a5852a05e068b4e70fd83756b5411f7fa51e5702e5645780553522c8e36833d09d42a596c5a6a6656e09dfec4fc9a1ee0e9ab76baef1ab03132093a1c45
+  checksum: 10/23c1cda30152b651fc515d65a315397cd969bf9e08371a9bf9a11361bad92ce9ed38934512c36e1e8396dd41c6f174c6413bce38ab6699302238c64b1e0d72fb
   languageName: node
   linkType: hard
 
@@ -14254,6 +14269,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 10/0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
   languageName: node
   linkType: hard
 
@@ -14514,15 +14536,6 @@ __metadata:
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: 10/5d6949693d58cb2e636a84f3ee1c6e7b2f9c16cb1d42d0ecb386d8c025c69e327205aa1c69e2868cc06a01e5e20681fbba55a4e0ed0cce913d60334024eae798
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^8.3.2":
-  version: 8.3.2
-  resolution: "uuid@npm:8.3.2"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
   languageName: node
   linkType: hard
 

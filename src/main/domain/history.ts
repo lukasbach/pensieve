@@ -175,8 +175,7 @@ export const openRecordingFolder = async (recordingId: string) => {
 };
 
 export const removeRecording = async (recordingId: string) => {
-  const trash = await import("trash");
-  await trash.default(path.join(await getRecordingsFolder(), recordingId));
+  await fs.remove(path.join(await getRecordingsFolder(), recordingId));
   searchIndex.removeRecordingFromIndex(recordingId);
   invalidateUiKeys(QueryKeys.History);
 };
