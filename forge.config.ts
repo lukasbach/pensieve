@@ -25,15 +25,17 @@ const createIcon = async (factor: number, base = 32) => {
       "extra",
       factor === 1 ? "icon.png" : `icon@${factor}x.png`,
     ),
-    png.asPng(),
+    png.asPng() as any,
   );
 };
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: "*.{node,dll,exe}",
+    },
     extraResource: "./extra",
-    icon: "./extra/icon@8x",
+    icon: "./extra/icon@8x.ico",
   },
   rebuildConfig: {},
   makers: [
@@ -77,7 +79,7 @@ const config: ForgeConfig = {
       [FuseV1Options.EnableCookieEncryption]: true,
       [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
       [FuseV1Options.EnableNodeCliInspectArguments]: false,
-      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: false,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
@@ -154,7 +156,7 @@ const config: ForgeConfig = {
       await createIcon(4);
       await createIcon(8);
       await pngToIco(path.join(__dirname, "extra/icon@8x.png")).then((buf) =>
-        fs.writeFileSync(path.join(__dirname, "extra/icon@8x.ico"), buf),
+        fs.writeFileSync(path.join(__dirname, "extra/icon@8x.ico"), buf as any),
       );
     },
   },
