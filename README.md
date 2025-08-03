@@ -9,6 +9,11 @@
 </div>
 <br />
 
+# API for desktop recording
+
+If you’re looking for a hosted desktop recording API, consider checking out [Recall.ai](https://www.recall.ai), an API that records Zoom, Google Meet, Microsoft Teams, In-person meetings, and more.
+
+# Pensieve App
 
 <div align="center">
     <img src="https://github.com/lukasbach/pensieve/raw/main/images/preview.png" alt="Preview image of Pensieve" />
