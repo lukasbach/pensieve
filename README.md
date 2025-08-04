@@ -11,7 +11,7 @@
 
 # API for desktop recording
 
-If you’re looking for a hosted desktop recording API, consider checking out [Recall.ai](https://www.recall.ai), an API that records Zoom, Google Meet, Microsoft Teams, In-person meetings, and more.
+If you’re looking for a hosted desktop recording API, consider checking out [Recall.ai](https://www.recall.ai/?utm_source=github&utm_medium=sponsorship&utm_campaign=pensieve), an API that records Zoom, Google Meet, Microsoft Teams, In-person meetings, and more.
 
 # Pensieve App
 
