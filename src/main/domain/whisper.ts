@@ -1,4 +1,5 @@
 import path from "path";
+import os from "os";
 import log from "electron-log/main";
 import {
   buildArgs,
@@ -11,7 +12,12 @@ import * as runner from "./runner";
 import * as postprocess from "./postprocess";
 import { getSettings } from "./settings";
 
-const whisperPath = path.join(getExtraResourcesFolder(), "whisper.exe");
+// Use bundled Whisper for Windows, system installation for macOS/Linux
+const whisperPath = os.platform() === "win32" 
+  ? path.join(getExtraResourcesFolder(), "whisper.exe") // Windows bundles Whisper
+  : os.platform() === "darwin" 
+    ? "/opt/homebrew/bin/whisper-cpp" // macOS Homebrew whisper-cpp
+    : "whisper-cpp"; // Linux use system installation
 
 export const processWavFile = async (
   input: string,

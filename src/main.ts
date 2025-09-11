@@ -45,6 +45,18 @@ app.on("window-all-closed", () => {
   }
 });
 
+app.on("before-quit", (event) => {
+  // App is about to quit
+});
+
+app.on("will-quit", (event) => {
+  // App will quit
+});
+
+app.on("quit", () => {
+  // App has quit
+});
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: "recording",
