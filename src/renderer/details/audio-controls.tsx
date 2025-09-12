@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Box, Flex, IconButton, Slider, Tooltip } from "@radix-ui/themes";
 import {
   HiChevronDoubleDown,
@@ -11,12 +11,28 @@ import { LuMouse } from "react-icons/lu";
 import { useDebouncedEffect } from "@react-hookz/web";
 import { useManagedAudio } from "./use-managed-audio";
 import { timeToDisplayString } from "../../utils";
+import { historyApi } from "../api";
 
 export const AudioControls: FC<{
   audio: ReturnType<typeof useManagedAudio>;
   id: string;
 }> = ({ audio, id }) => {
   const [syncScroll, setSyncScroll] = useState(false);
+  const [audioSrc, setAudioSrc] = useState<string>("");
+
+  useEffect(() => {
+    const loadAudioSrc = async () => {
+      try {
+        const audioFile = await historyApi.getRecordingAudioFile(id);
+        if (audioFile) {
+          setAudioSrc(audioFile);
+        }
+      } catch (error) {
+        console.error("Failed to load audio file:", error);
+      }
+    };
+    loadAudioSrc();
+  }, [id]);
 
   useDebouncedEffect(
     () => {
@@ -24,7 +40,7 @@ export const AudioControls: FC<{
         audio.scrollTo(audio.progress * 1000);
       }
     },
-    [audio.progress],
+    [audio.progress, syncScroll],
     1000,
     2000,
   );
@@ -33,7 +49,7 @@ export const AudioControls: FC<{
     <Box px="1rem" py=".5rem" style={{ borderTop: `1px solid var(--gray-5)` }}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio preload="auto" ref={audio.audioTag}>
-        <source src={`recording://${id}`} type="audio/mpeg" />
+        {audioSrc && <source src={audioSrc} type="audio/mpeg" />}
       </audio>
       <Slider
         max={audio.duration}
