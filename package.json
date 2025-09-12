@@ -13,8 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build:docs": "markbase build ./docs",
-    "start:docs": "markbase watch ./docs",
+    "build:docs": "markbase build ./docs || echo 'markbase not available on this platform'",
+    "start:docs": "markbase watch ./docs || echo 'markbase not available on this platform'",
     "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs"
   },
   "dependencies": {
@@ -26,6 +26,9 @@
     "electron-squirrel-startup": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "optionalDependencies": {
+    "markbase": "^0.0.6"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.3.1",
@@ -66,7 +69,6 @@
     "handlebars": "^4.7.8",
     "humanize-duration": "^3.32.0",
     "langchain": "^0.1.33",
-    "markbase": "^0.0.6",
     "png-to-ico": "^2.1.8",
     "react-aria": "^3.33.0",
     "react-hook-form": "^7.51.2",
