@@ -44,8 +44,7 @@ export const DetailsScreen: FC = () => {
         title={recording?.name ?? "Untitled Recording"}
         statusButtons={
           <SearchBar
-            transcript={transcript}
-            onJumpTo={(time) => {
+            transcript={transcript            onJumpTo={(time) => {
               setTab("transcript");
               audio.jump(time / 1000 - 1);
               setTimeout(() => audio.scrollTo(time));

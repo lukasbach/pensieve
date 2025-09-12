@@ -68,7 +68,7 @@ const getChatModel = async () => {
   }
 };
 
-const getEmbeddings = async () => {
+export const getEmbeddings = async () => {
   const { llm } = await settings.getSettings();
 
   switch (llm.provider) {
