@@ -8,11 +8,13 @@ import {
   Text,
   Card,
   Badge,
+  Select,
 } from "@radix-ui/themes";
-import { HiPaperAirplane, HiSparkles } from "react-icons/hi2";
+import { HiPaperAirplane, HiSparkles, HiMagnifyingGlass } from "react-icons/hi2";
 import { useQuery } from "@tanstack/react-query";
 import { historyApi } from "../api";
 import { QueryKeys } from "../../query-keys";
+import { RecordingMeta } from "../../types";
 
 interface ChatMessage {
   id: string;
@@ -32,6 +34,8 @@ export const ChatScreen: FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRecordingId, setSelectedRecordingId] = useState<string>("all");
+  const [recordingSearchQuery, setRecordingSearchQuery] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Check if vector store is available
@@ -49,6 +53,32 @@ export const ChatScreen: FC = () => {
     staleTime: 30000,
   });
 
+  // Get recordings list
+  const { data: recordings } = useQuery({
+    queryKey: [QueryKeys.History],
+    queryFn: historyApi.getRecordings,
+    staleTime: 60000,
+  });
+
+  // Filter recordings based on search query
+  const filteredRecordings = recordings ? Object.entries(recordings)
+    .filter(([id, meta]) => {
+      if (!recordingSearchQuery) {
+        return true;
+      }
+      const searchLower = recordingSearchQuery.toLowerCase();
+      return (
+        meta.name?.toLowerCase().includes(searchLower) ||
+        id.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort(([, a], [, b]) => {
+      // Sort by name if available, otherwise by ID
+      const nameA = a.name || a.started;
+      const nameB = b.name || b.started;
+      return nameA.localeCompare(nameB);
+    }) : [];
+
   const [isPopulating, setIsPopulating] = useState(false);
 
   // Auto-scroll to bottom when new messages are added
@@ -59,7 +89,9 @@ export const ChatScreen: FC = () => {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) {
+      return;
+    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -72,12 +104,13 @@ export const ChatScreen: FC = () => {
     setInput("");
     setIsLoading(true);
 
-    try {
-      // Get relevant content using vector search
-      const searchResults = await historyApi.vectorSearch(input.trim(), 5);
-      
-      // Generate conversational response using LLM
-      const response = await historyApi.generateConversationalResponse(input.trim(), searchResults);
+          try {
+            // Get relevant content using vector search
+            const recordingFilter = selectedRecordingId === "all" ? undefined : selectedRecordingId;
+            const searchResults = await historyApi.vectorSearch(input.trim(), 5, recordingFilter);
+
+            // Generate conversational response using LLM
+            const response = await historyApi.generateConversationalResponse(input.trim(), searchResults);
 
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -152,6 +185,11 @@ export const ChatScreen: FC = () => {
       <Flex justify="between" align="center" mb="2">
         <Text size="3" weight="medium">Chat with Your Transcripts</Text>
         <Flex align="center" gap="2">
+          {selectedRecordingId !== "all" && recordings && (
+            <Badge size="2" color="green" variant="soft">
+              Filtered: {recordings[selectedRecordingId]?.name || `Recording ${selectedRecordingId}`}
+            </Badge>
+          )}
           {vectorStoreStats && (
             <Badge size="2" color="blue" variant="soft">
               {vectorStoreStats.totalChunks} chunks available
@@ -168,6 +206,72 @@ export const ChatScreen: FC = () => {
             </Button>
           )}
         </Flex>
+      </Flex>
+
+      {/* Transcript Filter */}
+      <Flex align="center" gap="2" mb="3">
+        <Text size="2" weight="medium" color="gray">Filter by transcript:</Text>
+        <Box style={{ position: "relative", minWidth: "300px" }}>
+          <TextField.Root
+            placeholder="Search transcripts..."
+            value={recordingSearchQuery}
+            onChange={(e) => setRecordingSearchQuery(e.target.value)}
+            style={{ width: "100%" }}
+          />
+          {recordingSearchQuery && filteredRecordings.length > 0 && (
+            <Box
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                backgroundColor: "var(--color-background)",
+                border: "1px solid var(--gray-6)",
+                borderRadius: "var(--radius-2)",
+                boxShadow: "var(--shadow-3)",
+                zIndex: 10,
+                maxHeight: "200px",
+                overflowY: "auto",
+              }}
+            >
+              <Box
+                p="2"
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: selectedRecordingId === "all" ? "var(--accent-3)" : "transparent",
+                }}
+                onClick={() => setSelectedRecordingId("all")}
+              >
+                <Text size="2">All Transcripts</Text>
+              </Box>
+              {filteredRecordings.slice(0, 10).map(([id, meta]) => (
+                <Box
+                  key={id}
+                  p="2"
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: selectedRecordingId === id ? "var(--accent-3)" : "transparent",
+                  }}
+                  onClick={() => {
+                    setSelectedRecordingId(id);
+                    setRecordingSearchQuery("");
+                  }}
+                >
+                  <Text size="2">{meta.name || `Recording ${id}`}</Text>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+        {selectedRecordingId !== "all" && (
+          <Button
+            size="1"
+            variant="ghost"
+            onClick={() => setSelectedRecordingId("all")}
+          >
+            Clear Filter
+          </Button>
+        )}
       </Flex>
 
       {/* Messages area */}
