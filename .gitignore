@@ -112,3 +112,4 @@ docs/index.md
 docs/images
 .vscode
 vector-store/vector-store.db
+package-lock.json
