@@ -53,7 +53,8 @@ export type PostProcessingStep =
   | "mp3"
   | "whisper"
   | "summary"
-  | "datahooks";
+  | "datahooks"
+  | "vectorSearch";
 
 export type PostProcessingJob = {
   recordingId: string;

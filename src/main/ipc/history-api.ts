@@ -27,8 +27,61 @@ export const historyApi = {
   hybridSearch: async (query: string, limit?: number, recordingId?: string) => 
     vectorSearch.hybridSearch(query, limit, recordingId),
   initializeVectorStore: async () => vectorSearch.initializeVectorStore(),
-  isVectorStoreAvailable: () => vectorSearch.isVectorStoreAvailable(),
+  isVectorStoreAvailable: async () => vectorSearch.isVectorStoreAvailable(),
   getVectorStoreStats: async () => vectorSearch.getVectorStoreStats(),
+  
+  // Conversational chat functions
+  generateConversationalResponse: async (query: string, searchResults: any[]) => {
+    const { getChatModel, getEmbeddings } = await import("../domain/llm");
+    const { createStuffDocumentsChain } = await import("langchain/chains/combine_documents");
+    const { ChatPromptTemplate } = await import("@langchain/core/prompts");
+    const { Document } = await import("@langchain/core/documents");
+    
+    try {
+      const chatModel = await getChatModel();
+      
+      // Create a conversational prompt
+      const prompt = ChatPromptTemplate.fromTemplate(`
+You are a helpful assistant that answers questions based on meeting transcripts. 
+Use the provided context to give a natural, conversational response to the user's question.
+
+Context from transcripts:
+{context}
+
+User question: {input}
+
+Please provide a helpful, conversational response based on the context above. If the context doesn't contain enough information to answer the question, say so politely.
+`);
+
+      // Create the chain
+      const chain = await createStuffDocumentsChain({
+        llm: chatModel,
+        prompt,
+      });
+
+      // Convert search results to documents
+      const documents = searchResults.map(result => new Document({
+        pageContent: result.text,
+        metadata: {
+          recordingId: result.recordingId,
+          timestamp: result.timestamp,
+          speaker: result.speaker,
+          score: result.score
+        }
+      }));
+
+      // Generate response
+      const response = await chain.invoke({
+        input: query,
+        context: documents,
+      });
+
+      return response;
+    } catch (error) {
+      console.error("Failed to generate conversational response:", error);
+      return "I'm sorry, I couldn't generate a proper response. Please try again.";
+    }
+  },
   
   // Debug/utility functions
   populateVectorStoreFromExistingTranscripts: async () => {

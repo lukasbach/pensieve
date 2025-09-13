@@ -73,22 +73,11 @@ export const ChatScreen: FC = () => {
     setIsLoading(true);
 
     try {
-      // For now, we'll use vector search to find relevant content
-      // In the future, this could be enhanced with a proper RAG pipeline
+      // Get relevant content using vector search
       const searchResults = await historyApi.vectorSearch(input.trim(), 5);
       
-      // Create a simple response based on search results
-      let response = "I found some relevant content from your transcripts:\n\n";
-      
-      if (searchResults.length === 0) {
-        response = "I couldn't find any relevant content in your transcripts for that question.";
-      } else {
-        searchResults.forEach((result, index) => {
-          response += `${index + 1}. From recording ${result.recordingId}:\n`;
-          response += `   "${result.text}"\n`;
-          response += `   (Score: ${result.score.toFixed(3)})\n\n`;
-        });
-      }
+      // Generate conversational response using LLM
+      const response = await historyApi.generateConversationalResponse(input.trim(), searchResults);
 
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -189,7 +178,7 @@ export const ChatScreen: FC = () => {
       >
         <Flex direction="column" gap="3">
           {messages.length === 0 && (
-            <Card p="4" style={{ textAlign: "center" }}>
+            <Card style={{ textAlign: "center", padding: "1rem" }}>
               <Flex direction="column" align="center" gap="3">
                 <HiSparkles size="32" color="var(--accent-9)" />
                 <Text size="3" weight="medium">Ask questions about your transcripts</Text>
@@ -201,13 +190,14 @@ export const ChatScreen: FC = () => {
           )}
 
           {messages.map((message) => (
-            <Card key={message.id} p="3" style={{ 
+            <Card key={message.id} style={{
+              padding: "0.75rem", 
               alignSelf: message.type === "user" ? "flex-end" : "flex-start",
               maxWidth: "80%",
               backgroundColor: message.type === "user" ? "var(--accent-3)" : "var(--gray-2)"
             }}>
               <Flex direction="column" gap="2">
-                <Text size="2" weight="medium" color={message.type === "user" ? "accent" : "gray"}>
+                <Text size="2" weight="medium" color={message.type === "user" ? "blue" : "gray"}>
                   {message.type === "user" ? "You" : "Assistant"}
                 </Text>
                 <Text size="2" style={{ whiteSpace: "pre-wrap" }}>
@@ -236,7 +226,7 @@ export const ChatScreen: FC = () => {
           ))}
 
           {isLoading && (
-            <Card p="3" style={{ alignSelf: "flex-start", maxWidth: "80%" }}>
+            <Card style={{ alignSelf: "flex-start", maxWidth: "80%", padding: "0.75rem" }}>
               <Flex align="center" gap="2">
                 <Text size="2" color="gray">Assistant is thinking...</Text>
                 <Box style={{ 

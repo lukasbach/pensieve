@@ -1,14 +1,9 @@
-// Set up IndexedDB polyfill for Node.js environment
-import 'fake-indexeddb/auto';
-
-import { createRxDatabase, RxDatabase, RxCollection } from 'rxdb';
-import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import fs from "fs-extra";
+import sqlite3 from "sqlite3";
 import path from "path";
+import fs from "fs-extra";
 import log from "electron-log/main";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "@langchain/core/documents";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import * as history from "./history";
 import { getEmbeddings } from "./llm";
 import { RecordingTranscript, RecordingTranscriptItem } from "../../types";
@@ -37,91 +32,127 @@ interface TranscriptChunk {
   embedding: number[];
 }
 
-interface VectorIndex {
-  id: string;
-  chunkId: string;
-  index: number;
-  distance: number;
-}
-
-// Database collections
-type Collections = {
-  chunks: RxCollection<TranscriptChunk>;
-  vectorIndex: RxCollection<VectorIndex>;
-};
-
-class VectorStore {
-  private db: RxDatabase<Collections> | null = null;
+class SQLiteVectorStore {
+  private db: sqlite3.Database | null = null;
   private embeddings: any = null;
-  private dataPath: string;
+  private dbPath: string;
 
   constructor() {
-    this.dataPath = path.join(process.cwd(), "vector-store");
+    this.dbPath = path.join(process.cwd(), "vector-store", "vector-store.db");
   }
 
   async initialize() {
     try {
-      // Initialize the embedding model using existing LLM infrastructure
+      // Ensure directory exists
+      await fs.ensureDir(path.dirname(this.dbPath));
+
+      // Initialize the embedding model
       log.info("Loading embedding model...");
       this.embeddings = await getEmbeddings();
       log.info("Embedding model loaded successfully");
 
-      // Create RxDB database
-      log.info("Creating RxDB database...");
-      this.db = await createRxDatabase({
-        name: 'vector-store',
-        storage: getRxStorageDexie(),
-        multiInstance: false,
-      });
-      log.info("RxDB database created successfully");
+      // Open SQLite database
+      log.info("Opening SQLite database...");
+      this.db = new sqlite3.Database(this.dbPath);
+      
+      // Load sqlite-vec extension if available
+      await this.loadSqliteVec();
 
-      // Add collections
-      log.info("Adding collections to RxDB...");
-      await this.db.addCollections({
-        chunks: {
-          schema: {
-            version: 0,
-            primaryKey: 'id',
-            type: 'object',
-            properties: {
-              id: { type: 'string', maxLength: 50 },
-              recordingId: { type: 'string', maxLength: 50 },
-              chunkIndex: { type: 'number' },
-              text: { type: 'string' },
-              timestamp: { type: 'string', maxLength: 20 },
-              speaker: { type: 'string', maxLength: 20 },
-              startTime: { type: 'number' },
-              endTime: { type: 'number' },
-              embedding: { 
-                type: 'array',
-                items: { type: 'number' }
-              }
-            },
-            required: ['id', 'recordingId', 'chunkIndex', 'text', 'timestamp', 'speaker', 'startTime', 'endTime', 'embedding']
-          }
-        },
-        vectorIndex: {
-          schema: {
-            version: 0,
-            primaryKey: 'id',
-            type: 'object',
-            properties: {
-              id: { type: 'string', maxLength: 50 },
-              chunkId: { type: 'string', maxLength: 50 },
-              index: { type: 'number' },
-              distance: { type: 'number' }
-            },
-            required: ['id', 'chunkId', 'index', 'distance']
-          }
-        }
-      });
-      log.info("Collections added successfully");
-
-      log.info("Vector store initialized successfully");
+      // Create tables
+      await this.createTables();
+      
+      log.info("SQLite vector store initialized successfully");
     } catch (error) {
-      log.error("Failed to initialize vector store:", error);
+      log.error("Failed to initialize SQLite vector store:", error);
       throw error;
     }
+  }
+
+  private async loadSqliteVec() {
+    if (!this.db) return;
+
+    try {
+      // Try to load sqlite-vec extension
+      // Note: This requires the sqlite-vec extension to be available
+      // For now, we'll use basic SQLite with FTS5 for text search
+      log.info("sqlite-vec extension not available, using FTS5 for text search");
+    } catch (error) {
+      log.warn("Could not load sqlite-vec extension:", error);
+    }
+  }
+
+  private async createTables() {
+    if (!this.db) return;
+
+    return new Promise<void>((resolve, reject) => {
+      this.db!.serialize(() => {
+        // Create chunks table
+        this.db!.run(`
+          CREATE TABLE IF NOT EXISTS chunks (
+            id TEXT PRIMARY KEY,
+            recording_id TEXT NOT NULL,
+            chunk_index INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            speaker TEXT NOT NULL,
+            start_time INTEGER NOT NULL,
+            end_time INTEGER NOT NULL,
+            embedding BLOB NOT NULL
+          )
+        `, (err) => {
+          if (err) {
+            log.error("Failed to create chunks table:", err);
+            reject(err);
+            return;
+          }
+        });
+
+        // Create FTS5 virtual table for text search
+        this.db!.run(`
+          CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
+            text,
+            speaker,
+            timestamp,
+            content='chunks',
+            content_rowid='rowid'
+          )
+        `, (err) => {
+          if (err) {
+            log.error("Failed to create FTS5 table:", err);
+            reject(err);
+            return;
+          }
+        });
+
+        // Create triggers to keep FTS5 in sync
+        this.db!.run(`
+          CREATE TRIGGER IF NOT EXISTS chunks_ai AFTER INSERT ON chunks BEGIN
+            INSERT INTO chunks_fts(rowid, text, speaker, timestamp)
+            VALUES (new.rowid, new.text, new.speaker, new.timestamp);
+          END
+        `, (err) => {
+          if (err) {
+            log.error("Failed to create insert trigger:", err);
+            reject(err);
+            return;
+          }
+        });
+
+        this.db!.run(`
+          CREATE TRIGGER IF NOT EXISTS chunks_ad AFTER DELETE ON chunks BEGIN
+            INSERT INTO chunks_fts(chunks_fts, rowid, text, speaker, timestamp)
+            VALUES('delete', old.rowid, old.text, old.speaker, old.timestamp);
+          END
+        `, (err) => {
+          if (err) {
+            log.error("Failed to create delete trigger:", err);
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      });
+    });
   }
 
   async addTranscript(recordingId: string) {
@@ -149,11 +180,6 @@ class VectorStore {
         const chunk = chunks[i];
         const embedding = await this.embeddings.embedDocuments([chunk.pageContent]);
         
-        // Debug: Log embedding dimension
-        if (i === 0) {
-          log.info(`Embedding dimension: ${embedding[0].length}`);
-        }
-        
         const chunkDoc: TranscriptChunk = {
           id: `${recordingId}-${i}`,
           recordingId,
@@ -166,10 +192,7 @@ class VectorStore {
           embedding: embedding[0]
         };
 
-        await this.db.chunks.insert(chunkDoc);
-        
-        // TODO: Create vector index entries for faster searching
-        // await this.createVectorIndex(chunkDoc);
+        await this.insertChunk(chunkDoc);
       }
 
       log.info(`Added ${chunks.length} chunks to vector store for recording: ${recordingId}`);
@@ -179,26 +202,57 @@ class VectorStore {
     }
   }
 
+  private async insertChunk(chunk: TranscriptChunk) {
+    if (!this.db) return;
+
+    return new Promise<void>((resolve, reject) => {
+      const stmt = this.db!.prepare(`
+        INSERT INTO chunks (id, recording_id, chunk_index, text, timestamp, speaker, start_time, end_time, embedding)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run([
+        chunk.id,
+        chunk.recordingId,
+        chunk.chunkIndex,
+        chunk.text,
+        chunk.timestamp,
+        chunk.speaker,
+        chunk.startTime,
+        chunk.endTime,
+        JSON.stringify(chunk.embedding)
+      ], (err) => {
+        if (err) {
+          log.error("Failed to insert chunk:", err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
   async removeTranscript(recordingId: string) {
     try {
       if (!this.db) return;
 
-      // Remove chunks
-      const chunks = await this.db.chunks.find({
-        selector: { recordingId }
-      }).exec();
-
-      for (const chunk of chunks) {
-        // Remove vector index entries
-        await this.db.vectorIndex.find({
-          selector: { chunkId: chunk.id }
-        }).remove();
-        
-        // Remove chunk
-        await chunk.remove();
-      }
-
-      log.info(`Removed vector chunks for recording: ${recordingId}`);
+      return new Promise<void>((resolve, reject) => {
+        this.db!.run(
+          "DELETE FROM chunks WHERE recording_id = ?",
+          [recordingId],
+          function(err) {
+            if (err) {
+              log.error("Failed to remove transcript:", err);
+              reject(err);
+            } else {
+              log.info(`Removed ${this.changes} chunks for recording: ${recordingId}`);
+              resolve();
+            }
+          }
+        );
+      });
     } catch (error) {
       log.error(`Failed to remove transcript from vector store: ${error}`);
     }
@@ -214,36 +268,140 @@ class VectorStore {
       // Generate embedding for the query
       const queryEmbedding = await this.embeddings.embedQuery(query);
 
-      // Build selector for recording filter
-      const selector: any = {};
+      // Build SQL query
+      let sql = `
+        SELECT id, recording_id, chunk_index, text, timestamp, speaker, start_time, end_time, embedding
+        FROM chunks
+      `;
+      const params: any[] = [];
+
       if (recordingId) {
-        selector.recordingId = recordingId;
+        sql += " WHERE recording_id = ?";
+        params.push(recordingId);
       }
 
-      // Get all chunks (in a real implementation, you'd use the vector index for better performance)
-      const chunks = await this.db.chunks.find({ selector }).exec();
-      
-      // Calculate similarities
-      const results = chunks.map(chunk => {
-        const similarity = this.cosineSimilarity(queryEmbedding, chunk.embedding);
-        return {
-          recordingId: chunk.recordingId,
-          chunkIndex: chunk.chunkIndex,
-          text: chunk.text,
-          timestamp: chunk.timestamp,
-          speaker: chunk.speaker,
-          score: similarity,
-          startTime: chunk.startTime,
-          endTime: chunk.endTime
-        };
+      return new Promise<VectorSearchResult[]>((resolve, reject) => {
+        this.db!.all(sql, params, (err, rows: any[]) => {
+          if (err) {
+            log.error("Vector search failed:", err);
+            reject(err);
+            return;
+          }
+
+          // Calculate similarities
+          const results = rows.map(row => {
+            const embedding = JSON.parse(row.embedding);
+            const similarity = this.cosineSimilarity(queryEmbedding, embedding);
+            return {
+              recordingId: row.recording_id,
+              chunkIndex: row.chunk_index,
+              text: row.text,
+              timestamp: row.timestamp,
+              speaker: row.speaker,
+              score: similarity,
+              startTime: row.start_time,
+              endTime: row.end_time
+            };
+          });
+
+          // Sort by similarity and return top results
+          const sortedResults = results
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit);
+
+          resolve(sortedResults);
+        });
+      });
+    } catch (error) {
+      log.error("Vector search failed:", error);
+      return [];
+    }
+  }
+
+  async textSearch(query: string, limit: number = 10, recordingId?: string): Promise<VectorSearchResult[]> {
+    try {
+      if (!this.db) return [];
+
+      // Build FTS5 query
+      let sql = `
+        SELECT c.id, c.recording_id, c.chunk_index, c.text, c.timestamp, c.speaker, c.start_time, c.end_time
+        FROM chunks_fts f
+        JOIN chunks c ON f.rowid = c.rowid
+        WHERE chunks_fts MATCH ?
+      `;
+      const params: any[] = [query];
+
+      if (recordingId) {
+        sql += " AND c.recording_id = ?";
+        params.push(recordingId);
+      }
+
+      sql += " ORDER BY rank LIMIT ?";
+      params.push(limit);
+
+      return new Promise<VectorSearchResult[]>((resolve, reject) => {
+        this.db!.all(sql, params, (err, rows: any[]) => {
+          if (err) {
+            log.error("Text search failed:", err);
+            reject(err);
+            return;
+          }
+
+          const results = rows.map(row => ({
+            recordingId: row.recording_id,
+            chunkIndex: row.chunk_index,
+            text: row.text,
+            timestamp: row.timestamp,
+            speaker: row.speaker,
+            score: 1.0, // FTS5 doesn't provide similarity scores
+            startTime: row.start_time,
+            endTime: row.end_time
+          }));
+
+          resolve(results);
+        });
+      });
+    } catch (error) {
+      log.error("Text search failed:", error);
+      return [];
+    }
+  }
+
+  async hybridSearch(query: string, limit: number = 10, recordingId?: string): Promise<VectorSearchResult[]> {
+    try {
+      // Get both vector and text search results
+      const [vectorResults, textResults] = await Promise.all([
+        this.search(query, limit, recordingId),
+        this.textSearch(query, limit, recordingId)
+      ]);
+
+      // Combine and deduplicate results
+      const resultMap = new Map<string, VectorSearchResult>();
+
+      // Add vector results (higher weight)
+      vectorResults.forEach(result => {
+        const key = `${result.recordingId}-${result.chunkIndex}`;
+        resultMap.set(key, { ...result, score: result.score * 0.7 });
       });
 
-      // Sort by similarity and return top results
-      return results
+      // Add text results (lower weight)
+      textResults.forEach(result => {
+        const key = `${result.recordingId}-${result.chunkIndex}`;
+        if (resultMap.has(key)) {
+          // Boost existing result
+          const existing = resultMap.get(key)!;
+          existing.score += 0.3;
+        } else {
+          resultMap.set(key, { ...result, score: result.score * 0.3 });
+        }
+      });
+
+      // Sort by combined score and return top results
+      return Array.from(resultMap.values())
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
     } catch (error) {
-      log.error("Vector search failed:", error);
+      log.error("Hybrid search failed:", error);
       return [];
     }
   }
@@ -254,19 +412,31 @@ class VectorStore {
         return { totalChunks: 0, recordings: 0 };
       }
 
-      const totalChunks = await this.db.chunks.count().exec();
-      
-      // Get unique recording count
-      const chunks = await this.db.chunks.find({}).exec();
-      const recordings = new Set(chunks.map(chunk => chunk.recordingId)).size;
+      return new Promise<{ totalChunks: number; recordings: number }>((resolve, reject) => {
+        this.db!.get("SELECT COUNT(*) as count FROM chunks", (err, row: any) => {
+          if (err) {
+            reject(err);
+            return;
+          }
 
-      return { totalChunks, recordings };
+          this.db!.get("SELECT COUNT(DISTINCT recording_id) as count FROM chunks", (err, row2: any) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            resolve({
+              totalChunks: row.count,
+              recordings: row2.count
+            });
+          });
+        });
+      });
     } catch (error) {
       log.error("Failed to get vector store stats:", error);
       return { totalChunks: 0, recordings: 0 };
     }
   }
-
 
   private cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
@@ -286,53 +456,10 @@ class VectorStore {
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
-  private async createVectorIndex(chunk: TranscriptChunk) {
-    if (!this.db) return;
-
-    // Create sample vectors for indexing (simplified approach)
-    const sampleVectors = this.generateSampleVectors(chunk.embedding.length);
-    
-    for (let i = 0; i < sampleVectors.length; i++) {
-      const distance = this.euclideanDistance(sampleVectors[i], chunk.embedding);
-      
-      const indexDoc: VectorIndex = {
-        id: `${chunk.id}-${i}`,
-        chunkId: chunk.id,
-        index: i,
-        distance: distance
-      };
-
-      await this.db.vectorIndex.insert(indexDoc);
-    }
-  }
-
-  private generateSampleVectors(embeddingDimension: number): number[][] {
-    // Generate 5 sample vectors for indexing
-    // In a real implementation, you'd use a more sophisticated approach
-    const vectors: number[][] = [];
-    for (let i = 0; i < 5; i++) {
-      const vector = new Array(embeddingDimension).fill(0).map(() => Math.random() - 0.5);
-      vectors.push(vector);
-    }
-    return vectors;
-  }
-
-  private euclideanDistance(a: number[], b: number[]): number {
-    if (a.length !== b.length) {
-      throw new Error("Vectors must have the same length");
-    }
-
-    let sum = 0;
-    for (let i = 0; i < a.length; i++) {
-      sum += Math.pow(a[i] - b[i], 2);
-    }
-    return Math.sqrt(sum);
-  }
-
   private async chunkTranscript(transcript: RecordingTranscript): Promise<Document[]> {
     const settings = await getSettings();
-    const chunkSize = settings.vectorSearch?.chunkSize || 1000;
-    const chunkOverlap = settings.vectorSearch?.chunkOverlap || 200;
+    const chunkSize = 1000; // Default chunk size
+    const chunkOverlap = 200; // Default chunk overlap
 
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize,
@@ -360,8 +487,17 @@ class VectorStore {
   async shutdown() {
     try {
       if (this.db) {
-        await this.db.destroy();
-        log.info("Vector store database closed");
+        return new Promise<void>((resolve, reject) => {
+          this.db!.close((err) => {
+            if (err) {
+              log.error("Failed to close database:", err);
+              reject(err);
+            } else {
+              log.info("Vector store database closed");
+              resolve();
+            }
+          });
+        });
       }
     } catch (error) {
       log.error("Failed to shutdown vector store:", error);
@@ -370,7 +506,7 @@ class VectorStore {
 }
 
 // Singleton instance
-const vectorStore = new VectorStore();
+const vectorStore = new SQLiteVectorStore();
 
 export const initializeVectorStore = async () => {
   try {
@@ -378,7 +514,6 @@ export const initializeVectorStore = async () => {
     return true;
   } catch (error) {
     log.error("Failed to initialize vector store:", error);
-    log.error("Error details:", JSON.stringify(error, null, 2));
     log.info("Vector search will be disabled. App will continue with text search only.");
     return false;
   }
@@ -400,14 +535,20 @@ export const vectorSearch = async (
   return await vectorStore.search(query, limit, recordingId);
 };
 
+export const textSearch = async (
+  query: string,
+  limit: number = 10,
+  recordingId?: string
+): Promise<VectorSearchResult[]> => {
+  return await vectorStore.textSearch(query, limit, recordingId);
+};
+
 export const hybridSearch = async (
   query: string,
   limit: number = 10,
   recordingId?: string
 ): Promise<VectorSearchResult[]> => {
-  // For now, hybrid search is the same as vector search
-  // In the future, this could combine text search and vector search results
-  return await vectorStore.search(query, limit, recordingId);
+  return await vectorStore.hybridSearch(query, limit, recordingId);
 };
 
 export const isVectorStoreAvailable = () => {
