@@ -2,6 +2,7 @@ import sqlite3 from "sqlite3";
 import path from "path";
 import fs from "fs-extra";
 import log from "electron-log/main";
+import { app } from "electron";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "@langchain/core/documents";
 import * as history from "./history";
@@ -38,7 +39,11 @@ class SQLiteVectorStore {
   private dbPath: string;
 
   constructor() {
-    this.dbPath = path.join(process.cwd(), "vector-store", "vector-store.db");
+    // Use user data directory for packaged app, fallback to cwd for development
+    const dataDir = app.isPackaged 
+      ? app.getPath('userData')
+      : process.cwd();
+    this.dbPath = path.join(dataDir, "vector-store", "vector-store.db");
   }
 
   async initialize() {
