@@ -33,7 +33,7 @@ export const AudioControls: FC<{
     <Box px="1rem" py=".5rem" style={{ borderTop: `1px solid var(--gray-5)` }}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio preload="auto" ref={audio.audioTag}>
-        <source src={`recording://${id}`} type="audio/mpeg" />
+        <source src={`http://localhost:3001/audio/${id}`} type="audio/mpeg" />
       </audio>
       <Slider
         max={audio.duration}
