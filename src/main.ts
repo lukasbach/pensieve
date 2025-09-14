@@ -1,4 +1,4 @@
-import { app, protocol } from "electron";
+import { app, protocol, ipcMain } from "electron";
 import path from "path";
 import fs from "fs-extra";
 import { updateElectronApp } from "update-electron-app";
@@ -74,7 +74,70 @@ app.whenReady().then(async () => {
     await mainApi.setAutoStart(true);
   }
 
-  // protocol.handle("recording" doesn't produce a seekable stream
+  // Start a local HTTP server for audio files
+  const http = require('http');
+  const audioServer = http.createServer(async (req, res) => {
+    if (req.url?.startsWith('/audio/')) {
+      const recordingId = req.url.replace('/audio/', '');
+      const mp3 = path.join(
+        await history.getRecordingsFolder(),
+        recordingId,
+        "recording.mp3",
+      );
+      
+      if (!fs.existsSync(mp3)) {
+        res.writeHead(404);
+        res.end('Audio not found');
+        return;
+      }
+
+      const stat = fs.statSync(mp3);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+
+      console.log(`Audio request: ${req.url}, Range: ${range || 'none'}`);
+
+      if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunksize = (end - start) + 1;
+        
+        console.log(`Range request: ${start}-${end} (${chunksize} bytes)`);
+        
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': chunksize,
+          'Content-Type': 'audio/mpeg',
+        });
+        
+        const stream = fs.createReadStream(mp3, { start, end });
+        stream.pipe(res);
+      } else {
+        console.log(`Full file request: ${fileSize} bytes`);
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': 'audio/mpeg',
+          'Accept-Ranges': 'bytes',
+        });
+        
+        const stream = fs.createReadStream(mp3);
+        stream.pipe(res);
+      }
+    } else {
+      res.writeHead(404);
+      res.end('Not found');
+    }
+  });
+
+  // Start the audio server on a random port
+  const audioPort = 3001;
+  audioServer.listen(audioPort, () => {
+    console.log(`Audio server running on port ${audioPort}`);
+  });
+
+  // Keep the original protocol for backward compatibility
   protocol.registerFileProtocol("recording", async (request, callback) => {
     const recordingId = request.url.replace("recording://", "");
     const mp3 = path.join(
