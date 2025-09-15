@@ -1,5 +1,7 @@
 import { execa } from "execa";
 import path from "path";
+import os from "os";
+import fs from "fs";
 import {
   getExtraResourcesFolder,
   getMillisecondsFromTimeString,
@@ -7,7 +9,33 @@ import {
 import * as runner from "./runner";
 import * as settings from "./settings";
 
-const ffmpegPath = path.join(getExtraResourcesFolder(), "ffmpeg.exe");
+// Find FFmpeg executable
+const findFFmpegPath = (): string => {
+  if (os.platform() === "win32") {
+    return path.join(getExtraResourcesFolder(), "ffmpeg.exe"); // Windows still bundles FFmpeg
+  }
+  
+  // Common FFmpeg paths on macOS
+  const commonPaths = [
+    "/opt/homebrew/bin/ffmpeg", // Apple Silicon Homebrew
+    "/usr/local/bin/ffmpeg",    // Intel Homebrew
+    "/usr/bin/ffmpeg",          // System installation
+    "ffmpeg"                    // Fallback to PATH
+  ];
+  
+  for (const ffmpegPath of commonPaths) {
+    if (ffmpegPath === "ffmpeg") {
+      return ffmpegPath; // Let execa handle PATH resolution
+    }
+    if (fs.existsSync(ffmpegPath)) {
+      return ffmpegPath;
+    }
+  }
+  
+  return "ffmpeg"; // Final fallback
+};
+
+const ffmpegPath = findFFmpegPath();
 
 export const simpleTranscode = async (input: string, output: string) => {
   await execa(ffmpegPath, ["-i", input, "-y", output], {

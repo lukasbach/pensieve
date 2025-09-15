@@ -112,6 +112,7 @@ const config: ForgeConfig = {
       const target = path.join(__dirname, "extra");
       await fs.ensureDir(target);
 
+      // Bundle FFmpeg and Whisper binaries for Windows only
       if (platform === "win32" && arch === "x64") {
         await fs.copy(
           path.join(ffmpegBase, "win/x64/ffmpeg.exe"),
@@ -149,6 +150,8 @@ const config: ForgeConfig = {
           path.join(target, "whisper.dll"),
         );
       }
+
+      // Note: For macOS and Linux, FFmpeg and Whisper will use system installations
 
       await createIcon(1);
       await createIcon(2);

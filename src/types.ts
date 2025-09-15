@@ -85,7 +85,7 @@ export const defaultSettings = {
       ollama: {
         chatModel: {
           baseUrl: "http://localhost:11434",
-          model: "llama2:latest",
+          model: "gemma3:4b",
         },
         embeddings: {
           model: "nomic-embed-text",

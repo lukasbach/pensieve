@@ -81,7 +81,7 @@ export const saveRecording = async (recording: RecordingData) => {
 
 export const importRecording = async (file: string, meta: RecordingMeta) => {
   const date = new Date(meta.started);
-  const recordingId = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+  const recordingId = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
   const folder = path.join(await getRecordingsFolder(), recordingId);
   await fs.ensureDir(folder);
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
@@ -105,19 +105,25 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
 export const listRecordings = async () => {
   const recordingFolders = await fs.readdir(await getRecordingsFolder());
   const items = await Promise.all(
-    recordingFolders.map(
-      async (recordingFolder) =>
-        [
-          recordingFolder,
-          (await fs.readJson(
-            path.join(
-              await getRecordingsFolder(),
-              recordingFolder,
-              "meta.json",
-            ),
-          )) as RecordingMeta,
-        ] as const,
-    ),
+    recordingFolders
+      .filter(async (folder) => {
+        const folderPath = path.join(await getRecordingsFolder(), folder);
+        const stats = await fs.stat(folderPath);
+        return stats.isDirectory();
+      })
+      .map(
+        async (recordingFolder) =>
+          [
+            recordingFolder,
+            (await fs.readJson(
+              path.join(
+                await getRecordingsFolder(),
+                recordingFolder,
+                "meta.json",
+              ),
+            )) as RecordingMeta,
+          ] as const,
+      ),
   );
   return items.reverse().reduce(
     (acc, [folder, meta]) => {
