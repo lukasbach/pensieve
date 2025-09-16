@@ -48,7 +48,10 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
   };
 
   return {
-    recordingConfig: { recordScreenAudio: true },
+    recordingConfig: { 
+      recordScreenAudio: true,
+      mic: { deviceId: "default", label: "Default Microphone", kind: "audioinput" } as MediaDeviceInfo, // Placeholder - will be replaced with actual default mic
+    },
     meta: { started: new Date().toISOString() },
     isRecording: false,
     isPaused: false,

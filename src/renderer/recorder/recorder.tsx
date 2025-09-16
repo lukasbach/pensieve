@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
@@ -25,11 +25,12 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     setMeta,
   } = useRecorderState();
 
-  // not sure why that was needed?
-  // useEffect(() => {
-  //   reset();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  // Automatically set the default microphone when available
+  useEffect(() => {
+    if (defaultMic && (!recordingConfig.mic || recordingConfig.mic.deviceId === "default")) {
+      setConfig({ mic: defaultMic });
+    }
+  }, [defaultMic, recordingConfig.mic, setConfig]);
 
   if (recorder) {
     return <RecorderInsession ref={ref} />;
