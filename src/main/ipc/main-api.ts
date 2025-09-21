@@ -2,7 +2,10 @@ import { app, desktopCapturer, shell } from "electron";
 import path from "path";
 import * as settings from "../domain/settings";
 import * as screenshot from "../domain/screenshot";
-import { getAudioServerPort } from "../domain/audio-server";
+import {
+  getAudioServerPort,
+  getAudioServerSecret,
+} from "../domain/audio-server";
 
 const updateExe = path.resolve(
   path.dirname(process.execPath),
@@ -20,6 +23,10 @@ export const mainApi = {
 
   getAudioPort: async () => {
     return getAudioServerPort();
+  },
+
+  getAudioSecret: async () => {
+    return getAudioServerSecret();
   },
 
   setAutoStart: async (value: boolean) => {
