@@ -25,6 +25,11 @@ export const AudioControls: FC<{
     queryFn: () => mainApi.getAudioPort(),
   });
 
+  const { data: audioSecret } = useQuery({
+    queryKey: ["audioSecret"],
+    queryFn: () => mainApi.getAudioSecret(),
+  });
+
   useDebouncedEffect(
     () => {
       if (syncScroll) {
@@ -40,9 +45,9 @@ export const AudioControls: FC<{
     <Box px="1rem" py=".5rem" style={{ borderTop: `1px solid var(--gray-5)` }}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio preload="auto" ref={audio.audioTag}>
-        {audioPort && (
+        {audioPort && audioSecret && (
           <source
-            src={`http://localhost:${audioPort}/audio/${id}`}
+            src={`http://localhost:${audioPort}/audio/${id}?auth=${audioSecret}`}
             type="audio/mpeg"
           />
         )}

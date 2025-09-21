@@ -17,7 +17,10 @@ import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
-import { setAudioServerPort } from "./main/domain/audio-server";
+import {
+  getAudioServerSecret,
+  setAudioServerPort,
+} from "./main/domain/audio-server";
 
 log.initialize({ spyRendererConsole: true });
 
@@ -80,7 +83,22 @@ app.whenReady().then(async () => {
   // Start a local HTTP server for audio files
   const audioServer = http.createServer(async (req, res) => {
     if (req.url?.startsWith("/audio/")) {
-      const recordingId = req.url.replace("/audio/", "");
+      // Check for auth secret in query parameters
+      const url = new URL(req.url, `http://localhost`);
+      const providedSecret = url.searchParams.get("auth");
+      const expectedSecret = getAudioServerSecret();
+
+      if (
+        !providedSecret ||
+        !expectedSecret ||
+        providedSecret !== expectedSecret
+      ) {
+        res.writeHead(401);
+        res.end("Unauthorized");
+        return;
+      }
+
+      const recordingId = url.pathname.replace("/audio/", "");
       const mp3 = path.join(
         await history.getRecordingsFolder(),
         recordingId,
