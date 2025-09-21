@@ -54,7 +54,7 @@ const parseActionItems = (text: string) => {
     .filter(isNotNull);
 };
 
-const getChatModel = async () => {
+export const getChatModel = async () => {
   const { llm } = await settings.getSettings();
   switch (llm.provider) {
     case "ollama":
@@ -68,7 +68,7 @@ const getChatModel = async () => {
   }
 };
 
-const getEmbeddings = async () => {
+export const getEmbeddings = async () => {
   const { llm } = await settings.getSettings();
 
   switch (llm.provider) {
