@@ -44,7 +44,9 @@ and summarization, or various audio processing settings.
         Download the latest release
     </a>
 </div>
-## macOS Setup
+
+
+# MacOS Setup Notes
 
 Pensieve requires FFmpeg and Whisper to be installed on macOS. The easiest way to install these dependencies is using Homebrew:
 
