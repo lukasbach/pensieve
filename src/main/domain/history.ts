@@ -104,26 +104,36 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
 
 export const listRecordings = async () => {
   const recordingFolders = await fs.readdir(await getRecordingsFolder());
+  
+  // Filter out non-directories and .DS_Store files first
+  const validFolders = [];
+  for (const folder of recordingFolders) {
+    // Skip .DS_Store and other hidden files
+    if (folder.startsWith('.')) {
+      continue;
+    }
+    
+    const folderPath = path.join(await getRecordingsFolder(), folder);
+    const stats = await fs.stat(folderPath);
+    if (stats.isDirectory()) {
+      validFolders.push(folder);
+    }
+  }
+  
   const items = await Promise.all(
-    recordingFolders
-      .filter(async (folder) => {
-        const folderPath = path.join(await getRecordingsFolder(), folder);
-        const stats = await fs.stat(folderPath);
-        return stats.isDirectory();
-      })
-      .map(
-        async (recordingFolder) =>
-          [
-            recordingFolder,
-            (await fs.readJson(
-              path.join(
-                await getRecordingsFolder(),
-                recordingFolder,
-                "meta.json",
-              ),
-            )) as RecordingMeta,
-          ] as const,
-      ),
+    validFolders.map(
+      async (recordingFolder) =>
+        [
+          recordingFolder,
+          (await fs.readJson(
+            path.join(
+              await getRecordingsFolder(),
+              recordingFolder,
+              "meta.json",
+            ),
+          )) as RecordingMeta,
+        ] as const,
+    ),
   );
   return items.reverse().reduce(
     (acc, [folder, meta]) => {
