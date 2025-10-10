@@ -162,9 +162,12 @@ const doDataHooksStep = async (job: PostProcessingJob) => {
 const doVectorSearchStep = async (job: PostProcessingJob) => {
   if (hasAborted() || !hasStep(job, "vectorSearch")) return;
   setStep("vectorSearch");
+  setProgress("vectorSearch", 0);
   
   try {
-    await vectorSearch.addTranscriptToVectorStore(job.recordingId);
+    await vectorSearch.addTranscriptToVectorStore(job.recordingId, (progress) => {
+      setProgress("vectorSearch", progress);
+    });
   } catch (error) {
     console.error("Vector search indexing failed:", error);
     // Don't fail the entire post-processing if vector indexing fails

@@ -142,7 +142,7 @@ class SQLiteVectorStore {
     });
   }
 
-  async addTranscript(recordingId: string) {
+  async addTranscript(recordingId: string, onProgress?: (progress: number) => void) {
     try {
       if (!this.db || !this.embeddings) {
         log.warn("Vector store not initialized, skipping transcript indexing");
@@ -180,6 +180,12 @@ class SQLiteVectorStore {
         };
 
         await this.insertChunk(chunkDoc);
+        
+        // Report progress
+        if (onProgress) {
+          const progressPercent = Math.round(((i + 1) / chunks.length) * 100);
+          onProgress(progressPercent);
+        }
       }
 
       log.info(`Added ${chunks.length} chunks to vector store for recording: ${recordingId}`);
@@ -531,8 +537,8 @@ export const initializeVectorStore = async () => {
   }
 };
 
-export const addTranscriptToVectorStore = async (recordingId: string) => {
-  await vectorStore.addTranscript(recordingId);
+export const addTranscriptToVectorStore = async (recordingId: string, onProgress?: (progress: number) => void) => {
+  await vectorStore.addTranscript(recordingId, onProgress);
   invalidateUiKeys(QueryKeys.VectorStore, QueryKeys.VectorSearch, QueryKeys.HybridSearch);
 };
 
