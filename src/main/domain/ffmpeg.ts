@@ -2,7 +2,7 @@ import { execa } from "execa";
 import path from "path";
 import os from "os";
 import fs from "fs";
-import { dialog } from "electron";
+import { dialog, shell } from "electron";
 import {
   getExtraResourcesFolder,
   getMillisecondsFromTimeString,
@@ -39,7 +39,6 @@ const showFFmpegWarning = async () => {
   });
   
   if (result.response === 1) {
-    const { shell } = require("electron");
     shell.openExternal("https://ffmpeg.org/download.html");
   }
 };

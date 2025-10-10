@@ -1,7 +1,7 @@
 import path from "path";
 import os from "os";
 import fs from "fs";
-import { dialog } from "electron";
+import { dialog, shell } from "electron";
 import log from "electron-log/main";
 import {
   buildArgs,
@@ -19,21 +19,21 @@ const showWhisperWarning = async () => {
   if (os.platform() !== "darwin") {
     return; // Only show on macOS
   }
-  
+
   const result = await dialog.showMessageBox({
     type: "warning",
     title: "Whisper Not Found",
     message: "Whisper is required but not found on your system.",
-    detail: "Please install whisper-cpp using one of these methods:\n\n" +
-            "• Homebrew: brew install whisper-cpp\n" +
-            "• Download from: https://github.com/ggerganov/whisper.cpp\n\n" +
-            "Pensieve will not work properly without Whisper.",
+    detail:
+      "Please install whisper-cpp using one of these methods:\n\n" +
+      "• Homebrew: brew install whisper-cpp\n" +
+      "• Download from: https://github.com/ggerganov/whisper.cpp\n\n" +
+      "Pensieve will not work properly without Whisper.",
     buttons: ["OK", "Open Whisper Website"],
     defaultId: 0,
   });
-  
+
   if (result.response === 1) {
-    const { shell } = require("electron");
     shell.openExternal("https://github.com/ggerganov/whisper.cpp");
   }
 };
@@ -44,14 +44,14 @@ const checkWhisperAvailability = async (): Promise<boolean> => {
     // Windows uses bundled Whisper
     return fs.existsSync(path.join(getExtraResourcesFolder(), "whisper.exe"));
   }
-  
+
   // Check common Whisper paths on macOS
   const commonPaths = [
     "/opt/homebrew/bin/whisper-cpp", // Apple Silicon Homebrew
-    "/usr/local/bin/whisper-cpp",    // Intel Homebrew
-    "whisper-cpp"                    // Fallback to PATH
+    "/usr/local/bin/whisper-cpp", // Intel Homebrew
+    "whisper-cpp", // Fallback to PATH
   ];
-  
+
   for (const whisperPath of commonPaths) {
     if (whisperPath === "whisper-cpp") {
       // Check if it's available in PATH
@@ -67,7 +67,7 @@ const checkWhisperAvailability = async (): Promise<boolean> => {
       return true;
     }
   }
-  
+
   return false;
 };
 
@@ -76,14 +76,14 @@ const getWhisperPath = (): string => {
   if (os.platform() === "win32") {
     return path.join(getExtraResourcesFolder(), "whisper.exe"); // Windows bundles Whisper
   }
-  
+
   // Common Whisper paths on macOS
   const commonPaths = [
     "/opt/homebrew/bin/whisper-cpp", // Apple Silicon Homebrew
-    "/usr/local/bin/whisper-cpp",    // Intel Homebrew
-    "whisper-cpp"                    // Fallback to PATH
+    "/usr/local/bin/whisper-cpp", // Intel Homebrew
+    "whisper-cpp", // Fallback to PATH
   ];
-  
+
   for (const whisperPath of commonPaths) {
     if (whisperPath === "whisper-cpp") {
       return whisperPath; // Let execa handle PATH resolution
@@ -92,7 +92,7 @@ const getWhisperPath = (): string => {
       return whisperPath;
     }
   }
-  
+
   return "whisper-cpp"; // Final fallback
 };
 
@@ -105,7 +105,7 @@ const ensureWhisperAvailable = async () => {
     return;
   }
   whisperChecked = true;
-  
+
   // Only check and warn on macOS (Windows bundles Whisper)
   if (os.platform() === "darwin") {
     const isAvailable = await checkWhisperAvailability();
