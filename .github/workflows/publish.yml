@@ -24,9 +24,10 @@ jobs:
       - run: yarn run typecheck
       - run: yarn run build:docs
       - run: yarn make
-      - uses: 'paramsinghvc/gh-action-bump-version@master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # TODO enable again before next release
+      # - uses: 'paramsinghvc/gh-action-bump-version@master'
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
