@@ -70,6 +70,8 @@ export const defaultSettings = {
     autoStart: true,
     trayRunningNotificationShown: false,
     useOverlayTool: true,
+    defaultRecordScreenAudio: true,
+    defaultRecordMicrophone: true,
   },
   llm: {
     enabled: true,

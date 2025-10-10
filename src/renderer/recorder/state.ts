@@ -24,6 +24,17 @@ type RecorderState = {
   addScreenshot: (fileName: string) => void;
 };
 
+const getDefaultConfig = async (): Promise<RecordingConfig> => {
+  const settings = await mainApi.getSettings();
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const defaultMic = devices.find((d) => d.kind === "audioinput");
+  
+  return {
+    recordScreenAudio: settings.ui.defaultRecordScreenAudio,
+    mic: settings.ui.defaultRecordMicrophone ? defaultMic : undefined,
+  };
+};
+
 export const useRecorderState = create<RecorderState>()((_set, get) => {
   const set: typeof _set = (newState) => {
     if (typeof newState === "function") {
@@ -49,8 +60,8 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
 
   return {
     recordingConfig: { 
-      recordScreenAudio: true,
-      mic: { deviceId: "default", label: "Default Microphone", kind: "audioinput" } as MediaDeviceInfo, // Placeholder - will be replaced with actual default mic
+      recordScreenAudio: false,
+      mic: undefined,
     },
     meta: { started: new Date().toISOString() },
     isRecording: false,
@@ -61,8 +72,18 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
 
     setMeta: (meta: Partial<RecordingMeta>) =>
       set({ meta: { ...get().meta, ...meta } }),
-    setConfig: (config) =>
-      set({ recordingConfig: { ...get().recordingConfig, ...config } }),
+    setConfig: async (config) => {
+      const newConfig = { ...get().recordingConfig, ...config };
+      set({ recordingConfig: newConfig });
+      
+      // Save to settings for persistence
+      await mainApi.saveSettings({
+        ui: {
+          defaultRecordScreenAudio: newConfig.recordScreenAudio,
+          defaultRecordMicrophone: !!newConfig.mic,
+        },
+      });
+    },
     startRecording: async () => {
       set({
         recorder: await createRecorder(get().recordingConfig),
@@ -71,19 +92,16 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
         isPaused: false,
       });
     },
-    reset: async () =>
+    reset: async () => {
+      const defaultConfig = await getDefaultConfig();
       set({
-        recordingConfig: {
-          recordScreenAudio: true,
-          mic: (await navigator.mediaDevices.enumerateDevices()).find(
-            (d) => d.kind === "audioinput",
-          ),
-        },
+        recordingConfig: defaultConfig,
         recorder: undefined,
         meta: undefined,
         isRecording: false,
         isPaused: false,
-      }),
+      });
+    },
     pause: () => {
       get().recorder?.mic?.pause();
       get().recorder?.screen?.pause();

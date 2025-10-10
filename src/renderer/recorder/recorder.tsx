@@ -12,6 +12,7 @@ import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
+import { mainApi } from "../api";
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
@@ -25,12 +26,21 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     setMeta,
   } = useRecorderState();
 
-  // Automatically set the default microphone when available
+  // Initialize recorder with settings
   useEffect(() => {
-    if (defaultMic && (!recordingConfig.mic || recordingConfig.mic.deviceId === "default")) {
-      setConfig({ mic: defaultMic });
-    }
-  }, [defaultMic, recordingConfig.mic, setConfig]);
+    const initializeWithSettings = async () => {
+      const settings = await mainApi.getSettings();
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const defaultMicDevice = devices.find((d) => d.kind === "audioinput");
+
+      setConfig({
+        recordScreenAudio: settings.ui.defaultRecordScreenAudio,
+        mic: settings.ui.defaultRecordMicrophone ? defaultMicDevice : undefined,
+      });
+    };
+
+    initializeWithSettings();
+  }, [setConfig]);
 
   if (recorder) {
     return <RecorderInsession ref={ref} />;
@@ -65,8 +75,6 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
         ]}
         columns={{ initial: "1" }}
         onValueChange={(value) => {
-          if (value.filter((v) => !!v).length === 0) return;
-
           setConfig({
             mic: value.includes("mic")
               ? recordingConfig.mic ?? defaultMic
