@@ -7,19 +7,10 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "@langchain/core/documents";
 import * as history from "./history";
 import { getEmbeddings } from "./llm";
-import { RecordingTranscript, RecordingTranscriptItem } from "../../types";
+import { RecordingTranscript, RecordingTranscriptItem, VectorSearchResult } from "../../types";
 import { getSettings } from "./settings";
-
-interface VectorSearchResult {
-  recordingId: string;
-  chunkIndex: number;
-  text: string;
-  timestamp: string;
-  speaker: string;
-  score: number;
-  startTime: number;
-  endTime: number;
-}
+import { invalidateUiKeys } from "../ipc/invalidate-ui";
+import { QueryKeys } from "../../query-keys";
 
 interface TranscriptChunk {
   id: string;
@@ -59,9 +50,6 @@ class SQLiteVectorStore {
       // Open SQLite database
       log.info("Opening SQLite database...");
       this.db = new sqlite3.Database(this.dbPath);
-      
-      // Load sqlite-vec extension if available
-      await this.loadSqliteVec();
 
       // Create tables
       await this.createTables();
@@ -73,26 +61,20 @@ class SQLiteVectorStore {
     }
   }
 
-  private async loadSqliteVec() {
-    if (!this.db) return;
-
-    try {
-      // Try to load sqlite-vec extension
-      // Note: This requires the sqlite-vec extension to be available
-      // For now, we'll use basic SQLite with FTS5 for text search
-      log.info("sqlite-vec extension not available, using FTS5 for text search");
-    } catch (error) {
-      log.warn("Could not load sqlite-vec extension:", error);
-    }
-  }
 
   private async createTables() {
     if (!this.db) return;
 
     return new Promise<void>((resolve, reject) => {
-      this.db!.serialize(() => {
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      
+      this.db.serialize(() => {
+        const db = this.db!; // Safe to use ! here since we checked above
         // Create chunks table
-        this.db!.run(`
+        db.run(`
           CREATE TABLE IF NOT EXISTS chunks (
             id TEXT PRIMARY KEY,
             recording_id TEXT NOT NULL,
@@ -113,7 +95,7 @@ class SQLiteVectorStore {
         });
 
         // Create FTS5 virtual table for text search
-        this.db!.run(`
+        db.run(`
           CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
             text,
             speaker,
@@ -130,7 +112,7 @@ class SQLiteVectorStore {
         });
 
         // Create triggers to keep FTS5 in sync
-        this.db!.run(`
+        db.run(`
           CREATE TRIGGER IF NOT EXISTS chunks_ai AFTER INSERT ON chunks BEGIN
             INSERT INTO chunks_fts(rowid, text, speaker, timestamp)
             VALUES (new.rowid, new.text, new.speaker, new.timestamp);
@@ -143,7 +125,7 @@ class SQLiteVectorStore {
           }
         });
 
-        this.db!.run(`
+        db.run(`
           CREATE TRIGGER IF NOT EXISTS chunks_ad AFTER DELETE ON chunks BEGIN
             INSERT INTO chunks_fts(chunks_fts, rowid, text, speaker, timestamp)
             VALUES('delete', old.rowid, old.text, old.speaker, old.timestamp);
@@ -211,7 +193,12 @@ class SQLiteVectorStore {
     if (!this.db) return;
 
     return new Promise<void>((resolve, reject) => {
-      const stmt = this.db!.prepare(`
+      if (!this.db) {
+        reject(new Error("Database not initialized"));
+        return;
+      }
+      
+      const stmt = this.db.prepare(`
         INSERT INTO chunks (id, recording_id, chunk_index, text, timestamp, speaker, start_time, end_time, embedding)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
@@ -244,7 +231,12 @@ class SQLiteVectorStore {
       if (!this.db) return;
 
       return new Promise<void>((resolve, reject) => {
-        this.db!.run(
+        if (!this.db) {
+          reject(new Error("Database not initialized"));
+          return;
+        }
+        
+        this.db.run(
           "DELETE FROM chunks WHERE recording_id = ?",
           [recordingId],
           function(err) {
@@ -286,7 +278,12 @@ class SQLiteVectorStore {
       }
 
       return new Promise<VectorSearchResult[]>((resolve, reject) => {
-        this.db!.all(sql, params, (err, rows: any[]) => {
+        if (!this.db) {
+          reject(new Error("Database not initialized"));
+          return;
+        }
+        
+        this.db.all(sql, params, (err, rows: any[]) => {
           if (err) {
             log.error("Vector search failed:", err);
             reject(err);
@@ -345,7 +342,12 @@ class SQLiteVectorStore {
       params.push(limit);
 
       return new Promise<VectorSearchResult[]>((resolve, reject) => {
-        this.db!.all(sql, params, (err, rows: any[]) => {
+        if (!this.db) {
+          reject(new Error("Database not initialized"));
+          return;
+        }
+        
+        this.db.all(sql, params, (err, rows: any[]) => {
           if (err) {
             log.error("Text search failed:", err);
             reject(err);
@@ -418,13 +420,18 @@ class SQLiteVectorStore {
       }
 
       return new Promise<{ totalChunks: number; recordings: number }>((resolve, reject) => {
-        this.db!.get("SELECT COUNT(*) as count FROM chunks", (err, row: any) => {
+        if (!this.db) {
+          reject(new Error("Database not initialized"));
+          return;
+        }
+        
+        this.db.get("SELECT COUNT(*) as count FROM chunks", (err, row: any) => {
           if (err) {
             reject(err);
             return;
           }
 
-          this.db!.get("SELECT COUNT(DISTINCT recording_id) as count FROM chunks", (err, row2: any) => {
+          this.db.get("SELECT COUNT(DISTINCT recording_id) as count FROM chunks", (err, row2: any) => {
             if (err) {
               reject(err);
               return;
@@ -526,10 +533,12 @@ export const initializeVectorStore = async () => {
 
 export const addTranscriptToVectorStore = async (recordingId: string) => {
   await vectorStore.addTranscript(recordingId);
+  invalidateUiKeys(QueryKeys.VectorStore, QueryKeys.VectorSearch, QueryKeys.HybridSearch);
 };
 
 export const removeTranscriptFromVectorStore = async (recordingId: string) => {
   await vectorStore.removeTranscript(recordingId);
+  invalidateUiKeys(QueryKeys.VectorStore, QueryKeys.VectorSearch, QueryKeys.HybridSearch);
 };
 
 export const vectorSearch = async (

@@ -47,6 +47,17 @@ export type RecordingTranscriptItem = {
   speaker: string;
 };
 
+export type VectorSearchResult = {
+  recordingId: string;
+  chunkIndex: number;
+  text: string;
+  timestamp: string;
+  speaker: string;
+  score: number;
+  startTime: number;
+  endTime: number;
+};
+
 export type PostProcessingStep =
   | "modelDownload"
   | "wav"

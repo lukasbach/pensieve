@@ -5,7 +5,11 @@ import * as postprocess from "../domain/postprocess";
 import * as searchIndex from "../domain/search";
 import * as vectorSearch from "../domain/vector-search";
 import { openAppWindow } from "../domain/windows";
-import { PostProcessingJob } from "../../types";
+import { PostProcessingJob, VectorSearchResult } from "../../types";
+import { getChatModel, getEmbeddings } from "../domain/llm";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { Document } from "@langchain/core/documents";
 
 export const historyApi = {
   storeUnassociatedScreenshot: history.storeUnassociatedScreenshot,
@@ -31,12 +35,7 @@ export const historyApi = {
   getVectorStoreStats: async () => vectorSearch.getVectorStoreStats(),
   
   // Conversational chat functions
-  generateConversationalResponse: async (query: string, searchResults: any[]) => {
-    const { getChatModel, getEmbeddings } = await import("../domain/llm");
-    const { createStuffDocumentsChain } = await import("langchain/chains/combine_documents");
-    const { ChatPromptTemplate } = await import("@langchain/core/prompts");
-    const { Document } = await import("@langchain/core/documents");
-    
+  generateConversationalResponse: async (query: string, searchResults: VectorSearchResult[]) => {
     try {
       const chatModel = await getChatModel();
       
