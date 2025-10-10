@@ -104,22 +104,23 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
 
 export const listRecordings = async () => {
   const recordingFolders = await fs.readdir(await getRecordingsFolder());
-  
+
   // Filter out non-directories and .DS_Store files first
   const validFolders = [];
   for (const folder of recordingFolders) {
     // Skip .DS_Store and other hidden files
-    if (folder.startsWith('.')) {
+    if (folder.startsWith(".")) {
+      // eslint-disable-next-line no-continue
       continue;
     }
-    
+
     const folderPath = path.join(await getRecordingsFolder(), folder);
     const stats = await fs.stat(folderPath);
     if (stats.isDirectory()) {
       validFolders.push(folder);
     }
   }
-  
+
   const items = await Promise.all(
     validFolders.map(
       async (recordingFolder) =>

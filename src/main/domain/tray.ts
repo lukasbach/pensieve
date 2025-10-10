@@ -18,12 +18,12 @@ export const registerTray = () => {
       type: "normal",
       click: () => windowsApi.openSettingsWindow(),
     },
-    { 
-      label: "Quit", 
-      type: "normal", 
+    {
+      label: "Quit",
+      type: "normal",
       click: () => {
         app.exit(0);
-      }
+      },
     },
   ]);
 

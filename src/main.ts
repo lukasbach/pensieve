@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs-extra";
 import { updateElectronApp } from "update-electron-app";
 import log from "electron-log/main";
+import started from "electron-squirrel-startup";
 import { loadIpcInterfaceInMain } from "./main/ipc/ipc-connector";
 import { mainApi } from "./main/ipc/main-api";
 import { modelsApi } from "./main/ipc/models-api";
@@ -14,7 +15,6 @@ import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
-import started from "electron-squirrel-startup";
 
 log.initialize({ spyRendererConsole: true });
 
@@ -50,7 +50,6 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-
 
 protocol.registerSchemesAsPrivileged([
   {

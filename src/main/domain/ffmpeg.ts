@@ -25,19 +25,20 @@ const showFFmpegWarning = async () => {
   if (os.platform() !== "darwin") {
     return; // Only show on macOS
   }
-  
+
   const result = await dialog.showMessageBox({
     type: "warning",
     title: "FFmpeg Not Found",
     message: "FFmpeg is required but not found on your system.",
-    detail: "Please install FFmpeg using one of these methods:\n\n" +
-            "• Homebrew: brew install ffmpeg\n" +
-            "• Download from: https://ffmpeg.org/download.html\n\n" +
-            "Pensieve will not work properly without FFmpeg.",
+    detail:
+      "Please install FFmpeg using one of these methods:\n\n" +
+      "• Homebrew: brew install ffmpeg\n" +
+      "• Download from: https://ffmpeg.org/download.html\n\n" +
+      "Pensieve will not work properly without FFmpeg.",
     buttons: ["OK", "Open FFmpeg Website"],
     defaultId: 0,
   });
-  
+
   if (result.response === 1) {
     shell.openExternal("https://ffmpeg.org/download.html");
   }
@@ -48,15 +49,15 @@ const findFFmpegPath = (): string => {
   if (os.platform() === "win32") {
     return path.join(getExtraResourcesFolder(), "ffmpeg.exe"); // Windows still bundles FFmpeg
   }
-  
+
   // Common FFmpeg paths on macOS
   const commonPaths = [
     "/opt/homebrew/bin/ffmpeg", // Apple Silicon Homebrew
-    "/usr/local/bin/ffmpeg",    // Intel Homebrew
-    "/usr/bin/ffmpeg",          // System installation
-    "ffmpeg"                    // Fallback to PATH
+    "/usr/local/bin/ffmpeg", // Intel Homebrew
+    "/usr/bin/ffmpeg", // System installation
+    "ffmpeg", // Fallback to PATH
   ];
-  
+
   for (const ffmpegPath of commonPaths) {
     if (ffmpegPath === "ffmpeg") {
       return ffmpegPath; // Let execa handle PATH resolution
@@ -65,7 +66,7 @@ const findFFmpegPath = (): string => {
       return ffmpegPath;
     }
   }
-  
+
   return "ffmpeg"; // Final fallback
 };
 
@@ -78,7 +79,7 @@ const ensureFFmpegAvailable = async () => {
     return;
   }
   ffmpegChecked = true;
-  
+
   // Only check and warn on macOS (Windows bundles FFmpeg)
   if (os.platform() === "darwin") {
     const isAvailable = await checkFFmpegAvailability();

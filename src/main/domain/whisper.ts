@@ -60,7 +60,7 @@ const checkWhisperAvailability = async (): Promise<boolean> => {
         await execa("whisper-cpp", ["--help"], { stdio: "pipe" });
         return true;
       } catch {
-        continue;
+        // try next
       }
     }
     if (fs.existsSync(whisperPath)) {

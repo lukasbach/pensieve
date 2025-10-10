@@ -1,4 +1,4 @@
-import { BrowserWindow, Notification, Rectangle, screen, app } from "electron";
+import { BrowserWindow, Notification, Rectangle, app, screen } from "electron";
 import path from "path";
 import { getIconPath } from "../../main-utils";
 import { getSettings, saveSettings } from "./settings";
