@@ -9,14 +9,26 @@ import {
 } from "react-icons/hi2";
 import { LuMouse } from "react-icons/lu";
 import { useDebouncedEffect } from "@react-hookz/web";
+import { useQuery } from "@tanstack/react-query";
 import { useManagedAudio } from "./use-managed-audio";
 import { timeToDisplayString } from "../../utils";
+import { mainApi } from "../api";
 
 export const AudioControls: FC<{
   audio: ReturnType<typeof useManagedAudio>;
   id: string;
 }> = ({ audio, id }) => {
   const [syncScroll, setSyncScroll] = useState(false);
+
+  const { data: audioPort } = useQuery({
+    queryKey: ["audioPort"],
+    queryFn: () => mainApi.getAudioPort(),
+  });
+
+  const { data: audioSecret } = useQuery({
+    queryKey: ["audioSecret"],
+    queryFn: () => mainApi.getAudioSecret(),
+  });
 
   useDebouncedEffect(
     () => {
@@ -33,7 +45,12 @@ export const AudioControls: FC<{
     <Box px="1rem" py=".5rem" style={{ borderTop: `1px solid var(--gray-5)` }}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio preload="auto" ref={audio.audioTag}>
-        <source src={`recording://${id}`} type="audio/mpeg" />
+        {audioPort && audioSecret && (
+          <source
+            src={`http://localhost:${audioPort}/audio/${id}?auth=${audioSecret}`}
+            type="audio/mpeg"
+          />
+        )}
       </audio>
       <Slider
         max={audio.duration}

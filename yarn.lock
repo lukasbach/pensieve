@@ -8839,7 +8839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-port@npm:^7.0.0":
+"get-port@npm:^7.0.0, get-port@npm:^7.1.0":
   version: 7.1.0
   resolution: "get-port@npm:7.1.0"
   checksum: 10/f4d23b43026124007663a899578cc87ff37bfcf645c5c72651e9810ebafc759857784e409fb8e0ada9b90e5c5db089b0ae2f5f6b49fba1ce2e0aff86094ab17d
@@ -12464,6 +12464,7 @@ __metadata:
     ffmpeg-static-electron: "npm:^2.0.3"
     follow-redirects: "npm:^1.15.6"
     fs-extra: "npm:^11.2.0"
+    get-port: "npm:^7.1.0"
     handlebars: "npm:^4.7.8"
     humanize-duration: "npm:^3.32.0"
     langchain: "npm:^0.1.33"
