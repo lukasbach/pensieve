@@ -7,11 +7,12 @@ import {
   TextField,
 } from "@radix-ui/themes";
 
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
+import { mainApi } from "../api";
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
@@ -25,11 +26,21 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     setMeta,
   } = useRecorderState();
 
-  // not sure why that was needed?
-  // useEffect(() => {
-  //   reset();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  // Initialize recorder with settings
+  useEffect(() => {
+    const initializeWithSettings = async () => {
+      const settings = await mainApi.getSettings();
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const defaultMicDevice = devices.find((d) => d.kind === "audioinput");
+
+      setConfig({
+        recordScreenAudio: settings.ui.defaultRecordScreenAudio,
+        mic: settings.ui.defaultRecordMicrophone ? defaultMicDevice : undefined,
+      });
+    };
+
+    initializeWithSettings();
+  }, [setConfig]);
 
   if (recorder) {
     return <RecorderInsession ref={ref} />;
@@ -64,8 +75,6 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
         ]}
         columns={{ initial: "1" }}
         onValueChange={(value) => {
-          if (value.filter((v) => !!v).length === 0) return;
-
           setConfig({
             mic: value.includes("mic")
               ? recordingConfig.mic ?? defaultMic
