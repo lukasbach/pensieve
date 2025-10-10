@@ -21,5 +21,10 @@ export default defineConfig((env) => {
       preserveSymlinks: true,
     },
     clearScreen: false,
+    server: {
+      host: "localhost",
+      port: 5173,
+      strictPort: true,
+    },
   } as UserConfig;
 });
