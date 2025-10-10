@@ -1,4 +1,4 @@
-import { BrowserWindow, Notification, Rectangle, screen } from "electron";
+import { BrowserWindow, Notification, Rectangle, app, screen } from "electron";
 import path from "path";
 import { getIconPath } from "../../main-utils";
 import { getSettings, saveSettings } from "./settings";
@@ -122,6 +122,15 @@ export const initializeMainWindow = () => {
       mainWindowMode = MainWindowModeValue.Minimized;
     }
   });
+
+  mainWindow.on("close", (event) => {
+    // On macOS, prevent the default close behavior and quit the app instead
+    if (process.platform === "darwin") {
+      event.preventDefault();
+      app.exit(0);
+    }
+  });
+
   return mainWindow;
 };
 

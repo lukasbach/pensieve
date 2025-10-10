@@ -4,6 +4,13 @@ on:
 
 jobs:
   publish:
+    strategy:
+      matrix:
+        os:
+          [
+            { name: 'windows', image: 'windows-latest' },
+            { name: 'macos', image: 'macos-latest' },
+          ]
     runs-on: windows-latest
     permissions:
       contents: write

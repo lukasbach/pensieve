@@ -18,7 +18,13 @@ export const registerTray = () => {
       type: "normal",
       click: () => windowsApi.openSettingsWindow(),
     },
-    { label: "Close", type: "normal", click: () => app.quit() },
+    {
+      label: "Quit",
+      type: "normal",
+      click: () => {
+        app.exit(0);
+      },
+    },
   ]);
 
   tray.setContextMenu(contextMenu);

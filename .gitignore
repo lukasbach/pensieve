@@ -57,6 +57,10 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Lock files should be committed for consistent dependency versions
+# package-lock.json
+# yarn.lock
+
 # dotenv environment variables file
 .env
 .env.test

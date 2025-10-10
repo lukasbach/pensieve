@@ -32,9 +32,15 @@ if (!lock) {
 } else {
   app.on("second-instance", () => {
     const mainWindow = windows.getMainWindow();
-    if (!mainWindow) return;
-    if (!windows.isMainWindowOpen()) windows.openMainWindowNormally();
-    if (mainWindow.isMinimized()) mainWindow.restore();
+    if (!mainWindow) {
+      return;
+    }
+    if (!windows.isMainWindowOpen()) {
+      windows.openMainWindowNormally();
+    }
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
     mainWindow.focus();
   });
 }
