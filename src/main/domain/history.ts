@@ -81,7 +81,7 @@ export const saveRecording = async (recording: RecordingData) => {
 
 export const importRecording = async (file: string, meta: RecordingMeta) => {
   const date = new Date(meta.started);
-  const recordingId = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+  const recordingId = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
   const folder = path.join(await getRecordingsFolder(), recordingId);
   await fs.ensureDir(folder);
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
@@ -104,8 +104,25 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
 
 export const listRecordings = async () => {
   const recordingFolders = await fs.readdir(await getRecordingsFolder());
+
+  // Filter out non-directories and .DS_Store files first
+  const validFolders = [];
+  for (const folder of recordingFolders) {
+    // Skip .DS_Store and other hidden files
+    if (folder.startsWith(".")) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const folderPath = path.join(await getRecordingsFolder(), folder);
+    const stats = await fs.stat(folderPath);
+    if (stats.isDirectory()) {
+      validFolders.push(folder);
+    }
+  }
+
   const items = await Promise.all(
-    recordingFolders.map(
+    validFolders.map(
       async (recordingFolder) =>
         [
           recordingFolder,

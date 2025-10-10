@@ -3,6 +3,7 @@ import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerZIP } from "@electron-forge/maker-zip";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 // import { MakerAppX } from "@electron-forge/maker-appx";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
@@ -65,6 +66,9 @@ const config: ForgeConfig = {
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({}),
+    new MakerDMG({
+      icon: "./extra/icon@8x.ico",
+    }),
   ],
   plugins: [
     new VitePlugin({
@@ -111,7 +115,7 @@ const config: ForgeConfig = {
           name: "pensieve",
         },
         prerelease: false,
-        draft: false,
+        draft: true,
         generateReleaseNotes: true,
       },
     },
@@ -130,6 +134,7 @@ const config: ForgeConfig = {
       const target = path.join(__dirname, "extra");
       await fs.ensureDir(target);
 
+      // Bundle FFmpeg and Whisper binaries for Windows only
       if (platform === "win32" && arch === "x64") {
         await fs.copy(
           path.join(ffmpegBase, "win/x64/ffmpeg.exe"),
@@ -167,6 +172,8 @@ const config: ForgeConfig = {
           path.join(target, "whisper.dll"),
         );
       }
+
+      // Note: For macOS and Linux, FFmpeg and Whisper will use system installations
 
       await createIcon(1);
       await createIcon(2);
