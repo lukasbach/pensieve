@@ -7,7 +7,7 @@ export const builtins = [
   ...builtinModules.map((m) => [m, `node:${m}`]).flat(),
 ];
 
-export const external = [...builtins];
+export const external = [...builtins, "sqlite3"];
 
 export function getBuildConfig(env: ConfigEnv<"build">): UserConfig {
   const { root, mode, command } = env;
@@ -80,6 +80,7 @@ export function pluginExposeRenderer(name: string): Plugin {
         // Expose env constant for main process use.
         process.env[VITE_DEV_SERVER_URL] =
           `http://localhost:${addressInfo?.port}`;
+        console.log(`Vite dev server exposed at: ${process.env[VITE_DEV_SERVER_URL]}`);
       });
     },
   };

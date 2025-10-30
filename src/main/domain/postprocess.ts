@@ -11,6 +11,7 @@ import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
+import * as vectorSearch from "./vector-search";
 import { getSettings } from "./settings";
 import { PostProcessingJob, PostProcessingStep } from "../../types";
 
@@ -23,6 +24,7 @@ const emptyProgress: Record<PostProcessingStep, null | number> = {
   whisper: 0,
   summary: 0,
   datahooks: null,
+  vectorSearch: 0,
 };
 const progress = { ...emptyProgress };
 let lastUiUpdate = 0;
@@ -157,12 +159,28 @@ const doDataHooksStep = async (job: PostProcessingJob) => {
   await datahooks.runDatahooks(job);
 };
 
+const doVectorSearchStep = async (job: PostProcessingJob) => {
+  if (hasAborted() || !hasStep(job, "vectorSearch")) return;
+  setStep("vectorSearch");
+  setProgress("vectorSearch", 0);
+  
+  try {
+    await vectorSearch.addTranscriptToVectorStore(job.recordingId, (progress) => {
+      setProgress("vectorSearch", progress);
+    });
+  } catch (error) {
+    console.error("Vector search indexing failed:", error);
+    // Don't fail the entire post-processing if vector indexing fails
+  }
+};
+
 const postProcessRecording = async (job: PostProcessingJob) => {
   await doWavStep(job);
   await doMp3Step(job);
   await doWhisperStep(job);
   await doSummaryStep(job);
   await doDataHooksStep(job);
+  await doVectorSearchStep(job);
 
   const settings = await getSettings();
 

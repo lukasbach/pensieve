@@ -13,6 +13,7 @@ import { historyApi } from "./main/ipc/history-api";
 import * as history from "./main/domain/history";
 import * as searchIndex from "./main/domain/search";
 import * as settings from "./main/domain/settings";
+import * as vectorSearch from "./main/domain/vector-search";
 import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
@@ -79,6 +80,15 @@ app.whenReady().then(async () => {
 
   searchIndex.initializeSearchIndex().then(() => {
     log.info("Search index initialized.");
+  });
+
+  // Initialize vector store for semantic search
+  vectorSearch.initializeVectorStore().then((success) => {
+    if (success) {
+      log.info("Vector store initialized successfully.");
+    } else {
+      log.info("Vector store initialization failed or disabled.");
+    }
   });
 
   if (!settings.existsSettingsFile()) {

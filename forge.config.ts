@@ -33,12 +33,30 @@ const createIcon = async (factor: number, base = 32) => {
 const config: ForgeConfig = {
   packagerConfig: {
     asar: {
-      unpack: "*.{node,dll,exe}",
+      unpack: "**/*.node",
+      unpackDir: "node_modules/sqlite3",
     },
     extraResource: "./extra",
     icon: "./extra/icon@8x.ico",
+    ignore: [
+      /^\/src/,
+      /^\/docs/,
+      /^\/images/,
+      /^\/\.github/,
+      /^\/\.idea/,
+      /^\/scripts/,
+      /^\/vector-store/,
+      /^\/\.git/,
+      /^\/\.gitignore/,
+      /^\/README\.md$/,
+      /^\/yarn\.lock$/,
+      /^\/\.yarnrc\.yml$/,
+      /^\/package-lock\.json$/,
+    ],
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    onlyModules: ["sqlite3"],
+  },
   makers: [
     new MakerSquirrel({
       loadingGif: path.join(__dirname, "splash.gif"),
