@@ -2,6 +2,7 @@ import { FC } from "react";
 import { IconButton, Tabs } from "@radix-ui/themes";
 import {
   HiMiniListBullet,
+  HiOutlineChatBubbleLeftRight,
   HiOutlineCog6Tooth,
   HiOutlineDocumentText,
   HiOutlineVideoCamera,
@@ -9,6 +10,7 @@ import {
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
+import { ChatScreen } from "../chat/chat-screen";
 import { windowsApi } from "../api";
 import { Recorder } from "../recorder/recorder";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
@@ -35,6 +37,12 @@ export const MainScreen: FC = () => {
             >
               Postprocessing
             </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger
+              value="chat"
+              icon={<HiOutlineChatBubbleLeftRight />}
+            >
+              Chat
+            </ResponsiveTabTrigger>
           </Tabs.List>
         }
         statusButtons={
@@ -59,6 +67,10 @@ export const MainScreen: FC = () => {
 
         <Tabs.Content value="postprocess">
           <Postprocess />
+        </Tabs.Content>
+
+        <Tabs.Content value="chat">
+          <ChatScreen />
         </Tabs.Content>
       </PageContainer>
     </Tabs.Root>

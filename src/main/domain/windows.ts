@@ -1,5 +1,7 @@
 import { BrowserWindow, Notification, Rectangle, app, screen } from "electron";
 import path from "path";
+import http from "http";
+import log from "electron-log/main";
 import { getIconPath } from "../../main-utils";
 import { getSettings, saveSettings } from "./settings";
 import * as recorderIpc from "./recorder-ipc";
@@ -42,6 +44,41 @@ export const openAppWindow = (
     },
   });
 
+  // Add error handling for failed loads
+  win.webContents.on(
+    "did-fail-load",
+    (event, errorCode, errorDescription, validatedURL) => {
+      log.error(`Failed to load ${validatedURL}:`, errorCode, errorDescription);
+    },
+  );
+
+  // Helper function to check if Vite server is reachable
+  const checkViteServer = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      try {
+        const urlObj = new URL(url);
+        const req = http.get(
+          {
+            hostname: urlObj.hostname,
+            port: urlObj.port || 5173,
+            path: "/",
+            timeout: 2000,
+          },
+          (res) => {
+            resolve(res.statusCode === 200 || res.statusCode === 304);
+          },
+        );
+        req.on("error", () => resolve(false));
+        req.on("timeout", () => {
+          req.destroy();
+          resolve(false);
+        });
+      } catch {
+        resolve(false);
+      }
+    });
+  };
+
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     const queryString = query
@@ -49,8 +86,41 @@ export const openAppWindow = (
           .map(([key, value]) => `${key}=${value}`)
           .join("&")
       : "";
-    win.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}#${hash}?${queryString}`);
+    const url = `${MAIN_WINDOW_VITE_DEV_SERVER_URL}#${hash}?${queryString}`;
+    log.info("Loading URL:", url);
+    log.info(
+      "MAIN_WINDOW_VITE_DEV_SERVER_URL constant:",
+      MAIN_WINDOW_VITE_DEV_SERVER_URL,
+    );
+
+    // Wait for Vite server to be ready before loading
+    const waitForViteServer = async (retries = 20) => {
+      const baseUrl = MAIN_WINDOW_VITE_DEV_SERVER_URL;
+      log.info(`Checking if Vite server is ready at ${baseUrl}...`);
+
+      for (let i = 0; i < retries; i++) {
+        const isReady = await checkViteServer(baseUrl);
+        if (isReady) {
+          log.info("Vite server is ready, loading window...");
+          win.loadURL(url);
+          return;
+        }
+        log.info(`Vite server not ready yet, waiting... (${i + 1}/${retries})`);
+        await new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 500);
+        });
+      }
+
+      log.error("Vite server failed to start after retries, loading anyway...");
+      win.loadURL(url);
+    };
+
+    waitForViteServer().catch((err) => {
+      log.error("Error waiting for Vite server:", err);
+      win.loadURL(url);
+    });
   } else {
+    log.warn("Vite dev server URL not set, loading from file");
     win.loadFile(
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
       { hash, query },

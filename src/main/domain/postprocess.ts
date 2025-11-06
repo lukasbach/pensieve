@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs-extra";
+import log from "electron-log/main";
 import * as ffmpeg from "./ffmpeg";
 import * as history from "./history";
 import * as whisper from "./whisper";
@@ -11,6 +12,7 @@ import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as searchIndex from "./search";
+import * as vectorSearch from "./vector-search";
 import { getSettings } from "./settings";
 import { PostProcessingJob, PostProcessingStep } from "../../types";
 
@@ -23,6 +25,7 @@ const emptyProgress: Record<PostProcessingStep, null | number> = {
   whisper: 0,
   summary: 0,
   datahooks: null,
+  vectorSearch: 0,
 };
 const progress = { ...emptyProgress };
 let lastUiUpdate = 0;
@@ -89,6 +92,12 @@ const doWavStep = async (job: PostProcessingJob) => {
   setStep("wav");
   const { mic, screen, wav } = await getFilePaths(job);
 
+  // Skip if WAV already exists
+  if (await fs.pathExists(wav)) {
+    log.info(`WAV file already exists, skipping creation: ${wav}`);
+    return;
+  }
+
   if (fs.existsSync(mic) && fs.existsSync(screen)) {
     await ffmpeg.toStereoWavFile(mic, screen, wav);
   } else if (fs.existsSync(mic)) {
@@ -105,6 +114,12 @@ const doMp3Step = async (job: PostProcessingJob) => {
   setStep("mp3");
   const { mic, screen, mp3 } = await getFilePaths(job);
 
+  // Skip if MP3 already exists (don't recreate if we're using it as fallback)
+  if (await fs.pathExists(mp3)) {
+    log.info(`MP3 file already exists, skipping creation: ${mp3}`);
+    return;
+  }
+
   if (fs.existsSync(mic) && fs.existsSync(screen)) {
     await ffmpeg.toJoinedFile(mic, screen, mp3);
   } else if (fs.existsSync(mic)) {
@@ -118,17 +133,31 @@ const doMp3Step = async (job: PostProcessingJob) => {
 
 const doWhisperStep = async (job: PostProcessingJob) => {
   if (hasAborted() || !hasStep(job, "whisper")) return;
-  const { wav, recordingsFolder } = await getFilePaths(job);
+  const { wav, mp3, recordingsFolder } = await getFilePaths(job);
+
+  // If WAV file doesn't exist (e.g., was removed), fallback to MP3
+  const audioInput = (await fs.pathExists(wav)) ? wav : mp3;
+  if (!(await fs.pathExists(audioInput))) {
+    log.error(
+      `No audio file found for processing. Expected WAV: ${wav} or MP3: ${mp3}`,
+    );
+    throw new Error(
+      `No audio file found for processing recording: ${job.recordingId}`,
+    );
+  }
 
   const model = await models.prepareConfiguredModel();
 
   await whisper.processWavFile(
-    wav,
+    audioInput,
     path.join(recordingsFolder, job.recordingId, "transcript.json"),
     model,
   );
 
-  await fs.rm(wav);
+  // Only remove WAV file if it exists and we used it (not if we used MP3 fallback)
+  if ((await fs.pathExists(wav)) && audioInput === wav) {
+    await fs.rm(wav);
+  }
 };
 
 const doSummaryStep = async (job: PostProcessingJob) => {
@@ -157,12 +186,31 @@ const doDataHooksStep = async (job: PostProcessingJob) => {
   await datahooks.runDatahooks(job);
 };
 
+const doVectorSearchStep = async (job: PostProcessingJob) => {
+  if (hasAborted() || !hasStep(job, "vectorSearch")) return;
+  setStep("vectorSearch");
+  setProgress("vectorSearch", 0);
+
+  try {
+    await vectorSearch.addTranscriptToVectorStore(
+      job.recordingId,
+      (progress) => {
+        setProgress("vectorSearch", progress);
+      },
+    );
+  } catch (error) {
+    log.error("Vector search indexing failed:", error);
+    // Don't fail the entire post-processing if vector indexing fails
+  }
+};
+
 const postProcessRecording = async (job: PostProcessingJob) => {
   await doWavStep(job);
   await doMp3Step(job);
   await doWhisperStep(job);
   await doSummaryStep(job);
   await doDataHooksStep(job);
+  await doVectorSearchStep(job);
 
   const settings = await getSettings();
 
@@ -217,7 +265,7 @@ export const startQueue = () => {
       job.isRunning = false;
     } catch (err) {
       if (hasAborted()) return;
-      console.error("Failed to process recording", job.recordingId, err);
+      log.error("Failed to process recording", job.recordingId, err);
       job.error = err instanceof Error ? err.message : String(err);
       job.isDone = true;
       job.isRunning = false;

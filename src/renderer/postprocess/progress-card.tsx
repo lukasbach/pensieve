@@ -18,6 +18,7 @@ const allSteps = [
   "whisper",
   "summary",
   "datahooks",
+  "vectorSearch",
 ] as const;
 const stepLabels = {
   modelDownload: "Downloading model",
@@ -26,6 +27,7 @@ const stepLabels = {
   whisper: "Transcribing audio",
   summary: "Generating summary",
   datahooks: "Running datahooks",
+  vectorSearch: "Building search index",
 };
 
 export const ProgressCard: FC<{

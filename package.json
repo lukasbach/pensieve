@@ -15,7 +15,8 @@
     "lint:fix": "eslint . --fix",
     "build:docs": "markbase build ./docs || echo 'markbase not available on this platform'",
     "start:docs": "markbase watch ./docs || echo 'markbase not available on this platform'",
-    "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs"
+    "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs",
+    "rebuild:sqlite3": "electron-rebuild -f -w sqlite3"
   },
   "dependencies": {
     "@types/node": "^20.11.30",
@@ -26,7 +27,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "get-port": "^7.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sqlite3": "^5.1.7"
   },
   "optionalDependencies": {
     "markbase": "^0.0.6"
@@ -71,6 +73,7 @@
     "handlebars": "^4.7.8",
     "humanize-duration": "^3.32.0",
     "langchain": "^0.1.33",
+    "p-map": "3.0.0",
     "png-to-ico": "^2.1.8",
     "react-aria": "^3.33.0",
     "react-hook-form": "^7.51.2",
@@ -110,6 +113,13 @@
   "volta": {
     "node": "20.11.1",
     "yarn": "4.1.1"
+  },
+  "resolutions": {
+    "p-map": "3.0.0",
+    "is-fullwidth-code-point": "3.0.0",
+    "slice-ansi": "3.0.0",
+    "string-width": "4.2.3",
+    "node-abi": "3.69.0"
   },
   "productName": "Pensieve",
   "funding": "https://github.com/sponsors/lukasbach",

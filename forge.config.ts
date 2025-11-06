@@ -12,6 +12,10 @@ import fs from "fs-extra";
 import path from "path";
 import { Resvg } from "@resvg/resvg-js";
 import pngToIco from "png-to-ico";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 const createIcon = async (factor: number, base = 32) => {
   const source = await fs.readFile(path.join(__dirname, "./icon.svg"), "utf-8");
@@ -30,26 +34,89 @@ const createIcon = async (factor: number, base = 32) => {
   );
 };
 
+const createIcns = async () => {
+  const extraDir = path.join(__dirname, "extra");
+  const iconsetDir = path.join(extraDir, "icon.iconset");
+  await fs.ensureDir(iconsetDir);
+
+  // macOS requires specific icon sizes in .iconset format
+  // Format: icon_{size}x{size}.png and icon_{size}x{size}@2x.png
+  const sizes = [
+    { size: 16, filename: "icon_16x16.png" },
+    { size: 32, filename: "icon_16x16@2x.png" }, // 32x32 for @2x
+    { size: 32, filename: "icon_32x32.png" },
+    { size: 64, filename: "icon_32x32@2x.png" }, // 64x64 for @2x
+    { size: 128, filename: "icon_128x128.png" },
+    { size: 256, filename: "icon_128x128@2x.png" }, // 256x256 for @2x
+    { size: 256, filename: "icon_256x256.png" },
+    { size: 512, filename: "icon_256x256@2x.png" }, // 512x512 for @2x
+    { size: 512, filename: "icon_512x512.png" },
+    { size: 1024, filename: "icon_512x512@2x.png" }, // 1024x1024 for @2x
+  ];
+
+  // Generate all required icon sizes
+  for (const { size, filename } of sizes) {
+    const source = await fs.readFile(
+      path.join(__dirname, "./icon.svg"),
+      "utf-8",
+    );
+    const resvg = new Resvg(source, {
+      background: "transparent",
+      fitTo: { mode: "width", value: size },
+    });
+    const png = resvg.render();
+    await fs.writeFile(path.join(iconsetDir, filename), png.asPng() as any);
+  }
+
+  // Convert .iconset to .icns using macOS iconutil
+  const icnsPath = path.join(extraDir, "icon.icns");
+  await execAsync(`iconutil -c icns "${iconsetDir}" -o "${icnsPath}"`);
+
+  // Clean up the .iconset directory
+  await fs.remove(iconsetDir);
+};
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: {
-      unpack: "*.{node,dll,exe}",
+      unpack: "**/*.node",
+      unpackDir: "node_modules/sqlite3",
     },
     extraResource: "./extra",
     icon: "./extra/icon@8x.ico",
+    ignore: [
+      /^\/src/,
+      /^\/docs/,
+      /^\/images/,
+      /^\/\.github/,
+      /^\/\.idea/,
+      /^\/scripts/,
+      /^\/vector-store/,
+      /^\/\.git/,
+      /^\/\.gitignore/,
+      /^\/README\.md$/,
+      /^\/yarn\.lock$/,
+      /^\/\.yarnrc\.yml$/,
+      /^\/package-lock\.json$/,
+    ],
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    // Explicitly exclude sqlite3 to avoid node-abi check issues
+    // sqlite3 will use prebuilt binaries or can be rebuilt manually
+    // onlyModules: ["sqlite3"],
+    onlyModules: [],
+  },
   makers: [
     new MakerSquirrel({
       loadingGif: path.join(__dirname, "splash.gif"),
-      setupIcon: "./extra/icon@8x.ico",
+      setupIcon: "./extra/icon.ico",
     }),
     // new MakerAppX({}),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({}),
     new MakerDMG({
-      icon: "./extra/icon@8x.ico",
+      icon: "./extra/icon.icns",
     }),
   ],
   plugins: [
@@ -93,8 +160,11 @@ const config: ForgeConfig = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "lukasbach",
-          name: "pensieve",
+          owner:
+            process.env.GITHUB_REPOSITORY_OWNER ||
+            process.env.GITHUB_REPOSITORY?.split("/")[0] ||
+            "lukasbach",
+          name: process.env.GITHUB_REPOSITORY?.split("/")[1] || "pensieve",
         },
         prerelease: false,
         draft: true,
@@ -104,6 +174,38 @@ const config: ForgeConfig = {
   ],
 
   hooks: {
+    packageAfterPrune: async (config, buildPath) => {
+      // Remove problematic symlinks in nested node_modules/.bin directories that break ASAR
+      // These symlinks point outside the package and cause ASAR packaging to fail.
+      // .bin directories are only needed for development (npm/yarn scripts), not at runtime.
+      const removeBinSymlinks = async (dir: string) => {
+        try {
+          const entries = await fs.readdir(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              // Recursively check all directories
+              await removeBinSymlinks(fullPath);
+
+              // If this is a .bin directory, remove it entirely
+              if (entry.name === ".bin") {
+                await fs.remove(fullPath);
+              }
+            } else if (entry.isSymbolicLink()) {
+              // Remove individual symlinks
+              await fs.unlink(fullPath);
+            }
+          }
+        } catch (error) {
+          // Ignore errors - directory might not exist or be inaccessible
+        }
+      };
+
+      const nodeModulesPath = path.join(buildPath, "node_modules");
+      if (await fs.pathExists(nodeModulesPath)) {
+        await removeBinSymlinks(nodeModulesPath);
+      }
+    },
     generateAssets: async (config, platform, arch) => {
       const ffmpegBase = path.join(
         __dirname,
@@ -157,14 +259,22 @@ const config: ForgeConfig = {
 
       // Note: For macOS and Linux, FFmpeg and Whisper will use system installations
 
+      // Generate standard PNG icons (for runtime use)
       await createIcon(1);
       await createIcon(2);
       await createIcon(3);
       await createIcon(4);
       await createIcon(8);
+
+      // Generate Windows ICO file (always generate for cross-platform builds)
       await pngToIco(path.join(__dirname, "extra/icon@8x.png")).then((buf) =>
-        fs.writeFileSync(path.join(__dirname, "extra/icon@8x.ico"), buf as any),
+        fs.writeFileSync(path.join(__dirname, "extra/icon.ico"), buf as any),
       );
+
+      // Generate macOS ICNS file (only on macOS due to iconutil requirement)
+      if (platform === "darwin") {
+        await createIcns();
+      }
     },
   },
 };
