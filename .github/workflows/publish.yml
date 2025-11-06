@@ -3,16 +3,33 @@ on:
   workflow_dispatch:
 
 jobs:
+  bump-version:
+    if: github.repository == 'lukasbach/pensieve'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: 'paramsinghvc/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   publish:
-    runs-on: windows-latest
-    # strategy:
-    #   matrix:
-    #     os:
-    #       [
-    #         { name: 'windows', image: 'windows-latest' },
-    #         { name: 'macos', image: 'macos-latest' },
-    #       ]
-    # runs-on: ${{ matrix.os.image }}
+    needs: bump-version
+    if: always() && (needs.bump-version.result == 'success' || needs.bump-version.result == 'skipped')
+    strategy:
+      matrix:
+        include:
+          - os: windows
+            image: windows-latest
+            arch: ""
+          - os: macos
+            image: macos-latest
+            arch: arm64
+          - os: macos
+            image: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.image }}
     permissions:
       contents: write
       deployments: write
@@ -24,10 +41,9 @@ jobs:
       - run: yarn lint
       - run: yarn run typecheck
       - run: yarn run build:docs
-      - run: yarn make
-      - uses: 'paramsinghvc/gh-action-bump-version@master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: yarn make ${{ matrix.arch != '' && '--arch=' || '' }}${{ matrix.arch }}
       - run: yarn publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

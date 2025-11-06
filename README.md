@@ -83,6 +83,27 @@ If you prefer not to use Homebrew:
 - **FFmpeg**: Download from [https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
 - **Whisper**: Download from [https://github.com/ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
+### Opening the App After Download
+
+After downloading Pensieve from the releases page, you may see a message that the app is "damaged" when trying to open it. This is due to macOS Gatekeeper's quarantine feature for apps downloaded from the internet.
+
+**Using the DMG Installer Helper (Recommended):**
+
+When you open the Pensieve DMG, you'll see a "Pensieve Installer.app" helper:
+1. Double-click "Pensieve Installer.app" (you may need to right-click it the first time and select "Open")
+2. The helper will automatically:
+   - Copy Pensieve.app to your Applications folder
+   - Remove the quarantine attribute
+   - Optionally open Pensieve for you
+3. You can then open Pensieve normally from Applications anytime
+
+**Alternative: Manual Method**
+
+If you prefer not to use the helper, after moving Pensieve to Applications, open Terminal and run:
+```bash
+xattr -d com.apple.quarantine /Applications/Pensieve.app
+```
+
 ### Troubleshooting
 
 If Pensieve shows warning dialogs about missing dependencies:
