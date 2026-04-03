@@ -1,11 +1,8 @@
 import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
-import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { ChatOllama } from "@langchain/ollama";
+import { ChatOpenAI } from "@langchain/openai";
 import { Document } from "@langchain/core/documents";
-import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
-import { createRetrievalChain } from "@langchain/classic/chains/retrieval";
 import log from "electron-log/main";
 import * as settings from "./settings";
 import { RecordingTranscript, Settings } from "../../types";
@@ -67,26 +64,8 @@ export const getChatModel = async () => {
   }
 };
 
-export const getEmbeddings = async () => {
-  const { llm } = await settings.getSettings();
-
-  switch (llm.provider) {
-    case "ollama":
-      await pullModel(llm.providerConfig.ollama.embeddings.model);
-      return new OllamaEmbeddings(llm.providerConfig.ollama.embeddings);
-    case "openai":
-      return new OpenAIEmbeddings({
-        ...llm.providerConfig.openai.chatModel, // reuse provider config
-        ...llm.providerConfig.openai.embeddings,
-      });
-    default:
-      throw new Error(`Invalid LLM provider: ${llm.provider}`);
-  }
-};
-
 const prepareContext = async (transcript: RecordingTranscript) => {
-  const splitter = new RecursiveCharacterTextSplitter();
-  const splitDocs = await splitter.splitDocuments([
+  return [
     new Document({
       pageContent: transcript.transcription
         .map((t) => {
@@ -100,8 +79,7 @@ const prepareContext = async (transcript: RecordingTranscript) => {
         })
         .join("\n"),
     }),
-  ]);
-  return splitDocs;
+  ];
 };
 
 const prepareLangchain = async () => {
@@ -120,49 +98,7 @@ const updateProgress = async (step: keyof Settings["llm"]["features"]) => {
   setProgress("summary", (getProgress("summary") ?? 0) + 1 / total);
 };
 
-const summarizeWithEmbeddings = async (transcript: RecordingTranscript) => {
-  const { llm } = await settings.getSettings();
-  const context = await prepareContext(transcript);
-  const chain = await prepareLangchain();
-
-  const vectorstore = await MemoryVectorStore.fromDocuments(
-    context,
-    await getEmbeddings(),
-  );
-  const retriever = vectorstore.asRetriever();
-  const retrievalChain = await createRetrievalChain({
-    combineDocsChain: chain,
-    retriever,
-  });
-
-  const summary = llm.features.summary
-    ? await retrievalChain.invoke({
-        input: prompts.summary + llm.prompt,
-      })
-    : null;
-  updateProgress("summary");
-  const actionItems = llm.features.actionItems
-    ? await retrievalChain.invoke({
-        input: prompts.actionItems + llm.prompt,
-      })
-    : null;
-  updateProgress("actionItems");
-  const sentenceSummary = llm.features.sentenceSummary
-    ? await retrievalChain.invoke({
-        input: prompts.sentenceSummary + llm.prompt,
-      })
-    : null;
-  updateProgress("sentenceSummary");
-  return {
-    summary: summary?.answer ?? null,
-    actionItems: actionItems?.answer
-      ? parseActionItems(actionItems.answer)
-      : null,
-    sentenceSummary: sentenceSummary?.answer ?? null,
-  };
-};
-
-const summarizeWithContext = async (transcript: RecordingTranscript) => {
+const summarizeTranscript = async (transcript: RecordingTranscript) => {
   const { llm } = await settings.getSettings();
   const context = await prepareContext(transcript);
   const chain = await prepareLangchain();
@@ -195,9 +131,4 @@ const summarizeWithContext = async (transcript: RecordingTranscript) => {
   };
 };
 
-export const summarize = async (transcript: RecordingTranscript) => {
-  const { llm } = await settings.getSettings();
-  return llm.useEmbedding
-    ? summarizeWithEmbeddings(transcript)
-    : summarizeWithContext(transcript);
-};
+export const summarize = summarizeTranscript;

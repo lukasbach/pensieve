@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as Tabs from "@radix-ui/react-tabs";
 import {
@@ -134,36 +134,6 @@ export const OpenAiSettings: FC = () => {
           </SettingsField>
         </>
       )}
-
-      {form.watch("llm.providerConfig.openai.useCustomUrl") ? (
-        <SettingsTextField
-          label="Embeddings Model"
-          {...form.register("llm.providerConfig.openai.embeddings.model")}
-        />
-      ) : (
-        <SettingsSelectField
-          label="Embeddings Model"
-          field="llm.providerConfig.openai.embeddings.model"
-          form={form}
-          values={[
-            "text-embedding-3-large",
-            "text-embedding-3-small",
-            "text-embedding-ada-002",
-          ]}
-        />
-      )}
-
-      <SettingsTextField
-        label="Embedding Dimensions"
-        type="number"
-        {...form.register("llm.providerConfig.openai.embeddings.dimensions")}
-      />
-
-      <SettingsTextField
-        label="Embedding Batch Size"
-        type="number"
-        {...form.register("llm.providerConfig.openai.embeddings.batchSize")}
-      />
     </>
   );
 };
@@ -212,19 +182,6 @@ export const OllamaSettings: FC = () => {
           Show available models
         </Button>
       </SettingsField>
-
-      <SettingsTextField
-        label="Embeddings Model"
-        {...form.register("llm.providerConfig.ollama.embeddings.model")}
-      />
-
-      <SettingsTextField
-        label="Embeddings Concurrency"
-        type="number"
-        {...form.register(
-          "llm.providerConfig.ollama.embeddings.maxConcurrency",
-        )}
-      />
     </>
   );
 };
@@ -325,13 +282,6 @@ export const SummarySettings: FC = () => {
         label="Enable summarization"
         form={form}
         field="llm.enabled"
-      />
-      <SettingsSwitchField
-        label="Use Embeddings"
-        description="Create embeddings of the meeting transcript as context for the LLM. If disabled, the transcript will be passed in directly.
-          Using embeddings can improve the quality of the summarization, but increase execution time."
-        form={form}
-        field="llm.useEmbedding"
       />
       <SettingsField label="Install Ollama">
         <Button

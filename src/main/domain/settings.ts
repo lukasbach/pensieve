@@ -14,7 +14,11 @@ const readSettings = async (
   fallback: Settings | {},
 ): Promise<Settings | {}> => {
   try {
-    return fs.existsSync(settingsFile) ? await fs.readJSON(settingsFile) : {};
+    if (!fs.existsSync(settingsFile)) {
+      return {};
+    }
+
+    return await fs.readJSON(settingsFile);
   } catch (e) {
     console.error("Error reading settings file, using fallback", e);
     return fallback;

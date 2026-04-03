@@ -79,17 +79,12 @@ export const defaultSettings = {
       actionItems: true,
       sentenceSummary: true,
     },
-    useEmbedding: true,
     provider: "ollama" as "ollama" | "openai",
     providerConfig: {
       ollama: {
         chatModel: {
           baseUrl: "http://localhost:11434",
           model: "gemma3:4b",
-        },
-        embeddings: {
-          model: "nomic-embed-text",
-          maxConcurrency: 5,
         },
       },
       openai: {
@@ -100,11 +95,6 @@ export const defaultSettings = {
           configuration: {
             baseURL: undefined,
           },
-        },
-        embeddings: {
-          model: "text-embedding-3-large",
-          dimensions: 1536,
-          batchSize: 20,
         },
       },
     },
