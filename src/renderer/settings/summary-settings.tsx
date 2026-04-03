@@ -18,21 +18,26 @@ import { SettingsField } from "./settings-field";
 import { SettingsTab } from "./tabs";
 
 const openAiModels = [
+  "gpt-5.4",
+  "gpt-5.4-mini",
+  "gpt-5.4-nano",
+  "gpt-5.2",
+  "gpt-5.1",
   "gpt-5",
-  "gpt-5-nano",
   "gpt-5-mini",
+  "gpt-5-nano",
   "gpt-5-chat-latest",
   "gpt-4.1",
+  "gpt-4.1-mini",
+  "gpt-4.1-nano",
   "gpt-4o",
+  "gpt-4o-mini",
   "o4-mini",
   "o3",
   "o3-pro",
   "o3-mini",
   "o1",
   "o1-pro",
-  "gpt-4.1-mini",
-  "gpt-4.1-nano",
-  "gpt-4o-mini",
   "Custom",
 ];
 

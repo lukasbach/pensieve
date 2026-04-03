@@ -94,7 +94,7 @@ export const defaultSettings = {
     provider: "ollama" as "ollama" | "openai",
     models: {
       ollama: "gemma3:4b",
-      openai: "gpt-3.5-turbo",
+      openai: "gpt-5.4",
     },
   },
   embeddings: {
