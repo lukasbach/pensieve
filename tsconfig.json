@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["w3c-image-capture"],
+    "types": [
+      "w3c-image-capture",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
     "target": "ESNext",
     "module": "commonjs",
     "allowJs": true,
