@@ -4,15 +4,32 @@ import { app } from "electron";
 import deepmerge from "deepmerge";
 import type { DeepPartial } from "@tanstack/react-router/dist/esm/utils";
 import { Settings, defaultSettings } from "../../types";
+import { embeddingCache } from "./embedding-cache";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 
 const settingsFile = path.join(app.getPath("userData"), "settings.json");
 let cachedSettings: Settings | null = null;
 
-const readSettings = async (
-  fallback: Settings | {},
-): Promise<Settings | {}> => {
+const getEmbeddingSettingsSignature = (settings: Settings) => {
+  if (settings.embeddings.provider === "ollama") {
+    return JSON.stringify({
+      provider: "ollama",
+      model: settings.embeddings.models.ollama,
+      baseUrl: settings.providers.ollama.baseUrl,
+    });
+  }
+
+  return JSON.stringify({
+    provider: "openai",
+    model: settings.embeddings.models.openai,
+    baseURL: settings.providers.openai.useCustomUrl
+      ? settings.providers.openai.baseURL ?? null
+      : null,
+  });
+};
+
+const readSettings = async (fallback: unknown): Promise<unknown> => {
   try {
     if (!fs.existsSync(settingsFile)) {
       return {};
@@ -23,6 +40,76 @@ const readSettings = async (
     console.error("Error reading settings file, using fallback", e);
     return fallback;
   }
+};
+
+const normalizeSettings = (rawSettings: unknown): Settings => {
+  const raw = (rawSettings ?? {}) as any;
+  const merged = deepmerge(defaultSettings, raw) as Settings &
+    Record<string, any>;
+
+  return {
+    core: merged.core,
+    ui: merged.ui,
+    providers: {
+      ollama: {
+        baseUrl:
+          raw.providers?.ollama?.baseUrl ??
+          raw.llm?.providerConfig?.ollama?.chatModel?.baseUrl ??
+          raw.embeddings?.providerConfig?.ollama?.baseUrl ??
+          merged.providers.ollama.baseUrl,
+      },
+      openai: {
+        apiKey:
+          raw.providers?.openai?.apiKey ??
+          raw.llm?.providerConfig?.openai?.chatModel?.apiKey ??
+          raw.embeddings?.providerConfig?.openai?.apiKey ??
+          merged.providers.openai.apiKey,
+        useCustomUrl:
+          raw.providers?.openai?.useCustomUrl ??
+          raw.llm?.providerConfig?.openai?.useCustomUrl ??
+          raw.embeddings?.providerConfig?.openai?.useCustomUrl ??
+          merged.providers.openai.useCustomUrl,
+        baseURL:
+          raw.providers?.openai?.baseURL ??
+          raw.llm?.providerConfig?.openai?.chatModel?.configuration?.baseURL ??
+          raw.embeddings?.providerConfig?.openai?.configuration?.baseURL ??
+          merged.providers.openai.baseURL,
+      },
+    },
+    llm: {
+      enabled: merged.llm.enabled,
+      prompt: merged.llm.prompt,
+      features: merged.llm.features,
+      provider: merged.llm.provider,
+      models: {
+        ollama:
+          raw.llm?.models?.ollama ??
+          raw.llm?.providerConfig?.ollama?.chatModel?.model ??
+          merged.llm.models.ollama,
+        openai:
+          raw.llm?.models?.openai ??
+          raw.llm?.providerConfig?.openai?.chatModel?.model ??
+          merged.llm.models.openai,
+      },
+    },
+    embeddings: {
+      enabled: merged.embeddings.enabled,
+      provider: merged.embeddings.provider,
+      models: {
+        ollama:
+          raw.embeddings?.models?.ollama ??
+          raw.embeddings?.providerConfig?.ollama?.model ??
+          merged.embeddings.models.ollama,
+        openai:
+          raw.embeddings?.models?.openai ??
+          raw.embeddings?.providerConfig?.openai?.model ??
+          merged.embeddings.models.openai,
+      },
+    },
+    ffmpeg: merged.ffmpeg,
+    whisper: merged.whisper,
+    datahooks: merged.datahooks,
+  };
 };
 
 export const initSettingsFile = async () => {
@@ -39,9 +126,9 @@ export const getSettings = async () => {
   }
 
   try {
-    const merged = deepmerge(defaultSettings, await readSettings({}));
-    cachedSettings = merged;
-    return merged;
+    const normalized = normalizeSettings(await readSettings({}));
+    cachedSettings = normalized;
+    return normalized;
   } catch (e) {
     console.error(
       "Error merging settings while reading, using default settings",
@@ -56,17 +143,26 @@ export const saveSettings = async (partialSettings: DeepPartial<Settings>) => {
     await fs.ensureDir(partialSettings.core.recordingsFolder);
   }
   const settings = await readSettings({});
-  const merged = deepmerge(settings, partialSettings);
-  await fs.writeJSON(settingsFile, merged, {
+  const previousSettings = normalizeSettings(cachedSettings ?? settings);
+  const merged = deepmerge(
+    settings as Record<string, unknown>,
+    partialSettings,
+  );
+  const resolvedSettings = normalizeSettings(merged);
+  await fs.writeJSON(settingsFile, resolvedSettings, {
     spaces: 2,
   });
-  cachedSettings = deepmerge(
-    deepmerge(cachedSettings ?? {}, defaultSettings),
-    merged,
-  ) as Settings;
+  cachedSettings = resolvedSettings;
   await invalidateUiKeys(QueryKeys.Settings);
-  if (partialSettings.ui?.dark !== undefined) {
+  if (previousSettings.ui.dark !== resolvedSettings.ui.dark) {
     await invalidateUiKeys(QueryKeys.Theme);
+  }
+  if (
+    getEmbeddingSettingsSignature(previousSettings) !==
+    getEmbeddingSettingsSignature(resolvedSettings)
+  ) {
+    embeddingCache.invalidate();
+    await invalidateUiKeys(QueryKeys.History);
   }
 };
 

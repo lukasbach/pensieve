@@ -1,12 +1,15 @@
 export {};
 
-const { ffmpegMock, historyMock, modelsMock, whisperMock } = vi.hoisted(() => ({
-  ffmpegMock: { simpleTranscode: vi.fn() },
-  historyMock: { listRecordings: vi.fn() },
-  modelsMock: { prepareConfiguredModel: vi.fn() },
-  whisperMock: { processWavFile: vi.fn() },
-}));
+const { embeddingsMock, ffmpegMock, historyMock, modelsMock, whisperMock } =
+  vi.hoisted(() => ({
+    embeddingsMock: { semanticSearch: vi.fn() },
+    ffmpegMock: { simpleTranscode: vi.fn() },
+    historyMock: { listRecordings: vi.fn() },
+    modelsMock: { prepareConfiguredModel: vi.fn() },
+    whisperMock: { processWavFile: vi.fn() },
+  }));
 
+vi.mock("./embeddings", () => embeddingsMock);
 vi.mock("./ffmpeg", () => ffmpegMock);
 vi.mock("./history", () => historyMock);
 vi.mock("./models", () => modelsMock);
@@ -20,6 +23,9 @@ describe("domain index", () => {
     expect(domain.history.listRecordings).toBe(historyMock.listRecordings);
     expect(domain.models.prepareConfiguredModel).toBe(
       modelsMock.prepareConfiguredModel,
+    );
+    expect(domain.embeddings.semanticSearch).toBe(
+      embeddingsMock.semanticSearch,
     );
     expect(domain.whisper.processWavFile).toBe(whisperMock.processWavFile);
   });

@@ -18,6 +18,7 @@ export type RecordingMeta = {
   duration?: number;
   name?: string;
   isPostProcessed?: boolean;
+  hasEmbedding?: boolean;
   isImported?: boolean;
   hasRawRecording?: boolean;
   hasMic?: boolean;
@@ -52,6 +53,7 @@ export type PostProcessingStep =
   | "wav"
   | "mp3"
   | "whisper"
+  | "embedding"
   | "summary"
   | "datahooks";
 
@@ -71,6 +73,16 @@ export const defaultSettings = {
     trayRunningNotificationShown: false,
     useOverlayTool: true,
   },
+  providers: {
+    ollama: {
+      baseUrl: "http://localhost:11434",
+    },
+    openai: {
+      apiKey: "YOUR_API_KEY",
+      useCustomUrl: false,
+      baseURL: undefined as string | undefined,
+    },
+  },
   llm: {
     enabled: true,
     prompt: "",
@@ -80,23 +92,17 @@ export const defaultSettings = {
       sentenceSummary: true,
     },
     provider: "ollama" as "ollama" | "openai",
-    providerConfig: {
-      ollama: {
-        chatModel: {
-          baseUrl: "http://localhost:11434",
-          model: "gemma3:4b",
-        },
-      },
-      openai: {
-        useCustomUrl: false,
-        chatModel: {
-          apiKey: "YOUR_API_KEY",
-          model: "gpt-3.5-turbo",
-          configuration: {
-            baseURL: undefined,
-          },
-        },
-      },
+    models: {
+      ollama: "gemma3:4b",
+      openai: "gpt-3.5-turbo",
+    },
+  },
+  embeddings: {
+    enabled: false,
+    provider: "ollama" as "ollama" | "openai",
+    models: {
+      ollama: "mxbai-embed-large",
+      openai: "text-embedding-3-small",
     },
   },
   ffmpeg: {

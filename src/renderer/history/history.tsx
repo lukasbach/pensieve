@@ -1,18 +1,12 @@
 import { FC, useMemo } from "react";
-import {
-  Box,
-  DropdownMenu,
-  Flex,
-  IconButton,
-  TextField,
-} from "@radix-ui/themes";
-import { HiMiniBars3, HiOutlineArrowDownOnSquare } from "react-icons/hi2";
+import { Box, Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
+import { HiSparkles } from "react-icons/hi2";
 import { useQuery } from "@tanstack/react-query";
 import { useHistoryRecordings } from "./state";
 import { HistoryItem } from "./history-item";
+import { HistoryMenu } from "./history-menu";
 import { useSearch } from "./use-search";
-import { historyApi } from "../api";
-import { useWindowedPromptText } from "../dialog/context";
+import { historyApi, mainApi } from "../api";
 import { QueryKeys } from "../../query-keys";
 import { EmptyState } from "../common/empty-state";
 import { EntityTitle } from "../common/entity-title";
@@ -23,15 +17,14 @@ export const History: FC = () => {
     queryKey: [QueryKeys.PostProcessing],
     queryFn: historyApi.getPostProcessingProgress,
   });
-  const { setSearch, searchResults, filter } = useSearch();
-  const recordingList = useMemo(
-    () =>
-      Object.entries(recordings || {}).sort(
-        ([, a], [, b]) =>
-          new Date(b.started).getTime() - new Date(a.started).getTime(),
-      ),
-    [recordings],
-  );
+  const { data: settings } = useQuery({
+    queryKey: [QueryKeys.Settings],
+    queryFn: mainApi.getSettings,
+  });
+  const search = useSearch({
+    embeddingsEnabled: settings?.embeddings.enabled,
+    recordings,
+  });
 
   const processingRecordings = useMemo(
     () =>
@@ -43,78 +36,63 @@ export const History: FC = () => {
     [postprocessing?.processingQueue],
   );
 
-  const askImportName = useWindowedPromptText(
-    "Import audio file",
-    "Name of the recording",
-  );
-  const askImportDate = useWindowedPromptText(
-    "Import audio file",
-    "Date of the recording",
-  );
-
-  const pinnedItems = useMemo(
-    () => recordingList.filter(([, meta]) => meta.isPinned).filter(filter),
-    [filter, recordingList],
-  );
-
   return (
     <Box p="1rem">
       <Flex gap=".5rem">
         <TextField.Root
           style={{ flexGrow: "1" }}
           placeholder="Search recordings..."
-          onChange={(e) => setSearch(e.currentTarget.value)}
+          onChange={(e) => search.setSearch(e.currentTarget.value)}
         />
 
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
-            <IconButton variant="outline" color="gray">
-              <HiMiniBars3 />
-            </IconButton>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content>
-            <DropdownMenu.Item
-              onClick={async () => {
-                const file = await historyApi.showOpenImportDialog();
-                if (!file) return;
-                const name = await askImportName(
-                  file.filePath.split("/").at(-1)?.split("\\").at(-1) ??
-                    "Untitled import",
-                );
-                if (!name) return;
-                const started = await askImportDate(new Date().toISOString());
-                if (!started) return;
-                await historyApi.importRecording(file.filePath, {
-                  name,
-                  started,
-                });
-              }}
+        {settings?.embeddings.enabled && (
+          <Tooltip
+            content={
+              search.useSemanticSearch
+                ? "Semantic search is enabled"
+                : "Use semantic search"
+            }
+          >
+            <IconButton
+              color={search.useSemanticSearch ? "blue" : "gray"}
+              variant={search.useSemanticSearch ? "solid" : "outline"}
+              onClick={() => search.setUseSemanticSearch((value) => !value)}
             >
-              <HiOutlineArrowDownOnSquare /> Import audio file
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
+              <HiSparkles />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        <HistoryMenu search={search} />
       </Flex>
 
-      {recordingList.length === 0 && (
+      {search.recordingList.length === 0 && (
         <EmptyState
           title="No recordings yet"
           description='Record your first item under the "Record" tab.'
         />
       )}
 
-      {pinnedItems.length > 0 && (
+      {search.recordingList.length > 0 &&
+        search.visibleRecordings.length === 0 && (
+          <EmptyState
+            title="No matching recordings"
+            description="Try a different search or switch the active filter."
+          />
+        )}
+
+      {search.pinnedItems.length > 0 && (
         <>
           <EntityTitle mb=".5rem" mt="1rem">
             Pinned recordings
           </EntityTitle>
-          {pinnedItems.map(([id, meta], idx, arr) => (
+          {search.pinnedItems.map(([id, meta], idx, arr) => (
             <HistoryItem
               key={id}
               id={id}
               recording={meta}
               priorItemDate={arr[idx - 1]?.[1].started}
-              searchText={searchResults?.[id] as string}
+              searchText={search.searchResults[id]?.snippet}
               isProcessing={processingRecordings.has(id)}
               isPinnedItem
             />
@@ -123,13 +101,15 @@ export const History: FC = () => {
         </>
       )}
 
-      {recordingList.filter(filter).map(([id, meta], idx, arr) => (
+      {search.visibleRecordings.map(([id, meta], idx, arr) => (
         <HistoryItem
           key={id}
           id={id}
           recording={meta}
-          priorItemDate={arr[idx - 1]?.[1].started}
-          searchText={searchResults?.[id] as string}
+          priorItemDate={
+            search.search.length ? meta.started : arr[idx - 1]?.[1].started
+          }
+          searchText={search.searchResults[id]?.snippet}
           isProcessing={processingRecordings.has(id)}
         />
       ))}

@@ -4,13 +4,15 @@ import { QueryKeys } from "../../query-keys";
 export {};
 
 const {
-  addToQueueMock,
   appGetPathMock,
   ensureDirMock,
   existsSyncMock,
+  getCurrentEmbeddingConfigurationKeyMock,
   getDurationMock,
   getSettingsMock,
+  hasCompatibleRecordingEmbeddingMock,
   invalidateUiKeysMock,
+  invalidateSemanticSearchStoreMock,
   moveMock,
   openPathMock,
   outputFileMock,
@@ -19,20 +21,21 @@ const {
   removeMock,
   removeRecordingFromIndexMock,
   simpleTranscodeMock,
-  startQueueMock,
   statMock,
   updateRecordingNameMock,
   writeFileMock,
   writeJsonMock,
   writeJSONMock,
 } = vi.hoisted(() => ({
-  addToQueueMock: vi.fn(),
   appGetPathMock: vi.fn(),
   ensureDirMock: vi.fn(),
   existsSyncMock: vi.fn(),
+  getCurrentEmbeddingConfigurationKeyMock: vi.fn(),
   getDurationMock: vi.fn(),
   getSettingsMock: vi.fn(),
+  hasCompatibleRecordingEmbeddingMock: vi.fn(),
   invalidateUiKeysMock: vi.fn(),
+  invalidateSemanticSearchStoreMock: vi.fn(),
   moveMock: vi.fn(),
   openPathMock: vi.fn(),
   outputFileMock: vi.fn(),
@@ -41,7 +44,6 @@ const {
   removeMock: vi.fn(),
   removeRecordingFromIndexMock: vi.fn(),
   simpleTranscodeMock: vi.fn(),
-  startQueueMock: vi.fn(),
   statMock: vi.fn(),
   updateRecordingNameMock: vi.fn(),
   writeFileMock: vi.fn(),
@@ -88,9 +90,10 @@ vi.mock("./settings", () => ({
   getSettings: getSettingsMock,
 }));
 
-vi.mock("./postprocess", () => ({
-  addToQueue: addToQueueMock,
-  startQueue: startQueueMock,
+vi.mock("./embeddings", () => ({
+  getCurrentEmbeddingConfigurationKey: getCurrentEmbeddingConfigurationKeyMock,
+  hasCompatibleRecordingEmbedding: hasCompatibleRecordingEmbeddingMock,
+  invalidateSemanticSearchStore: invalidateSemanticSearchStoreMock,
 }));
 
 describe("history", () => {
@@ -99,13 +102,15 @@ describe("history", () => {
 
   beforeEach(() => {
     vi.resetModules();
-    addToQueueMock.mockReset();
     appGetPathMock.mockReset();
     ensureDirMock.mockReset();
     existsSyncMock.mockReset();
+    getCurrentEmbeddingConfigurationKeyMock.mockReset();
     getDurationMock.mockReset();
     getSettingsMock.mockReset();
+    hasCompatibleRecordingEmbeddingMock.mockReset();
     invalidateUiKeysMock.mockReset();
+    invalidateSemanticSearchStoreMock.mockReset();
     moveMock.mockReset();
     openPathMock.mockReset();
     outputFileMock.mockReset();
@@ -114,7 +119,6 @@ describe("history", () => {
     removeMock.mockReset();
     removeRecordingFromIndexMock.mockReset();
     simpleTranscodeMock.mockReset();
-    startQueueMock.mockReset();
     statMock.mockReset();
     updateRecordingNameMock.mockReset();
     writeFileMock.mockReset();
@@ -122,10 +126,11 @@ describe("history", () => {
     writeJSONMock.mockReset();
 
     appGetPathMock.mockReturnValue(userDataFolder);
+    getCurrentEmbeddingConfigurationKeyMock.mockResolvedValue("embedding-key");
     getSettingsMock.mockResolvedValue({
       core: { recordingsFolder },
-      ffmpeg: { autoTriggerPostProcess: false },
     });
+    hasCompatibleRecordingEmbeddingMock.mockResolvedValue(false);
   });
 
   it("reads and initializes the recordings folders", async () => {
@@ -156,11 +161,7 @@ describe("history", () => {
     ).rejects.toThrow("Only PNG files are supported");
   });
 
-  it("saves recordings, moves screenshots, and auto-queues postprocessing", async () => {
-    getSettingsMock.mockResolvedValue({
-      core: { recordingsFolder },
-      ffmpeg: { autoTriggerPostProcess: true },
-    });
+  it("saves recordings and moves screenshots", async () => {
     vi.spyOn(Date, "now").mockReturnValue(
       new Date("2024-01-02T03:04:15").getTime(),
     );
@@ -171,15 +172,17 @@ describe("history", () => {
     const recordingId = "2024-1-2_3-4-5";
     const folder = path.join(recordingsFolder, recordingId);
 
-    await history.saveRecording({
-      mic,
-      screen,
-      meta: {
-        started: "2024-01-02T03:04:05",
-        name: "Daily Sync",
-        screenshots: { 5: "capture.png" },
-      },
-    });
+    await expect(
+      history.saveRecording({
+        mic,
+        screen,
+        meta: {
+          started: "2024-01-02T03:04:05",
+          name: "Daily Sync",
+          screenshots: { 5: "capture.png" },
+        },
+      }),
+    ).resolves.toBe(recordingId);
 
     expect(ensureDirMock).toHaveBeenCalledWith(folder);
     expect(writeFileMock).toHaveBeenCalledWith(
@@ -207,12 +210,10 @@ describe("history", () => {
       path.join(folder, "capture.png"),
     );
     expect(updateRecordingNameMock).toHaveBeenCalledWith(
-      expect.any(String),
+      recordingId,
       "Daily Sync",
     );
     expect(invalidateUiKeysMock).toHaveBeenCalledWith(QueryKeys.History);
-    expect(addToQueueMock).toHaveBeenCalledWith({ recordingId });
-    expect(startQueueMock).toHaveBeenCalledTimes(1);
   });
 
   it("imports recordings and writes imported metadata", async () => {
@@ -226,7 +227,9 @@ describe("history", () => {
       name: "Imported recording",
     };
 
-    await history.importRecording("C:\\temp\\input.webm", meta);
+    await expect(
+      history.importRecording("C:\\temp\\input.webm", meta),
+    ).resolves.toBe(recordingId);
 
     expect(ensureDirMock).toHaveBeenCalledWith(folder);
     expect(simpleTranscodeMock).toHaveBeenCalledWith(
@@ -237,16 +240,21 @@ describe("history", () => {
       path.join(folder, "meta.json"),
       expect.objectContaining({
         duration: 42,
+        hasMic: false,
+        hasRawRecording: true,
+        hasScreen: true,
         isImported: true,
+        isPostProcessed: false,
         name: "Imported recording",
       }),
       { spaces: 2 },
     );
-    expect(addToQueueMock).not.toHaveBeenCalled();
-    expect(startQueueMock).not.toHaveBeenCalled();
   });
 
   it("lists recordings from visible directories in reverse order", async () => {
+    hasCompatibleRecordingEmbeddingMock.mockImplementation(
+      async (recordingId: string) => recordingId === "2024-1-2_2-0-0",
+    );
     readdirMock.mockResolvedValue([
       "2024-1-1_1-0-0",
       ".DS_Store",
@@ -267,7 +275,10 @@ describe("history", () => {
 
     expect(Object.keys(result)).toEqual(["2024-1-2_2-0-0", "2024-1-1_1-0-0"]);
     expect(result["2024-1-2_2-0-0"]).toEqual(
-      expect.objectContaining({ name: "Newer" }),
+      expect.objectContaining({ hasEmbedding: true, name: "Newer" }),
+    );
+    expect(result["2024-1-1_1-0-0"]).toEqual(
+      expect.objectContaining({ hasEmbedding: false, name: "Older" }),
     );
   });
 
@@ -284,6 +295,7 @@ describe("history", () => {
     const history = await import("./history");
 
     await expect(history.getRecordingMeta("recording-1")).resolves.toEqual({
+      hasEmbedding: false,
       started: "2024-01-01T01:00:00.000Z",
     });
     await expect(
@@ -350,6 +362,7 @@ describe("history", () => {
       path.join(recordingsFolder, "recording-1"),
     );
     expect(removeRecordingFromIndexMock).toHaveBeenCalledWith("recording-1");
+    expect(invalidateSemanticSearchStoreMock).toHaveBeenCalledTimes(1);
     expect(invalidateUiKeysMock).toHaveBeenCalledWith(QueryKeys.History);
   });
 });

@@ -6,6 +6,7 @@ import * as whisper from "./whisper";
 import * as models from "./models";
 import * as runner from "./runner";
 import * as llm from "./llm";
+import * as embeddings from "./embeddings";
 import * as datahooks from "./datahooks";
 import { getRecordingTranscript, getRecordingsFolder } from "./history";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
@@ -21,6 +22,7 @@ const emptyProgress: Record<PostProcessingStep, null | number> = {
   wav: null,
   mp3: null,
   whisper: 0,
+  embedding: 0,
   summary: 0,
   datahooks: null,
 };
@@ -67,7 +69,13 @@ export const setStep = (step: keyof typeof progress | "notstarted") => {
 };
 
 export const addToQueue = (job: PostProcessingJob) => {
-  processingQueue.push(job);
+  processingQueue.push({
+    ...job,
+    steps:
+      job.steps?.includes("whisper") && !job.steps.includes("modelDownload")
+        ? [...job.steps, "modelDownload"]
+        : job.steps,
+  });
   updateUiProgress();
 };
 
@@ -82,6 +90,19 @@ const getFilePaths = async (job: PostProcessingJob) => {
 
 const hasStep = (job: PostProcessingJob, step: PostProcessingStep) => {
   return !job.steps || job.steps?.includes(step);
+};
+
+const getDefaultSteps = async (): Promise<PostProcessingStep[]> => {
+  const settings = await getSettings();
+  return [
+    "wav",
+    "mp3",
+    "modelDownload",
+    "whisper",
+    ...(settings.embeddings.enabled ? (["embedding"] as const) : []),
+    ...(settings.llm.enabled ? (["summary"] as const) : []),
+    ...(settings.datahooks.enabled ? (["datahooks"] as const) : []),
+  ];
 };
 
 const doWavStep = async (job: PostProcessingJob) => {
@@ -131,6 +152,21 @@ const doWhisperStep = async (job: PostProcessingJob) => {
   await fs.rm(wav);
 };
 
+const doEmbeddingStep = async (job: PostProcessingJob) => {
+  const settings = await getSettings();
+
+  if (
+    hasAborted() ||
+    !hasStep(job, "embedding") ||
+    !settings.embeddings.enabled
+  )
+    return;
+  setStep("embedding");
+  await embeddings.createRecordingEmbedding(job.recordingId, (progress) => {
+    setProgress("embedding", progress);
+  });
+};
+
 const doSummaryStep = async (job: PostProcessingJob) => {
   const settings = await getSettings();
   const transcript = await getRecordingTranscript(job.recordingId);
@@ -144,7 +180,9 @@ const doSummaryStep = async (job: PostProcessingJob) => {
     return;
   setStep("summary");
 
-  const summary = await llm.summarize(transcript);
+  const summary = await llm.summarize(transcript, (progress) => {
+    setProgress("summary", progress);
+  });
   await history.updateRecording(job.recordingId, { summary });
 };
 
@@ -161,6 +199,7 @@ const postProcessRecording = async (job: PostProcessingJob) => {
   await doWavStep(job);
   await doMp3Step(job);
   await doWhisperStep(job);
+  await doEmbeddingStep(job);
   await doSummaryStep(job);
   await doDataHooksStep(job);
 
@@ -179,6 +218,9 @@ const postProcessRecording = async (job: PostProcessingJob) => {
 
   const transcript = await getRecordingTranscript(job.recordingId);
   await history.updateRecording(job.recordingId, {
+    hasEmbedding: await embeddings.hasCompatibleRecordingEmbedding(
+      job.recordingId,
+    ),
     isPostProcessed: true,
     language: transcript?.result.language,
   });
@@ -187,11 +229,9 @@ const postProcessRecording = async (job: PostProcessingJob) => {
 };
 
 const resetProgress = () => {
-  progress.modelDownload = 0;
-  progress.wav = 0;
-  progress.mp3 = 0;
-  progress.whisper = 0;
-  progress.summary = 0;
+  for (const [step, value] of Object.entries(emptyProgress)) {
+    progress[step as PostProcessingStep] = value;
+  }
 };
 
 export const startQueue = () => {
@@ -210,6 +250,9 @@ export const startQueue = () => {
     }
 
     try {
+      if (!job.steps) {
+        job.steps = await getDefaultSteps();
+      }
       job.isRunning = true;
       resetProgress();
       await postProcessRecording(job);

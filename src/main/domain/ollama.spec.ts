@@ -1,28 +1,13 @@
 export {};
 
-const { fetchMock, getSettingsMock } = vi.hoisted(() => ({
+const { fetchMock } = vi.hoisted(() => ({
   fetchMock: vi.fn(),
-  getSettingsMock: vi.fn(),
-}));
-
-vi.mock("./settings", () => ({
-  getSettings: getSettingsMock,
 }));
 
 describe("ollama", () => {
   beforeEach(() => {
     vi.resetModules();
     fetchMock.mockReset();
-    getSettingsMock.mockReset();
-    getSettingsMock.mockResolvedValue({
-      llm: {
-        providerConfig: {
-          ollama: {
-            chatModel: { baseUrl: "http://localhost:11434" },
-          },
-        },
-      },
-    });
     vi.stubGlobal("fetch", fetchMock);
   });
 
@@ -38,7 +23,7 @@ describe("ollama", () => {
 
     const ollama = await import("./ollama");
 
-    await ollama.pullModel("gemma3:4b");
+  await ollama.pullModel("gemma3:4b", "http://localhost:11434");
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:11434/api/tags", {
@@ -60,7 +45,7 @@ describe("ollama", () => {
 
     const ollama = await import("./ollama");
 
-    await ollama.pullModel("llama3.2");
+  await ollama.pullModel("llama3.2", "http://localhost:11434");
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
@@ -89,7 +74,9 @@ describe("ollama", () => {
 
     const ollama = await import("./ollama");
 
-    await expect(ollama.pullModel("llama3.2")).rejects.toThrow(
+    await expect(
+      ollama.pullModel("llama3.2", "http://localhost:11434"),
+    ).rejects.toThrow(
       "Failed to fetch POST /api/pull: Bad Request",
     );
   });

@@ -3,13 +3,31 @@ import fs from "fs-extra";
 import * as history from "../domain/history";
 import * as postprocess from "../domain/postprocess";
 import * as searchIndex from "../domain/search";
+import * as settings from "../domain/settings";
 import { openAppWindow } from "../domain/windows";
 import { PostProcessingJob } from "../../types";
 
+const maybeAutoProcess = async (recordingId: string) => {
+  if (!(await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
+    return;
+  }
+
+  postprocess.addToQueue({ recordingId });
+  postprocess.startQueue();
+};
+
 export const historyApi = {
   storeUnassociatedScreenshot: history.storeUnassociatedScreenshot,
-  saveRecording: history.saveRecording,
-  importRecording: history.importRecording,
+  saveRecording: async (...args: Parameters<typeof history.saveRecording>) => {
+    const recordingId = await history.saveRecording(...args);
+    await maybeAutoProcess(recordingId);
+  },
+  importRecording: async (
+    ...args: Parameters<typeof history.importRecording>
+  ) => {
+    const recordingId = await history.importRecording(...args);
+    await maybeAutoProcess(recordingId);
+  },
   getRecordings: history.listRecordings,
   updateRecordingMeta: history.updateRecording,
   getRecordingMeta: history.getRecordingMeta,
@@ -18,7 +36,7 @@ export const historyApi = {
   openRecordingFolder: history.openRecordingFolder,
   removeRecording: history.removeRecording,
 
-  search: async (query: string) => searchIndex.search(query),
+  search: searchIndex.search,
 
   startPostProcessing: async () => postprocess.startQueue(),
   stopPostProcessing: async () => postprocess.stop(),

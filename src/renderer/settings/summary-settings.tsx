@@ -15,7 +15,6 @@ import { SettingsSwitchField } from "./settings-switch-field";
 import { SettingsTextField } from "./settings-text-field";
 import { SettingsSelectField } from "./settings-select-field";
 import { SettingsField } from "./settings-field";
-import { mainApi } from "../api";
 import { SettingsTab } from "./tabs";
 
 const openAiModels = [
@@ -37,77 +36,32 @@ const openAiModels = [
   "Custom",
 ];
 
-export const OpenAiSettings: FC = () => {
+const OpenAiSummaryModelSettings: FC = () => {
   const form = useFormContext<Settings>();
   const [customModel, setCustomModel] = useState(false);
-
-  const useCustomUrl = form.watch("llm.providerConfig.openai.useCustomUrl");
-  const model = form.watch("llm.providerConfig.openai.chatModel.model");
-
-  useEffect(() => {
-    if (!useCustomUrl) {
-      form.setValue(
-        "llm.providerConfig.openai.chatModel.configuration.baseURL",
-        undefined,
-      );
-    }
-  }, [useCustomUrl, form]);
+  const model = form.watch("llm.models.openai");
 
   useEffect(() => {
     if (model === "Custom") {
-      form.setValue("llm.providerConfig.openai.chatModel.model", "");
+      form.setValue("llm.models.openai", "");
       setCustomModel(true);
     }
-    // if (model === "") {
-    //   form.setValue(
-    //     "llm.providerConfig.openai.chatModel.model",
-    //     openAiModels[0],
-    //   );
-    // }
   }, [form, model]);
 
   return (
     <>
       <Heading mt="4rem" as="h2" size="4">
-        OpenAI ChatGPT Settings
+        OpenAI Model
       </Heading>
+      <Text as="p" mb="1rem">
+        OpenAI API keys and endpoint settings are configured in General
+        Settings.
+      </Text>
 
-      <SettingsSwitchField
-        label="Use Custom Endpoint"
-        description="Use a custom OpenAI compatible endpoint instead of the official OpenAI API"
-        form={form}
-        field="llm.providerConfig.openai.useCustomUrl"
-      />
-
-      {useCustomUrl && (
-        <SettingsTextField
-          label="Base URL"
-          {...form.register(
-            "llm.providerConfig.openai.chatModel.configuration.baseURL",
-            {
-              required: "Base URL is required when using a custom endpoint",
-              validate: (value) =>
-                value === "" ? "Base URL cannot be empty" : true,
-            },
-          )}
-        />
-      )}
-
-      <SettingsTextField
-        label="API Key"
-        description="OpenAI API Key"
-        {...form.register("llm.providerConfig.openai.chatModel.apiKey")}
-      />
-
-      {useCustomUrl ? (
-        <SettingsTextField
-          label="Chat Model"
-          {...form.register("llm.providerConfig.openai.chatModel.model")}
-        />
-      ) : !customModel ? (
+      {!customModel ? (
         <SettingsSelectField
           label="Chat Model"
-          field="llm.providerConfig.openai.chatModel.model"
+          field="llm.models.openai"
           form={form}
           values={openAiModels}
         />
@@ -115,18 +69,15 @@ export const OpenAiSettings: FC = () => {
         <>
           <SettingsTextField
             label="Chat Model"
-            {...form.register("llm.providerConfig.openai.chatModel.model")}
+            {...form.register("llm.models.openai")}
           />
 
           <SettingsField>
             <Button
               type="button"
-              onClick={async () => {
+              onClick={() => {
                 setCustomModel(false);
-                form.setValue(
-                  "llm.providerConfig.openai.chatModel.model",
-                  openAiModels[0],
-                );
+                form.setValue("llm.models.openai", openAiModels[0]);
               }}
             >
               Use default OpenAI models
@@ -138,50 +89,27 @@ export const OpenAiSettings: FC = () => {
   );
 };
 
-export const OllamaSettings: FC = () => {
+const OllamaSummaryModelSettings: FC = () => {
   const form = useFormContext<Settings>();
   return (
     <>
       <Heading mt="4rem" as="h2" size="4">
-        Ollama Settings
+        Ollama Model
       </Heading>
       <Text as="p" mb="1rem">
-        You need to make sure that Ollama is installed locally, running and
-        reachable.
+        Ollama installation and endpoint settings are configured in General
+        Settings.
       </Text>
-
-      <SettingsField label="Install">
-        <Button
-          type="button"
-          onClick={async () => {
-            await mainApi.openWeb("https://ollama.com/download");
-          }}
-        >
-          Download and install Ollama
-        </Button>
-      </SettingsField>
-
       <SettingsTextField
         label="Base URL"
-        {...form.register("llm.providerConfig.ollama.chatModel.baseUrl")}
+        disabled
+        value={form.watch("providers.ollama.baseUrl")}
       />
 
       <SettingsTextField
         label="Chat Model"
-        {...form.register("llm.providerConfig.ollama.chatModel.model")}
+        {...form.register("llm.models.ollama")}
       />
-
-      <SettingsField label="Install Ollama">
-        <Button
-          type="button"
-          variant="surface"
-          onClick={async () => {
-            await mainApi.openWeb("https://ollama.com/library");
-          }}
-        >
-          Show available models
-        </Button>
-      </SettingsField>
     </>
   );
 };
@@ -223,7 +151,8 @@ export const DetailedSummarySettings: FC = () => {
       </Heading>
       <Text as="p" mb="1rem">
         You can select a locally running LLM that is hosted through Ollama, or
-        enter an API key to have OpenAI ChatGPT API generate the summaries.
+        use OpenAI. Shared API keys and endpoints are configured in General
+        Settings.
       </Text>
 
       <Box position="relative">
@@ -250,8 +179,12 @@ export const DetailedSummarySettings: FC = () => {
         </RadioCards.Root>
       </Box>
 
-      {form.watch("llm.provider") === "ollama" && <OllamaSettings />}
-      {form.watch("llm.provider") === "openai" && <OpenAiSettings />}
+      {form.watch("llm.provider") === "ollama" && (
+        <OllamaSummaryModelSettings />
+      )}
+      {form.watch("llm.provider") === "openai" && (
+        <OpenAiSummaryModelSettings />
+      )}
     </>
   );
 };
@@ -275,24 +208,14 @@ export const SummarySettings: FC = () => {
       <Text as="p" mb="1rem">
         If you want all your data to stay locally, using Ollama for
         summarization is a good choice. It will download and run LLM models
-        offline only. You need to install Ollama on your machine and configure
-        it here.
+        offline only. You can configure shared Ollama and OpenAI connection
+        settings in General Settings.
       </Text>
       <SettingsSwitchField
         label="Enable summarization"
         form={form}
         field="llm.enabled"
       />
-      <SettingsField label="Install Ollama">
-        <Button
-          type="button"
-          onClick={async () => {
-            await mainApi.openWeb("https://ollama.com/download");
-          }}
-        >
-          Download and install Ollama
-        </Button>
-      </SettingsField>
       {form.watch("llm.enabled") && <DetailedSummarySettings />}
     </Tabs.Content>
   );

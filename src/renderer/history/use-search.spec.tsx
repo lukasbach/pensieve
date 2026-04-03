@@ -18,52 +18,127 @@ vi.mock("../api", () => ({
 }));
 
 describe("useSearch", () => {
+  const recordings = {
+    alpha: {
+      isPinned: true,
+      isPostProcessed: true,
+      started: "2024-01-03T10:00:00.000Z",
+    },
+    beta: {
+      hasEmbedding: false,
+      isPostProcessed: false,
+      started: "2024-01-02T10:00:00.000Z",
+    },
+    gamma: {
+      hasEmbedding: true,
+      isPostProcessed: true,
+      started: "2024-01-01T10:00:00.000Z",
+    },
+  };
+
   beforeEach(() => {
     historySearchMock.mockReset();
   });
 
-  it("returns a permissive filter before a search is applied", () => {
-    const { result } = renderHook(() => useSearch(), { wrapper: TestProvider });
+  it("returns sorted visible and pinned recordings before a search is applied", () => {
+    const { result } = renderHook(
+      () => useSearch({ embeddingsEnabled: true, recordings }),
+      { wrapper: TestProvider },
+    );
 
-    expect(
-      result.current.filter([
-        "recording-1",
-        { started: "2024-01-01T10:00:00.000Z" },
-      ] as any),
-    ).toBe(true);
+    expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+      "alpha",
+      "beta",
+      "gamma",
+    ]);
+    expect(result.current.pinnedItems.map(([id]) => id)).toEqual(["alpha"]);
     expect(historySearchMock).not.toHaveBeenCalled();
   });
 
-  it("queries history and filters items from the returned result set", async () => {
+  it("queries history and filters the visible recordings from the returned result set", async () => {
     historySearchMock.mockResolvedValue({
-      alpha: "...roadmap...",
+      matches: {
+        alpha: { snippet: "...roadmap..." },
+      },
+      mode: "text",
+      orderedIds: [],
     });
 
-    const { result } = renderHook(() => useSearch(), { wrapper: TestProvider });
+    const { result } = renderHook(
+      () => useSearch({ embeddingsEnabled: true, recordings }),
+      { wrapper: TestProvider },
+    );
 
     act(() => {
       result.current.setSearch("roadmap");
     });
 
     await waitFor(() => {
-      expect(historySearchMock).toHaveBeenCalledWith("roadmap");
+      expect(historySearchMock).toHaveBeenCalledWith("roadmap", {
+        useSemanticSearch: false,
+      });
     });
 
     await waitFor(() => {
-      expect(result.current.searchResults).toEqual({ alpha: "...roadmap..." });
+      expect(result.current.searchResults).toEqual({
+        alpha: { snippet: "...roadmap..." },
+      });
+      expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+        "alpha",
+      ]);
+      expect(result.current.pinnedItems).toEqual([]);
+    });
+  });
+
+  it("applies the local history filter before search results are displayed", () => {
+    const { result } = renderHook(
+      () => useSearch({ embeddingsEnabled: true, recordings }),
+      { wrapper: TestProvider },
+    );
+
+    act(() => {
+      result.current.setHistoryFilter("unprocessed");
     });
 
-    expect(
-      result.current.filter([
+    expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+      "beta",
+    ]);
+    expect(result.current.pinnedItems.map(([id]) => id)).toEqual([]);
+  });
+
+  it("can switch to semantic search and expose the result ordering", async () => {
+    historySearchMock.mockResolvedValue({
+      matches: {
+        gamma: { score: 0.91, snippet: "Discussed launch readiness" },
+        alpha: { score: 0.67, snippet: "Captured launch risks" },
+      },
+      mode: "semantic",
+      orderedIds: ["gamma", "alpha"],
+    });
+
+    const { result } = renderHook(
+      () => useSearch({ embeddingsEnabled: true, recordings }),
+      { wrapper: TestProvider },
+    );
+
+    act(() => {
+      result.current.setUseSemanticSearch(true);
+      result.current.setSearch("launch");
+    });
+
+    await waitFor(() => {
+      expect(historySearchMock).toHaveBeenCalledWith("launch", {
+        useSemanticSearch: true,
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.orderedIds).toEqual(["gamma", "alpha"]);
+      expect(result.current.searchMode).toBe("semantic");
+      expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+        "gamma",
         "alpha",
-        { started: "2024-01-01T10:00:00.000Z" },
-      ] as any),
-    ).toBeTruthy();
-    expect(
-      result.current.filter([
-        "beta",
-        { started: "2024-01-01T10:00:00.000Z" },
-      ] as any),
-    ).toBeFalsy();
+      ]);
+    });
   });
 });

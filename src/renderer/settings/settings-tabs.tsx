@@ -35,6 +35,11 @@ export const SettingsTabs: FC = () => (
         Summarization
       </Button>
     </Tabs.Trigger>
+    <Tabs.Trigger value={SettingsTab.Embeddings} asChild>
+      <Button variant="ghost" className={styles.tab}>
+        Embeddings
+      </Button>
+    </Tabs.Trigger>
     <Tabs.Trigger value={SettingsTab.Hooks} asChild>
       <Button variant="ghost" className={styles.tab}>
         Data Hooks

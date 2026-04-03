@@ -1,11 +1,34 @@
-const { getRecordingTranscriptMock, listRecordingsMock } = vi.hoisted(() => ({
-  getRecordingTranscriptMock: vi.fn(),
-  listRecordingsMock: vi.fn(),
+const {
+  existsSyncMock,
+  getSettingsMock,
+  readJsonMock,
+  readdirMock,
+  semanticSearchMock,
+  statMock,
+} = vi.hoisted(() => ({
+  existsSyncMock: vi.fn(),
+  getSettingsMock: vi.fn(),
+  readJsonMock: vi.fn(),
+  readdirMock: vi.fn(),
+  semanticSearchMock: vi.fn(),
+  statMock: vi.fn(),
 }));
 
-vi.mock("./history", () => ({
-  getRecordingTranscript: getRecordingTranscriptMock,
-  listRecordings: listRecordingsMock,
+vi.mock("fs-extra", () => ({
+  default: {
+    existsSync: existsSyncMock,
+    readJson: readJsonMock,
+    readdir: readdirMock,
+    stat: statMock,
+  },
+}));
+
+vi.mock("./embeddings", () => ({
+  semanticSearch: semanticSearchMock,
+}));
+
+vi.mock("./settings", () => ({
+  getSettings: getSettingsMock,
 }));
 
 const createTranscript = (text: string) => ({
@@ -23,38 +46,59 @@ const createTranscript = (text: string) => ({
 describe("search", () => {
   beforeEach(() => {
     vi.resetModules();
-    getRecordingTranscriptMock.mockReset();
-    listRecordingsMock.mockReset();
+    existsSyncMock.mockReset();
+    getSettingsMock.mockReset();
+    readJsonMock.mockReset();
+    readdirMock.mockReset();
+    semanticSearchMock.mockReset();
+    statMock.mockReset();
+
+    getSettingsMock.mockResolvedValue({
+      core: { recordingsFolder: "C:\\Recordings" },
+    });
   });
 
   it("indexes titles and transcripts during initialization", async () => {
-    listRecordingsMock.mockResolvedValue({
-      first: { name: "Daily Sync", started: "2024-01-01T10:00:00.000Z" },
-      second: { started: "2024-01-02T10:00:00.000Z" },
-    });
-    getRecordingTranscriptMock.mockImplementation(
-      async (recordingId: string) =>
-        recordingId === "first"
-          ? createTranscript(
-              "The team reviewed roadmap milestones, customer feedback, and release planning for next month.",
-            )
-          : createTranscript(
-              "We finished customer handoff preparation before the release checklist and deployment dry run.",
-            ),
+    readdirMock.mockResolvedValue(["first", "second"]);
+    statMock.mockResolvedValue({ isDirectory: () => true });
+    existsSyncMock.mockReturnValue(true);
+    readJsonMock.mockImplementation(async (filePath: string) =>
+      filePath.includes("first") && filePath.endsWith("meta.json")
+        ? { name: "Daily Sync", started: "2024-01-01T10:00:00.000Z" }
+        : filePath.includes("second") && filePath.endsWith("meta.json")
+          ? { started: "2024-01-02T10:00:00.000Z" }
+          : filePath.includes("first")
+            ? createTranscript(
+                "The team reviewed roadmap milestones, customer feedback, and release planning for next month.",
+              )
+            : createTranscript(
+                "We finished customer handoff preparation before the release checklist and deployment dry run.",
+              ),
     );
 
     const searchModule = await import("./search");
 
     await searchModule.initializeSearchIndex();
 
-    expect(searchModule.search("daily")).toEqual({ first: true });
-    expect(searchModule.search("release").second).toEqual(
-      expect.stringContaining("release"),
+    await expect(searchModule.search("daily")).resolves.toEqual({
+      matches: { first: {} },
+      mode: "text",
+      orderedIds: [],
+    });
+    await expect(searchModule.search("release")).resolves.toEqual(
+      expect.objectContaining({
+        matches: expect.objectContaining({
+          second: expect.objectContaining({
+            snippet: expect.stringContaining("release"),
+          }),
+        }),
+      }),
     );
   });
 
   it("updates recording names and transcript snippets independently", async () => {
-    getRecordingTranscriptMock.mockResolvedValue(
+    existsSyncMock.mockReturnValue(true);
+    readJsonMock.mockResolvedValue(
       createTranscript(
         "The meeting covered product telemetry, customer insights, analytics trends, action items, and the onboarding funnel.",
       ),
@@ -65,14 +109,25 @@ describe("search", () => {
     await searchModule.addRecordingToIndex("recording-1");
     searchModule.updateRecordingName("recording-1", "Weekly Review");
 
-    expect(searchModule.search("review")).toEqual({ "recording-1": true });
-    expect(searchModule.search("analytics")["recording-1"]).toEqual(
-      expect.stringContaining("analytics"),
+    await expect(searchModule.search("review")).resolves.toEqual({
+      matches: { "recording-1": {} },
+      mode: "text",
+      orderedIds: [],
+    });
+    await expect(searchModule.search("analytics")).resolves.toEqual(
+      expect.objectContaining({
+        matches: {
+          "recording-1": expect.objectContaining({
+            snippet: expect.stringContaining("analytics"),
+          }),
+        },
+      }),
     );
   });
 
   it("removes recordings from both indexes", async () => {
-    getRecordingTranscriptMock.mockResolvedValue(
+    existsSyncMock.mockReturnValue(true);
+    readJsonMock.mockResolvedValue(
       createTranscript("Discussed support queue triage and bug fixes."),
     );
 
@@ -82,6 +137,37 @@ describe("search", () => {
     searchModule.updateRecordingName("recording-2", "Support Triage");
     searchModule.removeRecordingFromIndex("recording-2");
 
-    expect(searchModule.search("support")).toEqual({});
+    await expect(searchModule.search("support")).resolves.toEqual({
+      matches: {},
+      mode: "text",
+      orderedIds: [],
+    });
+  });
+
+  it("returns semantic search results when requested", async () => {
+    semanticSearchMock.mockResolvedValue([
+      {
+        matchedLines: [],
+        recordingId: "recording-3",
+        score: 0.88,
+        snippet: "Release planning",
+      },
+    ]);
+
+    const searchModule = await import("./search");
+
+    await expect(
+      searchModule.search("release", { useSemanticSearch: true }),
+    ).resolves.toEqual({
+      matches: {
+        "recording-3": {
+          matchedLines: [],
+          score: 0.88,
+          snippet: "Release planning",
+        },
+      },
+      mode: "semantic",
+      orderedIds: ["recording-3"],
+    });
   });
 });

@@ -4,6 +4,7 @@ const {
   appGetPathMock,
   ensureDirMock,
   existsSyncMock,
+  invalidateEmbeddingCacheMock,
   invalidateUiKeysMock,
   readJSONMock,
   removeMock,
@@ -13,6 +14,7 @@ const {
   appGetPathMock: vi.fn(),
   ensureDirMock: vi.fn(),
   existsSyncMock: vi.fn(),
+  invalidateEmbeddingCacheMock: vi.fn(),
   invalidateUiKeysMock: vi.fn(),
   readJSONMock: vi.fn(),
   removeMock: vi.fn(),
@@ -41,12 +43,19 @@ vi.mock("../ipc/invalidate-ui", () => ({
   invalidateUiKeys: invalidateUiKeysMock,
 }));
 
+vi.mock("./embedding-cache", () => ({
+  embeddingCache: {
+    invalidate: invalidateEmbeddingCacheMock,
+  },
+}));
+
 describe("settings", () => {
   beforeEach(() => {
     vi.resetModules();
     appGetPathMock.mockReset();
     ensureDirMock.mockReset();
     existsSyncMock.mockReset();
+    invalidateEmbeddingCacheMock.mockReset();
     invalidateUiKeysMock.mockReset();
     readJSONMock.mockReset();
     removeMock.mockReset();
@@ -89,6 +98,55 @@ describe("settings", () => {
     expect(readJSONMock).toHaveBeenCalledTimes(1);
   });
 
+  it("migrates legacy provider config into shared provider settings", async () => {
+    existsSyncMock.mockReturnValue(true);
+    readJSONMock.mockResolvedValue({
+      embeddings: {
+        providerConfig: {
+          ollama: { baseUrl: "http://legacy-ollama:11434", model: "embed-v1" },
+          openai: {
+            apiKey: "legacy-embedding-key",
+            configuration: { baseURL: "https://legacy-openai.example.com/v1" },
+            model: "embed-openai-v1",
+            useCustomUrl: true,
+          },
+        },
+      },
+      llm: {
+        providerConfig: {
+          ollama: {
+            chatModel: {
+              baseUrl: "http://legacy-chat-ollama:11434",
+              model: "legacy-chat-model",
+            },
+          },
+          openai: {
+            chatModel: {
+              apiKey: "legacy-chat-key",
+              configuration: { baseURL: "https://legacy-chat.example.com/v1" },
+              model: "legacy-gpt",
+            },
+            useCustomUrl: true,
+          },
+        },
+      },
+    });
+
+    const settings = await import("./settings");
+    const result = await settings.getSettings();
+
+    expect(result.providers.ollama.baseUrl).toBe("http://legacy-chat-ollama:11434");
+    expect(result.providers.openai.apiKey).toBe("legacy-chat-key");
+    expect(result.providers.openai.useCustomUrl).toBe(true);
+    expect(result.providers.openai.baseURL).toBe(
+      "https://legacy-chat.example.com/v1",
+    );
+    expect(result.llm.models.ollama).toBe("legacy-chat-model");
+    expect(result.llm.models.openai).toBe("legacy-gpt");
+    expect(result.embeddings.models.ollama).toBe("embed-v1");
+    expect(result.embeddings.models.openai).toBe("embed-openai-v1");
+  });
+
   it("persists partial settings updates and invalidates affected queries", async () => {
     existsSyncMock.mockReturnValue(true);
     readJSONMock.mockResolvedValue({
@@ -108,7 +166,7 @@ describe("settings", () => {
       "C:\\Users\\tester\\AppData\\Roaming\\Pensieve\\settings.json",
       expect.objectContaining({
         core: { recordingsFolder: "C:\\Updated" },
-        ui: { dark: false },
+        ui: expect.objectContaining({ dark: false }),
       }),
       { spaces: 2 },
     );

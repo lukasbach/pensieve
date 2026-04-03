@@ -7,7 +7,6 @@ import log from "electron-log/main";
 import * as settings from "./settings";
 import { RecordingTranscript, Settings } from "../../types";
 import { isNotNull } from "../../utils";
-import { getProgress, setProgress } from "./postprocess";
 import { pullModel } from "./ollama";
 
 const promptTemplate = `Be short and concise. 
@@ -51,13 +50,22 @@ const parseActionItems = (text: string) => {
 };
 
 export const getChatModel = async () => {
-  const { llm } = await settings.getSettings();
+  const { llm, providers } = await settings.getSettings();
   switch (llm.provider) {
     case "ollama":
-      await pullModel(llm.providerConfig.ollama.chatModel.model);
-      return new ChatOllama(llm.providerConfig.ollama.chatModel);
+      await pullModel(llm.models.ollama, providers.ollama.baseUrl);
+      return new ChatOllama({
+        baseUrl: providers.ollama.baseUrl,
+        model: llm.models.ollama,
+      });
     case "openai": {
-      return new ChatOpenAI(llm.providerConfig.openai.chatModel);
+      return new ChatOpenAI({
+        apiKey: providers.openai.apiKey,
+        model: llm.models.openai,
+        ...(providers.openai.useCustomUrl && providers.openai.baseURL
+          ? { configuration: { baseURL: providers.openai.baseURL } }
+          : {}),
+      });
     }
     default:
       throw new Error(`Invalid LLM provider: ${llm.provider}`);
@@ -91,17 +99,24 @@ const prepareLangchain = async () => {
   return documentChain;
 };
 
-const updateProgress = async (step: keyof Settings["llm"]["features"]) => {
-  const { llm } = await settings.getSettings();
-  if (!llm.features[step]) return;
-  const total = Object.values(llm.features).filter((f) => f).length;
-  setProgress("summary", (getProgress("summary") ?? 0) + 1 / total);
-};
-
-const summarizeTranscript = async (transcript: RecordingTranscript) => {
+const summarizeTranscript = async (
+  transcript: RecordingTranscript,
+  onProgress?: (progress: number) => void,
+) => {
   const { llm } = await settings.getSettings();
   const context = await prepareContext(transcript);
   const chain = await prepareLangchain();
+  const total = Object.values(llm.features).filter((feature) => feature).length;
+  let completed = 0;
+
+  const updateProgress = (step: keyof Settings["llm"]["features"]) => {
+    if (!llm.features[step] || total === 0) {
+      return;
+    }
+
+    completed += 1;
+    onProgress?.(completed / total);
+  };
 
   const summary = llm.features.summary
     ? await chain.invoke({

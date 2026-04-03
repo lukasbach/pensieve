@@ -4,11 +4,24 @@ import { app, shell } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
-import * as searchIndex from "./search";
 import * as ffmpeg from "./ffmpeg";
 import * as settings from "./settings";
-import * as postprocess from "./postprocess";
+import * as embeddings from "./embeddings";
 import { getDuration } from "./ffmpeg";
+
+const withDerivedRecordingMeta = async (
+  recordingId: string,
+  meta: RecordingMeta,
+  embeddingConfigurationKey?: string,
+) => {
+  return {
+    ...meta,
+    hasEmbedding: await embeddings.hasCompatibleRecordingEmbedding(
+      recordingId,
+      embeddingConfigurationKey,
+    ),
+  };
+};
 
 export const getRecordingsFolder = async () => {
   return (await settings.getSettings()).core.recordingsFolder;
@@ -70,13 +83,11 @@ export const saveRecording = async (recording: RecordingData) => {
     );
   }
 
-  searchIndex.updateRecordingName(folder, recording.meta.name);
+  const searchIndex = await import("./search");
+  searchIndex.updateRecordingName(recordingId, recording.meta.name);
   invalidateUiKeys(QueryKeys.History);
 
-  if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue({ recordingId });
-    postprocess.startQueue();
-  }
+  return recordingId;
 };
 
 export const importRecording = async (file: string, meta: RecordingMeta) => {
@@ -87,22 +98,26 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
   const fullMeta: RecordingMeta = {
     ...meta,
+    hasMic: false,
+    hasRawRecording: true,
+    hasScreen: true,
     isImported: true,
+    isPostProcessed: false,
     duration: await getDuration(file),
   };
   await fs.writeJSON(path.join(folder, "meta.json"), fullMeta, {
     spaces: 2,
   });
-  searchIndex.updateRecordingName(folder, fullMeta.name);
+  const searchIndex = await import("./search");
+  searchIndex.updateRecordingName(recordingId, fullMeta.name);
   invalidateUiKeys(QueryKeys.History);
 
-  if ((await settings.getSettings()).ffmpeg.autoTriggerPostProcess) {
-    postprocess.addToQueue({ recordingId });
-    postprocess.startQueue();
-  }
+  return recordingId;
 };
 
 export const listRecordings = async () => {
+  const embeddingConfigurationKey =
+    await embeddings.getCurrentEmbeddingConfigurationKey();
   const recordingFolders = await fs.readdir(await getRecordingsFolder());
 
   // Filter out non-directories and .DS_Store files first
@@ -122,19 +137,20 @@ export const listRecordings = async () => {
   }
 
   const items = await Promise.all(
-    validFolders.map(
-      async (recordingFolder) =>
-        [
+    validFolders.map(async (recordingFolder) => {
+      const meta = (await fs.readJson(
+        path.join(await getRecordingsFolder(), recordingFolder, "meta.json"),
+      )) as RecordingMeta;
+
+      return [
+        recordingFolder,
+        await withDerivedRecordingMeta(
           recordingFolder,
-          (await fs.readJson(
-            path.join(
-              await getRecordingsFolder(),
-              recordingFolder,
-              "meta.json",
-            ),
-          )) as RecordingMeta,
-        ] as const,
-    ),
+          meta,
+          embeddingConfigurationKey,
+        ),
+      ] as const;
+    }),
   );
   return items.reverse().reduce(
     (acc, [folder, meta]) => {
@@ -147,8 +163,16 @@ export const listRecordings = async () => {
 
 export const getRecordingMeta = async (
   recordingId: string,
-): Promise<RecordingMeta> =>
-  fs.readJson(path.join(await getRecordingsFolder(), recordingId, "meta.json"));
+): Promise<RecordingMeta> => {
+  const meta = (await fs.readJson(
+    path.join(await getRecordingsFolder(), recordingId, "meta.json"),
+  )) as RecordingMeta;
+  return withDerivedRecordingMeta(
+    recordingId,
+    meta,
+    await embeddings.getCurrentEmbeddingConfigurationKey(),
+  );
+};
 
 export const getRecordingTranscript = async (
   recordingId: string,
@@ -181,6 +205,7 @@ export const updateRecording = async (
     },
     { spaces: 2 },
   );
+  const searchIndex = await import("./search");
   searchIndex.updateRecordingName(recordingId, partial.name);
   invalidateUiKeys(QueryKeys.History, recordingId);
   invalidateUiKeys(QueryKeys.History);
@@ -193,6 +218,8 @@ export const openRecordingFolder = async (recordingId: string) => {
 
 export const removeRecording = async (recordingId: string) => {
   await fs.remove(path.join(await getRecordingsFolder(), recordingId));
+  const searchIndex = await import("./search");
   searchIndex.removeRecordingFromIndex(recordingId);
+  embeddings.invalidateSemanticSearchStore();
   invalidateUiKeys(QueryKeys.History);
 };

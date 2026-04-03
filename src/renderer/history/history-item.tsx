@@ -10,6 +10,7 @@ import {
   HiOutlineServerStack,
   HiOutlineStar,
   HiOutlineTrash,
+  HiSparkles,
   HiStar,
 } from "react-icons/hi2";
 import humanizer from "humanize-duration";
@@ -198,6 +199,12 @@ export const HistoryItem: FC<{
                   disabled={!recording.hasRawRecording}
                 >
                   <HiOutlineDocumentText /> Audio and transcription
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={() => process(["embedding"])}
+                  disabled={!recording.isPostProcessed}
+                >
+                  <HiSparkles /> Embeddings
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   onClick={() => process(["summary"])}

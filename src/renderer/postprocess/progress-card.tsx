@@ -10,12 +10,14 @@ import { useHistoryRecordings } from "../history/state";
 import { ProgressCardWrapper } from "./progress-card-wrapper";
 import { PostProcessingJob } from "../../types";
 import type { getProgressData } from "../../main/domain/postprocess";
+import * as styles from "./styles.module.css";
 
 const allSteps = [
   "wav",
   "mp3",
   "modelDownload",
   "whisper",
+  "embedding",
   "summary",
   "datahooks",
 ] as const;
@@ -24,6 +26,7 @@ const stepLabels = {
   wav: "Preparing audio",
   mp3: "Generating MP3 file",
   whisper: "Transcribing audio",
+  embedding: "Computing embeddings",
   summary: "Generating summary",
   datahooks: "Running datahooks",
 };
@@ -42,11 +45,7 @@ export const ProgressCard: FC<{
         header={<Text color="red">{name}</Text>}
         icon={<HiOutlineExclamationTriangle color="var(--red-11)" />}
       >
-        <pre
-          style={{ overflowX: "auto", overflowY: "auto", maxHeight: "400px" }}
-        >
-          {job.error}
-        </pre>
+        <pre className={styles.errorOutput}>{job.error}</pre>
       </ProgressCardWrapper>
     );
   }
