@@ -1,12 +1,11 @@
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
+import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { Document } from "@langchain/core/documents";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { createRetrievalChain } from "langchain/chains/retrieval";
-import { ChatOllama } from "@langchain/community/chat_models/ollama";
+import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
+import { createRetrievalChain } from "@langchain/classic/chains/retrieval";
 import log from "electron-log/main";
 import * as settings from "./settings";
 import { RecordingTranscript, Settings } from "../../types";
