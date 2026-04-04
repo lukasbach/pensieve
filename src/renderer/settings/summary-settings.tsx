@@ -16,30 +16,7 @@ import { SettingsTextField } from "./settings-text-field";
 import { SettingsSelectField } from "./settings-select-field";
 import { SettingsField } from "./settings-field";
 import { SettingsTab } from "./tabs";
-
-const openAiModels = [
-  "gpt-5.4",
-  "gpt-5.4-mini",
-  "gpt-5.4-nano",
-  "gpt-5.2",
-  "gpt-5.1",
-  "gpt-5",
-  "gpt-5-mini",
-  "gpt-5-nano",
-  "gpt-5-chat-latest",
-  "gpt-4.1",
-  "gpt-4.1-mini",
-  "gpt-4.1-nano",
-  "gpt-4o",
-  "gpt-4o-mini",
-  "o4-mini",
-  "o3",
-  "o3-pro",
-  "o3-mini",
-  "o1",
-  "o1-pro",
-  "Custom",
-];
+import { openAiChatModels } from "./openai-chat-models";
 
 const OpenAiSummaryModelSettings: FC = () => {
   const form = useFormContext<Settings>();
@@ -68,7 +45,7 @@ const OpenAiSummaryModelSettings: FC = () => {
           label="Chat Model"
           field="llm.models.openai"
           form={form}
-          values={openAiModels}
+          values={openAiChatModels}
         />
       ) : (
         <>
@@ -82,7 +59,7 @@ const OpenAiSummaryModelSettings: FC = () => {
               type="button"
               onClick={() => {
                 setCustomModel(false);
-                form.setValue("llm.models.openai", openAiModels[0]);
+                form.setValue("llm.models.openai", openAiChatModels[0]);
               }}
             >
               Use default OpenAI models

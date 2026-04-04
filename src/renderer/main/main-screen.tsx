@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { IconButton, Tabs } from "@radix-ui/themes";
 import {
+  HiOutlineChatBubbleLeftRight,
   HiMiniListBullet,
   HiOutlineCog6Tooth,
   HiOutlineDocumentText,
@@ -13,6 +14,7 @@ import { windowsApi } from "../api";
 import { Recorder } from "../recorder/recorder";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 import { Fancybg } from "../common/fancybg";
+import { Chat } from "../chat/chat";
 
 export const MainScreen: FC = () => {
   return (
@@ -28,6 +30,12 @@ export const MainScreen: FC = () => {
             </ResponsiveTabTrigger>
             <ResponsiveTabTrigger value="history" icon={<HiMiniListBullet />}>
               History
+            </ResponsiveTabTrigger>
+            <ResponsiveTabTrigger
+              value="chat"
+              icon={<HiOutlineChatBubbleLeftRight />}
+            >
+              Chat
             </ResponsiveTabTrigger>
             <ResponsiveTabTrigger
               value="postprocess"
@@ -55,6 +63,10 @@ export const MainScreen: FC = () => {
 
         <Tabs.Content value="history">
           <History />
+        </Tabs.Content>
+
+        <Tabs.Content value="chat" style={{ height: "100%" }}>
+          <Chat />
         </Tabs.Content>
 
         <Tabs.Content value="postprocess">

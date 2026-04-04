@@ -14,6 +14,12 @@ contextBridge.exposeInMainWorld("ipcApi", {
   history: {
     invoke: (payload: any) => ipcRenderer.invoke("history", payload),
   },
+  mcp: {
+    invoke: (payload: any) => ipcRenderer.invoke("mcp", payload),
+  },
+  chat: {
+    invoke: (payload: any) => ipcRenderer.invoke("chat", payload),
+  },
   recorderIpc: {
     invoke: (payload: any) => ipcRenderer.invoke("recorderIpc", payload),
     onEvent: (type: string, listener: (...args: any[]) => void) => {

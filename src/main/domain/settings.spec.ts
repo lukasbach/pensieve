@@ -94,6 +94,8 @@ describe("settings", () => {
     expect(firstRead.ui.dark).toBe(false);
     expect(firstRead.whisper.threads).toBe(8);
     expect(firstRead.llm.provider).toBe("ollama");
+    expect(firstRead.chat.enabled).toBe(false);
+    expect(firstRead.chat.provider).toBe("ollama");
     expect(secondRead).toBe(firstRead);
     expect(readJSONMock).toHaveBeenCalledTimes(1);
   });
@@ -147,6 +149,26 @@ describe("settings", () => {
     expect(result.llm.models.openai).toBe("legacy-gpt");
     expect(result.embeddings.models.ollama).toBe("embed-v1");
     expect(result.embeddings.models.openai).toBe("embed-openai-v1");
+  });
+
+  it("falls back chat provider and models to llm settings when missing", async () => {
+    existsSyncMock.mockReturnValue(true);
+    readJSONMock.mockResolvedValue({
+      llm: {
+        models: {
+          ollama: "chat-ollama-model",
+          openai: "chat-openai-model",
+        },
+        provider: "openai",
+      },
+    });
+
+    const settings = await import("./settings");
+    const result = await settings.getSettings();
+
+    expect(result.chat.provider).toBe("openai");
+    expect(result.chat.models.ollama).toBe("chat-ollama-model");
+    expect(result.chat.models.openai).toBe("chat-openai-model");
   });
 
   it("persists partial settings updates and invalidates affected queries", async () => {

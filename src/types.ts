@@ -97,6 +97,14 @@ export const defaultSettings = {
       openai: "gpt-5.4",
     },
   },
+  chat: {
+    enabled: false,
+    provider: "ollama" as "ollama" | "openai",
+    models: {
+      ollama: "gemma3:4b",
+      openai: "gpt-5.4",
+    },
+  },
   embeddings: {
     enabled: false,
     provider: "ollama" as "ollama" | "openai",

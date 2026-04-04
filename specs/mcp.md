@@ -27,3 +27,27 @@ The search bar in the history view should have a "AI sprinkle" button next to it
 - read-transcript({ recordingId, startLine?, length? }): Read the transcript of a recording by its ID
 - recording-details({ recordingId }): Get details of a recording by its ID, including title, summary, notes, etc
 - open-recording({ recordingId, highlightedLine? }): Open the recording in the app
+
+## Embedded Chat
+
+Add a new tab to the main view, named "Chat". In there, the user can chat with an LLM about their recordings. The chat has the same tools as the MCP server, excluding the open-recording tool.
+
+For the chat to be enabled, in the settings under "Chat", the chat should be enabled and set to either openai or ollama. If disabled, the chat tab is still visible, but shows an empty state with instructions on how to enable the chat.
+
+The chat UI has an input field at the bottom, and the conversation at the top. New messages make the container to scroll down.
+
+### Follow up features
+
+#### Chat History
+
+Previous chats are stored as JSON files in the app data folder. The user can view a list of previous chats in a dropdown icon button at the top right of the chat view.
+
+#### Richer responses
+
+The LLM can respond with rich elements:
+
+`<recording id="123" highlightedLine="5"/>` renders a card with the recording title, date, and snippet of the transcript around the highlighted line. The card has a button that opens the recording in a new window.
+
+`<recording id="123"/>` renders a card with the recording title and date, without a transcript snippet. The card has a button that opens the recording in a new window.
+
+`<recording-lines id="123" startLine="5" length="10"/>` renders a card with the specified lines of the transcript. Clicking any of the lines opens the recording in a new window, with the line highlighted.

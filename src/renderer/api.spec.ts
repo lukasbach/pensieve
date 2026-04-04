@@ -22,7 +22,11 @@ describe("renderer api", () => {
     expect(createRendererIpcMock).toHaveBeenNthCalledWith(3, "models");
     expect(createRendererIpcMock).toHaveBeenNthCalledWith(4, "history");
     expect(createRendererIpcMock).toHaveBeenNthCalledWith(5, "recorderIpc");
+    expect(createRendererIpcMock).toHaveBeenNthCalledWith(6, "mcp");
+    expect(createRendererIpcMock).toHaveBeenNthCalledWith(7, "chat");
     expect(api.mainApi).toEqual({ channel: "main" });
     expect(api.historyApi).toEqual({ channel: "history" });
+    expect(api.mcpApi).toEqual({ channel: "mcp" });
+    expect(api.chatApi).toEqual({ channel: "chat" });
   });
 });

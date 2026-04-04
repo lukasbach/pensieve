@@ -18,6 +18,7 @@ import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
 import { mcpApi } from "./main/ipc/mcp-api";
+import { chatApi } from "./main/ipc/chat-api";
 import {
   getAudioServerSecret,
   setAudioServerPort,
@@ -83,6 +84,7 @@ app.whenReady().then(async () => {
   loadIpcInterfaceInMain("models", modelsApi);
   loadIpcInterfaceInMain("recorderIpc", recorderIpcApi);
   loadIpcInterfaceInMain("mcp", mcpApi);
+  loadIpcInterfaceInMain("chat", chatApi);
 
   searchIndex.initializeSearchIndex().then(() => {
     log.info("Search index initialized.");

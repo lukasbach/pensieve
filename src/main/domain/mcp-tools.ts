@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { RecordingMeta, RecordingTranscriptItem } from "../../types";
 import * as history from "./history";
 import * as searchIndex from "./search";
@@ -34,6 +35,14 @@ type McpTranscriptLine = RecordingTranscriptItem & {
   lineIndex: number;
   lineNumber: number;
   score?: number;
+};
+
+type McpToolDefinition = {
+  description: string;
+  execute: (args: any) => Promise<any>;
+  inputSchema: z.ZodTypeAny;
+  name: string;
+  summarizeResult: (result: any) => string;
 };
 
 const parseDate = (value?: string) => {
@@ -285,7 +294,79 @@ const openRecording = async ({
   };
 };
 
+const queryRecordingsTool = {
+  description:
+    "Query local Pensieve meeting recordings by id, date range, and search text. Search automatically uses semantic search when embeddings are enabled.",
+  execute: queryRecordings,
+  inputSchema: z.object({
+    endDate: z.string().optional(),
+    offset: z.number().int().min(0).optional(),
+    recordingId: z.string().optional(),
+    search: z.string().optional(),
+    startDate: z.string().optional(),
+  }),
+  name: "query-recordings",
+  summarizeResult: (result: Awaited<ReturnType<typeof queryRecordings>>) => {
+    const returnedCount = result.items.length;
+
+    return returnedCount
+      ? `Returned ${returnedCount} of ${result.totalResults} matching recordings.`
+      : "No recordings matched the query.";
+  },
+} satisfies McpToolDefinition;
+
+const readTranscriptTool = {
+  description:
+    "Read transcript lines from a local Pensieve meeting recording. Line numbers are 1-based.",
+  execute: readTranscript,
+  inputSchema: z.object({
+    length: z.number().int().min(1).optional(),
+    recordingId: z.string(),
+    startLine: z.number().int().min(1).optional(),
+  }),
+  name: "read-transcript",
+  summarizeResult: (result: Awaited<ReturnType<typeof readTranscript>>) =>
+    result.returnedLines
+      ? `Returned ${result.returnedLines} transcript lines starting at line ${result.startLine}.`
+      : "No transcript lines were returned.",
+} satisfies McpToolDefinition;
+
+const recordingDetailsTool = {
+  description:
+    "Get the metadata, notes, and summary information for a Pensieve meeting recording.",
+  execute: getRecordingDetails,
+  inputSchema: z.object({
+    recordingId: z.string(),
+  }),
+  name: "recording-details",
+  summarizeResult: (result: Awaited<ReturnType<typeof getRecordingDetails>>) =>
+    result.meta
+      ? `Loaded details for recording "${result.recordingId}".`
+      : `Recording "${result.recordingId}" was not found.`,
+} satisfies McpToolDefinition;
+
+const openRecordingTool = {
+  description:
+    "Open a Pensieve recording in the app, optionally highlighting a transcript line.",
+  execute: openRecording,
+  inputSchema: z.object({
+    highlightedLine: z.number().int().min(1).optional(),
+    recordingId: z.string(),
+  }),
+  name: "open-recording",
+  summarizeResult: (result: Awaited<ReturnType<typeof openRecording>>) =>
+    `Opened recording "${result.recordingId}" in Pensieve.`,
+} satisfies McpToolDefinition;
+
+const definitions: McpToolDefinition[] = [
+  queryRecordingsTool,
+  readTranscriptTool,
+  recordingDetailsTool,
+  openRecordingTool,
+];
+
 export const mcpTools = {
+  definitions,
   getRecordingDetails,
   openRecording,
   queryRecordings,

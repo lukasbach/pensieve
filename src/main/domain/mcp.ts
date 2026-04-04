@@ -4,7 +4,6 @@ import log from "electron-log/main";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp";
 // eslint-disable-next-line import/no-unresolved
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp";
-import { z } from "zod";
 import packageJson from "../../../package.json";
 import { QueryKeys } from "../../query-keys";
 import * as settings from "./settings";
@@ -70,109 +69,24 @@ const createPensieveMcpServer = () => {
     version: packageJson.version,
   });
 
-  server.registerTool(
-    "query-recordings",
-    {
-      description:
-        "Query local Pensieve meeting recordings by id, date range, and search text. Search automatically uses semantic search when embeddings are enabled.",
-      inputSchema: z.object({
-        endDate: z.string().optional(),
-        offset: z.number().int().min(0).optional(),
-        recordingId: z.string().optional(),
-        search: z.string().optional(),
-        startDate: z.string().optional(),
-      }),
-    },
-    async (args) => {
-      try {
-        const result = await mcpTools.queryRecordings(args);
-        const returnedCount = result.items.length;
+  mcpTools.definitions.forEach((definition) => {
+    server.registerTool(
+      definition.name,
+      {
+        description: definition.description,
+        inputSchema: definition.inputSchema,
+      },
+      async (args: unknown) => {
+        try {
+          const result = await definition.execute(args as never);
 
-        return createToolResult(
-          returnedCount
-            ? `Returned ${returnedCount} of ${result.totalResults} matching recordings.`
-            : "No recordings matched the query.",
-          result,
-        );
-      } catch (error) {
-        return createToolError(getErrorMessage(error));
-      }
-    },
-  );
-
-  server.registerTool(
-    "read-transcript",
-    {
-      description:
-        "Read transcript lines from a local Pensieve meeting recording. Line numbers are 1-based.",
-      inputSchema: z.object({
-        length: z.number().int().min(1).optional(),
-        recordingId: z.string(),
-        startLine: z.number().int().min(1).optional(),
-      }),
-    },
-    async (args) => {
-      try {
-        const result = await mcpTools.readTranscript(args);
-
-        return createToolResult(
-          result.returnedLines
-            ? `Returned ${result.returnedLines} transcript lines from recording ${result.recordingId}.`
-            : `Recording ${result.recordingId} has no transcript lines in the requested range.`,
-          result,
-        );
-      } catch (error) {
-        return createToolError(getErrorMessage(error));
-      }
-    },
-  );
-
-  server.registerTool(
-    "recording-details",
-    {
-      description:
-        "Get the metadata, notes, and summary information for a Pensieve meeting recording.",
-      inputSchema: z.object({
-        recordingId: z.string(),
-      }),
-    },
-    async (args) => {
-      try {
-        const result = await mcpTools.getRecordingDetails(args);
-
-        return createToolResult(
-          `Loaded details for recording ${result.recordingId}.`,
-          result,
-        );
-      } catch (error) {
-        return createToolError(getErrorMessage(error));
-      }
-    },
-  );
-
-  server.registerTool(
-    "open-recording",
-    {
-      description:
-        "Open a Pensieve meeting recording in the app. highlightedLine is a 1-based transcript line number.",
-      inputSchema: z.object({
-        highlightedLine: z.number().int().min(1).optional(),
-        recordingId: z.string(),
-      }),
-    },
-    async (args) => {
-      try {
-        const result = await mcpTools.openRecording(args);
-
-        return createToolResult(
-          `Opened recording ${result.recordingId} in Pensieve.`,
-          result,
-        );
-      } catch (error) {
-        return createToolError(getErrorMessage(error));
-      }
-    },
-  );
+          return createToolResult(definition.summarizeResult(result), result);
+        } catch (error) {
+          return createToolError(getErrorMessage(error));
+        }
+      },
+    );
+  });
 
   return server;
 };

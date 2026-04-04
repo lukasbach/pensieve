@@ -1,13 +1,11 @@
 import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOllama } from "@langchain/ollama";
-import { ChatOpenAI } from "@langchain/openai";
 import { Document } from "@langchain/core/documents";
 import log from "electron-log/main";
 import * as settings from "./settings";
 import { RecordingTranscript, Settings } from "../../types";
 import { isNotNull } from "../../utils";
-import { pullModel } from "./ollama";
+import { getConfiguredChatModel } from "./chat-model";
 
 const promptTemplate = `Be short and concise. 
 
@@ -50,26 +48,12 @@ const parseActionItems = (text: string) => {
 };
 
 export const getChatModel = async () => {
-  const { llm, providers } = await settings.getSettings();
-  switch (llm.provider) {
-    case "ollama":
-      await pullModel(llm.models.ollama, providers.ollama.baseUrl);
-      return new ChatOllama({
-        baseUrl: providers.ollama.baseUrl,
-        model: llm.models.ollama,
-      });
-    case "openai": {
-      return new ChatOpenAI({
-        apiKey: providers.openai.apiKey,
-        model: llm.models.openai,
-        ...(providers.openai.useCustomUrl && providers.openai.baseURL
-          ? { configuration: { baseURL: providers.openai.baseURL } }
-          : {}),
-      });
-    }
-    default:
-      throw new Error(`Invalid LLM provider: ${llm.provider}`);
-  }
+  const { llm } = await settings.getSettings();
+
+  return getConfiguredChatModel({
+    model: llm.models[llm.provider],
+    provider: llm.provider,
+  });
 };
 
 const prepareContext = async (transcript: RecordingTranscript) => {

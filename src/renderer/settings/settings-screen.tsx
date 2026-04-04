@@ -18,6 +18,7 @@ import { WhisperSettings } from "./whisper-settings";
 import { SettingsTabs } from "./settings-tabs";
 import { FfmpegSettings } from "./ffmpeg-settings";
 import { SummarySettings } from "./summary-settings";
+import { ChatSettings } from "./chat-settings";
 import { EmbeddingSettings } from "./embedding-settings";
 import { McpSettings } from "./mcp-settings";
 import { HooksSettings } from "./hooks-settings";
@@ -83,6 +84,7 @@ export const SettingsScreen: FC = () => {
                 <FfmpegSettings />
                 <WhisperSettings />
                 <SummarySettings />
+                <ChatSettings />
                 <EmbeddingSettings />
                 <McpSettings />
                 <HooksSettings />

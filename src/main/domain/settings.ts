@@ -105,6 +105,22 @@ const normalizeSettings = (rawSettings: unknown): Settings => {
           merged.llm.models.openai,
       },
     },
+    chat: {
+      enabled: merged.chat.enabled,
+      provider: raw.chat?.provider ?? raw.llm?.provider ?? merged.chat.provider,
+      models: {
+        ollama:
+          raw.chat?.models?.ollama ??
+          raw.llm?.models?.ollama ??
+          raw.llm?.providerConfig?.ollama?.chatModel?.model ??
+          merged.chat.models.ollama,
+        openai:
+          raw.chat?.models?.openai ??
+          raw.llm?.models?.openai ??
+          raw.llm?.providerConfig?.openai?.chatModel?.model ??
+          merged.chat.models.openai,
+      },
+    },
     embeddings: {
       enabled: merged.embeddings.enabled,
       provider: merged.embeddings.provider,

@@ -3,6 +3,7 @@ export enum SettingsTab {
   Ffmpeg = "ffmpeg",
   Whisper = "whisper",
   Summary = "summary",
+  Chat = "chat",
   Embeddings = "embeddings",
   Mcp = "mcp",
   Hooks = "hooks",

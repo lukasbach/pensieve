@@ -18,6 +18,8 @@ Object.defineProperty(window, "ipcApi", {
     main: { invoke: async () => undefined },
     models: { invoke: async () => undefined },
     history: { invoke: async () => undefined },
+    mcp: { invoke: async () => undefined },
+    chat: { invoke: async () => undefined },
     recorderIpc: { invoke: async () => undefined },
     windows: { invoke: async () => undefined },
     onInvalidateUiKeys: () => () => {},
