@@ -22,7 +22,9 @@ If you’re looking for a hosted desktop recording API, consider checking out [R
 
 Pensieve is a local-only desktop app for recording meetings, discussions, memos or other audio
 snippets from locally running applications for you to always go back and review your
-previous discussions.
+previous discussions. Once you have recorded some meetings, you can use an included Chat
+view to ask questions about your recordings, or use a built-in MCP server to integrate with
+external tools.
 
 It uses a bundled Whisper instance to transcribe the audio locally, and optionally
 summarizes the transcriptions with an LLM. You can connect a local Ollama instance to
@@ -45,7 +47,6 @@ and summarization, or various audio processing settings.
     </a>
 </div>
 
-
 # MacOS Setup Notes
 
 Pensieve requires FFmpeg and Whisper to be installed on macOS. The easiest way to install these dependencies is using Homebrew:
@@ -53,11 +54,13 @@ Pensieve requires FFmpeg and Whisper to be installed on macOS. The easiest way t
 ### Prerequisites
 
 1. **Install Homebrew** (if not already installed):
+
    ```bash
    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
    ```
 
 2. **Install FFmpeg**:
+
    ```bash
    brew install ffmpeg
    ```
@@ -86,6 +89,7 @@ If you prefer not to use Homebrew:
 ### Troubleshooting
 
 If Pensieve shows warning dialogs about missing dependencies:
+
 1. Ensure the tools are installed and available in your PATH
 2. Restart Pensieve after installation
 3. Check that the tools are accessible from the terminal
