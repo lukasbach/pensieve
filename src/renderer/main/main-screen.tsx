@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { IconButton, Tabs } from "@radix-ui/themes";
 import {
-  HiOutlineChatBubbleLeftRight,
   HiMiniListBullet,
+  HiOutlineChatBubbleLeftRight,
   HiOutlineCog6Tooth,
   HiOutlineDocumentText,
   HiOutlineVideoCamera,

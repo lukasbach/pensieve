@@ -27,6 +27,7 @@ import { QueryKeys } from "../../query-keys";
 import { chatApi, mainApi, windowsApi } from "../api";
 import { EmptyState } from "../common/empty-state";
 import { SettingsTab } from "../settings/tabs";
+import { ChatHistoryMenu } from "./chat-history-menu";
 import * as styles from "./chat.module.css";
 
 type ChatUiMessage = {
@@ -42,6 +43,12 @@ const suggestedPrompts = [
   "Summarize the latest discussion about hiring.",
   "Which recording mentioned action items for me?",
 ];
+
+const createSessionId = () => {
+  return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+type LoadedChatSession = Awaited<ReturnType<typeof chatApi.loadSession>>;
 
 const createMessage = (
   role: ChatUiMessage["role"],
@@ -60,9 +67,7 @@ export const Chat: FC = () => {
     queryKey: [QueryKeys.Settings],
     queryFn: mainApi.getSettings,
   });
-  const [sessionId] = useState(
-    () => `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-  );
+  const [sessionId, setSessionId] = useState(createSessionId);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<ChatUiMessage[]>([]);
@@ -80,10 +85,18 @@ export const Chat: FC = () => {
     };
   }, [sessionId]);
 
-  const handleReset = async () => {
-    await chatApi.resetSession(sessionId);
+  const handleReset = () => {
+    setSessionId(createSessionId());
     setMessages([]);
     setInput("");
+    setIsSending(false);
+  };
+
+  const handleLoadSession = async (session: LoadedChatSession) => {
+    setSessionId(session.sessionId);
+    setMessages(session.messages);
+    setInput("");
+    setIsSending(false);
   };
 
   const handleSendMessage = async (message: string) => {
@@ -172,15 +185,21 @@ export const Chat: FC = () => {
     >
       <Flex align="center" justify="between" className={styles.toolbar}>
         <Heading size="6">Chat</Heading>
-        <Button
-          type="button"
-          variant="outline"
-          color="gray"
-          onClick={() => handleReset()}
-          disabled={messages.length === 0 && input.length === 0}
-        >
-          <HiOutlineArrowPath /> New chat
-        </Button>
+        <Flex gap="2">
+          <ChatHistoryMenu
+            currentSessionId={sessionId}
+            onLoadSession={handleLoadSession}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            color="gray"
+            onClick={handleReset}
+            disabled={messages.length === 0 && input.length === 0}
+          >
+            <HiOutlineArrowPath /> New chat
+          </Button>
+        </Flex>
       </Flex>
 
       <Box className={styles.conversation}>

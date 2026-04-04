@@ -1,4 +1,5 @@
 export enum QueryKeys {
+  ChatHistory = "chathistory",
   History = "history",
   Transcript = "transcript",
   AudioFile = "audio",
