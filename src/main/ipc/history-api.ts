@@ -4,7 +4,7 @@ import * as history from "../domain/history";
 import * as postprocess from "../domain/postprocess";
 import * as searchIndex from "../domain/search";
 import * as settings from "../domain/settings";
-import { openAppWindow } from "../domain/windows";
+import { openRecordingWindow } from "../domain/windows";
 import { PostProcessingJob } from "../../types";
 
 const maybeAutoProcess = async (recordingId: string) => {
@@ -45,9 +45,10 @@ export const historyApi = {
   getPostProcessingProgress: async () => postprocess.getProgressData(),
   clearPostProcessingQueue: async () => postprocess.clearList(),
 
-  openRecordingDetailsWindow: async (id: string) => {
-    openAppWindow(`/history/${id}`, {}, { minWidth: 400, minHeight: 400 });
-  },
+  openRecording: async (id: string, highlightedLine?: number) =>
+    openRecordingWindow(id, highlightedLine),
+  openRecordingDetailsWindow: async (id: string, highlightedLine?: number) =>
+    openRecordingWindow(id, highlightedLine),
 
   showOpenImportDialog: async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({

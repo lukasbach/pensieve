@@ -23,7 +23,7 @@ describe("ollama", () => {
 
     const ollama = await import("./ollama");
 
-  await ollama.pullModel("gemma3:4b", "http://localhost:11434");
+    await ollama.pullModel("gemma3:4b", "http://localhost:11434");
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:11434/api/tags", {
@@ -45,7 +45,7 @@ describe("ollama", () => {
 
     const ollama = await import("./ollama");
 
-  await ollama.pullModel("llama3.2", "http://localhost:11434");
+    await ollama.pullModel("llama3.2", "http://localhost:11434");
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
@@ -76,8 +76,6 @@ describe("ollama", () => {
 
     await expect(
       ollama.pullModel("llama3.2", "http://localhost:11434"),
-    ).rejects.toThrow(
-      "Failed to fetch POST /api/pull: Bad Request",
-    );
+    ).rejects.toThrow("Failed to fetch POST /api/pull: Bad Request");
   });
 });

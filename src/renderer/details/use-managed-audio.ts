@@ -24,14 +24,33 @@ export const useManagedAudio = (
       if (!transcript) return;
 
       const closest = transcript.transcription.reduce(
-        (old, { offsets }) => {
+        (old, { offsets }, index) => {
           const dist = Math.abs(offsets.from - time);
-          return dist < old.dist ? { time: offsets.from, dist } : old;
+          return dist < old.dist ? { dist, index } : old;
         },
-        { time: 0, dist: Number.MAX_SAFE_INTEGER },
+        { dist: Number.MAX_SAFE_INTEGER, index: 0 },
       );
 
-      const id = `transcript-item-${closest.time}`;
+      const target = transcript.transcription[closest.index];
+      if (!target) return;
+
+      const id = `transcript-item-${target.offsets.from}`;
+      const element = document.getElementById(id);
+      if (!element) return;
+
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    [transcript],
+  );
+
+  const scrollToLine = useCallback(
+    (lineIndex: number) => {
+      if (!transcript) return;
+
+      const target = transcript.transcription[lineIndex];
+      if (!target) return;
+
+      const id = `transcript-item-${target.offsets.from}`;
       const element = document.getElementById(id);
       if (!element) return;
 
@@ -104,6 +123,7 @@ export const useManagedAudio = (
     play,
     jumpBackward,
     duration,
+    scrollToLine,
     scrollTo,
   };
 };

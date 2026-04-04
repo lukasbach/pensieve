@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Flex, Tabs } from "@radix-ui/themes";
 import { HiMiniPencilSquare, HiOutlineBars3BottomLeft } from "react-icons/hi2";
@@ -18,6 +18,7 @@ import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 
 export const DetailsScreen: FC = () => {
   const { id } = historyDetailsRoute.useParams();
+  const { highlightedLine } = historyDetailsRoute.useSearch();
   const [tab, setTab] = useState("transcript");
   const { data: recording } = useQuery({
     queryKey: [QueryKeys.History, id],
@@ -29,6 +30,23 @@ export const DetailsScreen: FC = () => {
   });
 
   const audio = useManagedAudio(transcript);
+  const { jump, scrollToLine } = audio;
+
+  useEffect(() => {
+    if (!transcript || !highlightedLine) {
+      return;
+    }
+
+    const targetLine = transcript.transcription[highlightedLine - 1];
+
+    if (!targetLine) {
+      return;
+    }
+
+    setTab("transcript");
+    jump(Math.max(targetLine.offsets.from / 1000 - 1, 0));
+    scrollToLine(highlightedLine - 1);
+  }, [highlightedLine, jump, scrollToLine, transcript]);
 
   if (!recording || !transcript) {
     return (

@@ -5,6 +5,7 @@ export enum QueryKeys {
   Settings = "settings",
   HasModel = "hasmodel",
   Theme = "theme",
+  Mcp = "mcp",
   PostProcessing = "postprocessing",
   ScreenSources = "screensources",
   MicrophoneSources = "microphonesources",

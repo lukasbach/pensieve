@@ -62,6 +62,17 @@ export const openAppWindow = (
   return win;
 };
 
+export const openRecordingWindow = (
+  recordingId: string,
+  highlightedLine?: number,
+) => {
+  openAppWindow(
+    `/history/${recordingId}`,
+    highlightedLine ? { highlightedLine: `${highlightedLine}` } : {},
+    { minWidth: 400, minHeight: 400 },
+  );
+};
+
 export const openRecorderOverlayWindow = async () => {
   if (!(await getSettings()).ui.useOverlayTool) {
     return;

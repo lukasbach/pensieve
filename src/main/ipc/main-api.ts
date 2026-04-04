@@ -2,6 +2,7 @@ import { app, desktopCapturer, shell } from "electron";
 import path from "path";
 import * as settings from "../domain/settings";
 import * as screenshot from "../domain/screenshot";
+import { mcpServer } from "../domain/mcp";
 import {
   getAudioServerPort,
   getAudioServerSecret,
@@ -61,6 +62,12 @@ export const mainApi = {
   abortScreenshotArea: screenshot.abortScreenshot,
 
   getSettings: settings.getSettings,
-  saveSettings: settings.saveSettings,
-  resetSettings: settings.reset,
+  saveSettings: async (...args: Parameters<typeof settings.saveSettings>) => {
+    await settings.saveSettings(...args);
+    await mcpServer.syncFromSettings();
+  },
+  resetSettings: async () => {
+    await settings.reset();
+    await mcpServer.syncFromSettings();
+  },
 };

@@ -29,6 +29,19 @@ const getEmbeddingSettingsSignature = (settings: Settings) => {
   });
 };
 
+const normalizePort = (rawPort: unknown, fallback: number) => {
+  const parsed =
+    typeof rawPort === "number"
+      ? rawPort
+      : typeof rawPort === "string" && rawPort.trim().length
+        ? Number(rawPort)
+        : Number.NaN;
+
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= 65535
+    ? parsed
+    : fallback;
+};
+
 const readSettings = async (fallback: unknown): Promise<unknown> => {
   try {
     if (!fs.existsSync(settingsFile)) {
@@ -105,6 +118,10 @@ const normalizeSettings = (rawSettings: unknown): Settings => {
           raw.embeddings?.providerConfig?.openai?.model ??
           merged.embeddings.models.openai,
       },
+    },
+    mcp: {
+      enabled: merged.mcp.enabled,
+      port: normalizePort(raw.mcp?.port, merged.mcp.port),
     },
     ffmpeg: merged.ffmpeg,
     whisper: merged.whisper,

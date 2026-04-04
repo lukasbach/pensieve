@@ -343,5 +343,4 @@ describe("embeddings", () => {
       }),
     ]);
   });
-
 });

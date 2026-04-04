@@ -4,6 +4,7 @@ import type { windowsApi as windowsApiBackend } from "../main/ipc/windows-api";
 import type { modelsApi as modelsApiBackend } from "../main/ipc/models-api";
 import type { historyApi as historyApiBackend } from "../main/ipc/history-api";
 import type { recorderIpcApi as recorderIpcApiBackend } from "../main/ipc/recorder-ipc";
+import type { mcpApi as mcpApiBackend } from "../main/ipc/mcp-api";
 
 export const mainApi = createRendererIpc<typeof mainApiBackend>("main");
 export const windowsApi =
@@ -13,3 +14,4 @@ export const historyApi =
   createRendererIpc<typeof historyApiBackend>("history");
 export const recorderIpcApi =
   createRendererIpc<typeof recorderIpcApiBackend>("recorderIpc");
+export const mcpApi = createRendererIpc<typeof mcpApiBackend>("mcp");

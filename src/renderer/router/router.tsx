@@ -18,6 +18,11 @@ const validateSearch = (search: Record<string, unknown>) => ({
   isMainWindow: !!search.isMainWindow,
 });
 
+const parsePositiveInteger = (value: unknown) => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+};
+
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
   validateSearch,
@@ -34,7 +39,10 @@ export const historyDetailsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/history/$id",
   component: DetailsScreen,
-  validateSearch,
+  validateSearch: (search: Record<string, unknown>) => ({
+    ...validateSearch(search),
+    highlightedLine: parsePositiveInteger(search.highlightedLine),
+  }),
 });
 
 const settingsRoute = createRoute({

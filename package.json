@@ -21,6 +21,7 @@
     "postinstall": "cpy ./README.md ./docs --rename=index.md && cpy ./images ./docs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
     "@types/node": "20.19.0",
     "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22",

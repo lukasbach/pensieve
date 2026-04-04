@@ -105,6 +105,10 @@ export const defaultSettings = {
       openai: "text-embedding-3-small",
     },
   },
+  mcp: {
+    enabled: false,
+    port: 3921,
+  },
   ffmpeg: {
     removeRawRecordings: true,
     autoTriggerPostProcess: true,

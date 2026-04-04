@@ -17,10 +17,12 @@ import { registerTray } from "./main/domain/tray";
 import * as windows from "./main/domain/windows";
 import { windowsApi } from "./main/ipc/windows-api";
 import { recorderIpcApi } from "./main/ipc/recorder-ipc";
+import { mcpApi } from "./main/ipc/mcp-api";
 import {
   getAudioServerSecret,
   setAudioServerPort,
 } from "./main/domain/audio-server";
+import { mcpServer } from "./main/domain/mcp";
 
 log.initialize({ spyRendererConsole: true });
 
@@ -57,6 +59,10 @@ app.on("window-all-closed", () => {
   }
 });
 
+app.on("before-quit", () => {
+  mcpServer.stop();
+});
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: "recording",
@@ -76,6 +82,7 @@ app.whenReady().then(async () => {
   loadIpcInterfaceInMain("history", historyApi);
   loadIpcInterfaceInMain("models", modelsApi);
   loadIpcInterfaceInMain("recorderIpc", recorderIpcApi);
+  loadIpcInterfaceInMain("mcp", mcpApi);
 
   searchIndex.initializeSearchIndex().then(() => {
     log.info("Search index initialized.");
@@ -85,6 +92,8 @@ app.whenReady().then(async () => {
     await settings.initSettingsFile();
     await mainApi.setAutoStart(true);
   }
+
+  await mcpServer.syncFromSettings();
 
   // Start a local HTTP server for audio files
   const audioServer = http.createServer(async (req, res) => {

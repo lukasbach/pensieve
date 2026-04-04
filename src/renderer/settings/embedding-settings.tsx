@@ -57,7 +57,10 @@ const OpenAiEmbeddingSettings: FC = () => {
               type="button"
               onClick={() => {
                 setCustomModel(false);
-                form.setValue("embeddings.models.openai", openAiEmbeddingModels[0]);
+                form.setValue(
+                  "embeddings.models.openai",
+                  openAiEmbeddingModels[0],
+                );
               }}
             >
               Use default OpenAI models

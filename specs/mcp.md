@@ -23,7 +23,7 @@ The search bar in the history view should have a "AI sprinkle" button next to it
 
 ## Tools
 
-- query-recordings({ search?, startDate?, endDate?, recordingId?, offset? }): Query all recordings for semantic search results. If not providing a query, return all
+- query-recordings({ search?, startDate?, endDate?, recordingId?, offset? }): Query all recordings for semantic search results. If not providing a query, return all recordings. Always limits to 20 results. Result contains details on how many total results, what the current offset is.
 - read-transcript({ recordingId, startLine?, length? }): Read the transcript of a recording by its ID
-- recording-details({ recordingId }): Get details of a recording by its ID, including title, summary, notes
+- recording-details({ recordingId }): Get details of a recording by its ID, including title, summary, notes, etc
 - open-recording({ recordingId, highlightedLine? }): Open the recording in the app

@@ -40,6 +40,11 @@ export const SettingsTabs: FC = () => (
         Embeddings
       </Button>
     </Tabs.Trigger>
+    <Tabs.Trigger value={SettingsTab.Mcp} asChild>
+      <Button variant="ghost" className={styles.tab}>
+        MCP Server
+      </Button>
+    </Tabs.Trigger>
     <Tabs.Trigger value={SettingsTab.Hooks} asChild>
       <Button variant="ghost" className={styles.tab}>
         Data Hooks

@@ -135,7 +135,9 @@ describe("settings", () => {
     const settings = await import("./settings");
     const result = await settings.getSettings();
 
-    expect(result.providers.ollama.baseUrl).toBe("http://legacy-chat-ollama:11434");
+    expect(result.providers.ollama.baseUrl).toBe(
+      "http://legacy-chat-ollama:11434",
+    );
     expect(result.providers.openai.apiKey).toBe("legacy-chat-key");
     expect(result.providers.openai.useCustomUrl).toBe(true);
     expect(result.providers.openai.baseURL).toBe(

@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { FC, PropsWithChildren, useState } from "react";
+import { FC, PropsWithChildren, useMemo, useState } from "react";
 import {
   DialogContext,
   useConfirm,
@@ -25,7 +25,9 @@ const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
   const [dialog, setDialog] = useState<any>(null);
 
   return (
-    <DialogContext.Provider value={{ dialog, setDialog }}>
+    <DialogContext.Provider
+      value={useMemo(() => ({ dialog, setDialog }), [dialog])}
+    >
       {children}
     </DialogContext.Provider>
   );

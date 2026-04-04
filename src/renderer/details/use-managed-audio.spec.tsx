@@ -15,7 +15,9 @@ const createAudioTag = () => {
     }),
     currentTime: 12,
     duration: 90,
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     pause: vi.fn(() => emit("pause")),
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     play: vi.fn(() => emit("play")),
     removeEventListener: vi.fn((type: string, listener: MockAudioListener) => {
       listeners.get(type)?.delete(listener);
@@ -50,6 +52,10 @@ const transcript = {
 };
 
 describe("useManagedAudio", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
   it("controls audio playback and keeps progress in sync", () => {
     const { result, rerender } = renderHook(() => useManagedAudio(transcript));
     const { audio, emit } = createAudioTag();
@@ -106,6 +112,25 @@ describe("useManagedAudio", () => {
 
     act(() => {
       result.current.scrollTo(42);
+    });
+
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "center",
+    });
+  });
+
+  it("can scroll directly to a transcript line", () => {
+    const { result } = renderHook(() => useManagedAudio(transcript));
+    const target = document.createElement("div");
+    const scrollIntoViewMock = vi.fn();
+
+    target.id = "transcript-item-40";
+    target.scrollIntoView = scrollIntoViewMock;
+    document.body.appendChild(target);
+
+    act(() => {
+      result.current.scrollToLine(1);
     });
 
     expect(scrollIntoViewMock).toHaveBeenCalledWith({
