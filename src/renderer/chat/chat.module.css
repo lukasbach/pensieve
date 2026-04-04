@@ -56,6 +56,8 @@
   border-radius: 14px;
   border: 1px solid transparent;
   overflow-wrap: anywhere;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 .bubbleUser {
@@ -109,6 +111,123 @@
 
 .bubbleAssistant :global(li > p) {
   margin: 0;
+}
+
+.richContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.richMarkdown {
+  min-width: 0;
+}
+
+.richCard {
+  border: 1px solid var(--gray-a5);
+  border-radius: 8px;
+  padding: 0.85rem;
+  background: linear-gradient(180deg, var(--color-panel-solid), var(--gray-2));
+}
+
+.richCardError {
+  border-color: var(--red-a6);
+  background: color-mix(in srgb, var(--red-3) 60%, var(--color-panel-solid));
+}
+
+.richCardHeader {
+  display: block;
+}
+
+.richCardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.richCardTitleRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 0.75rem;
+}
+
+.richCardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.richCardDate {
+  font-size: 0.85rem;
+  color: var(--gray-11);
+}
+
+.richCardBody {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.85rem;
+}
+
+.richLineGroup {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-a4);
+  border-radius: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-panel-solid) 88%, var(--gray-3));
+}
+
+.richLine {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.55rem 0.7rem;
+}
+
+.richLineHighlighted {
+  background: color-mix(in srgb, var(--accent-3) 52%, var(--color-panel-solid));
+}
+
+.richLineButton {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.richLine + .richLine,
+.richLine + .richLineButton,
+.richLineButton + .richLine,
+.richLineButton + .richLineButton {
+  border-top: 1px solid var(--gray-a4);
+}
+
+.richLineButton:hover {
+  background: color-mix(in srgb, var(--accent-3) 42%, var(--color-panel-solid));
+}
+
+.richLineButton:focus-visible {
+  outline: 2px solid var(--accent-8);
+  outline-offset: 2px;
+}
+
+.richLineText {
+  color: var(--gray-12);
+  overflow-wrap: anywhere;
+}
+
+.richCardStatus {
+  color: var(--gray-11);
+  font-size: 0.9rem;
 }
 
 .composer {

@@ -8,17 +8,23 @@ export {};
 const {
   disposeSessionMock,
   getSettingsMock,
+  getRecordingMetaMock,
+  getRecordingTranscriptMock,
   listSessionsMock,
   loadSessionMock,
   openSettingsWindowMock,
+  openRecordingDetailsWindowMock,
   resetSessionMock,
   sendMessageMock,
 } = vi.hoisted(() => ({
   disposeSessionMock: vi.fn(),
   getSettingsMock: vi.fn(),
+  getRecordingMetaMock: vi.fn(),
+  getRecordingTranscriptMock: vi.fn(),
   listSessionsMock: vi.fn(),
   loadSessionMock: vi.fn(),
   openSettingsWindowMock: vi.fn(),
+  openRecordingDetailsWindowMock: vi.fn(),
   resetSessionMock: vi.fn(),
   sendMessageMock: vi.fn(),
 }));
@@ -34,6 +40,11 @@ vi.mock("../api", () => ({
   mainApi: {
     getSettings: getSettingsMock,
   },
+  historyApi: {
+    getRecordingMeta: getRecordingMetaMock,
+    getRecordingTranscript: getRecordingTranscriptMock,
+    openRecordingDetailsWindow: openRecordingDetailsWindowMock,
+  },
   windowsApi: {
     openSettingsWindow: openSettingsWindowMock,
   },
@@ -43,9 +54,12 @@ describe("Chat", () => {
   beforeEach(() => {
     disposeSessionMock.mockReset();
     getSettingsMock.mockReset();
+    getRecordingMetaMock.mockReset();
+    getRecordingTranscriptMock.mockReset();
     listSessionsMock.mockReset();
     loadSessionMock.mockReset();
     openSettingsWindowMock.mockReset();
+    openRecordingDetailsWindowMock.mockReset();
     resetSessionMock.mockReset();
     sendMessageMock.mockReset();
     listSessionsMock.mockResolvedValue([]);

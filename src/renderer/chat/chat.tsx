@@ -17,7 +17,6 @@ import {
   Text,
   TextArea,
 } from "@radix-ui/themes";
-import Markdown from "react-markdown";
 import {
   HiOutlineArrowPath,
   HiOutlinePaperAirplane,
@@ -28,6 +27,7 @@ import { chatApi, mainApi, windowsApi } from "../api";
 import { EmptyState } from "../common/empty-state";
 import { SettingsTab } from "../settings/tabs";
 import { ChatHistoryMenu } from "./chat-history-menu";
+import { ChatRichContent } from "./chat-rich-content";
 import * as styles from "./chat.module.css";
 
 type ChatUiMessage = {
@@ -245,7 +245,7 @@ export const Chat: FC = () => {
                 } ${message.isError ? styles.bubbleError : ""}`}
               >
                 {message.role === "assistant" ? (
-                  <Markdown>{message.content}</Markdown>
+                  <ChatRichContent content={message.content} />
                 ) : (
                   <Text as="p">{message.content}</Text>
                 )}
