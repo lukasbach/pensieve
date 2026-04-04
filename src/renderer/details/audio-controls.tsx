@@ -1,5 +1,12 @@
 import { FC, useState } from "react";
-import { Box, Flex, IconButton, Slider, Tooltip } from "@radix-ui/themes";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Select,
+  Slider,
+  Tooltip,
+} from "@radix-ui/themes";
 import {
   HiChevronDoubleDown,
   HiOutlineBackward,
@@ -13,6 +20,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useManagedAudio } from "./use-managed-audio";
 import { timeToDisplayString } from "../../utils";
 import { mainApi } from "../api";
+
+const playbackSpeedOptions = [
+  "0.75",
+  "1",
+  "1.25",
+  "1.5",
+  "1.75",
+  "2",
+  "2.5",
+  "3",
+] as const;
 
 export const AudioControls: FC<{
   audio: ReturnType<typeof useManagedAudio>;
@@ -59,11 +77,11 @@ export const AudioControls: FC<{
           audio.jump(value);
         }}
       />
-      <Flex mt=".5rem">
-        <Flex width="35%" justify="start">
+      <Flex mt=".5rem" align="center">
+        <Flex style={{ flex: 1 }} justify="start">
           {timeToDisplayString(audio.progress)}
         </Flex>
-        <Flex width="30%" justify="center" align="center" gap=".7rem">
+        <Flex justify="center" align="center" gap=".7rem">
           <Tooltip content="Sync scroll position with currently playing text">
             <IconButton
               variant="ghost"
@@ -116,8 +134,28 @@ export const AudioControls: FC<{
               <LuMouse />
             </IconButton>
           </Tooltip>
+
+          <Tooltip content="Playback speed">
+            <Box style={{ width: "4.75rem" }}>
+              <Select.Root
+                value={audio.playbackRate.toString()}
+                onValueChange={(value) => {
+                  audio.setPlaybackRate(Number(value));
+                }}
+              >
+                <Select.Trigger />
+                <Select.Content position="popper">
+                  {playbackSpeedOptions.map((speed) => (
+                    <Select.Item key={speed} value={speed}>
+                      {`x${speed}`}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </Box>
+          </Tooltip>
         </Flex>
-        <Flex width="35%" justify="end">
+        <Flex style={{ flex: 1 }} justify="end">
           {!Number.isNaN(audio.duration) && timeToDisplayString(audio.duration)}
         </Flex>
       </Flex>

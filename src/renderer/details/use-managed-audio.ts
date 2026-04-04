@@ -7,6 +7,7 @@ export const useManagedAudio = (
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRateState] = useState(1);
   const audioTag = useRef<HTMLAudioElement>(null);
 
   const jump = useCallback(
@@ -85,6 +86,20 @@ export const useManagedAudio = (
     );
   }, []);
 
+  const setPlaybackRate = useCallback((value: number) => {
+    setPlaybackRateState(value);
+
+    if (!audioTag.current) return;
+
+    audioTag.current.playbackRate = value;
+  }, []);
+
+  useEffect(() => {
+    if (!audioTag.current) return;
+
+    audioTag.current.playbackRate = playbackRate;
+  }, [playbackRate]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const tag = audioTag.current;
@@ -125,5 +140,7 @@ export const useManagedAudio = (
     duration,
     scrollToLine,
     scrollTo,
+    playbackRate,
+    setPlaybackRate,
   };
 };
