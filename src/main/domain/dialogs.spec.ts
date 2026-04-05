@@ -1,6 +1,16 @@
-const { infoMock, openAppWindowMock } = vi.hoisted(() => ({
+const { infoMock, openAppWindowMock, showMessageBoxMock } = vi.hoisted(() => ({
   infoMock: vi.fn(),
   openAppWindowMock: vi.fn(),
+  showMessageBoxMock: vi.fn(),
+}));
+
+vi.mock("electron", () => ({
+  BrowserWindow: {
+    getFocusedWindow: vi.fn(),
+  },
+  dialog: {
+    showMessageBox: showMessageBoxMock,
+  },
 }));
 
 vi.mock("electron-log/main", () => ({
@@ -16,6 +26,7 @@ describe("dialogs", () => {
     vi.resetModules();
     infoMock.mockReset();
     openAppWindowMock.mockReset();
+    showMessageBoxMock.mockReset();
   });
 
   it("creates dialogs and resolves them with submitted values", async () => {
@@ -62,5 +73,36 @@ describe("dialogs", () => {
     await expect(promise).resolves.toBeNull();
     expect(closeMock).toHaveBeenCalledTimes(1);
     expect(dialogs.getDialogWindow("confirm")).toBeUndefined();
+  });
+
+  it("returns true when the confirmation dialog is accepted", async () => {
+    showMessageBoxMock.mockResolvedValue({ response: 1 });
+
+    const dialogs = await import("./dialogs");
+    await expect(
+      dialogs.confirmDialog(
+        "End recording now?",
+        "Stop and save the recording now?",
+        "Yes, stop and save",
+        "No, keep recording",
+      ),
+    ).resolves.toBe(true);
+
+    expect(showMessageBoxMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buttons: ["No, keep recording", "Yes, stop and save"],
+        message: "End recording now?",
+        detail: "Stop and save the recording now?",
+      }),
+    );
+  });
+
+  it("returns false when the confirmation dialog is dismissed", async () => {
+    showMessageBoxMock.mockResolvedValue({ response: 0 });
+
+    const dialogs = await import("./dialogs");
+    await expect(
+      dialogs.confirmDialog("End recording now?", "Stop and save?"),
+    ).resolves.toBe(false);
   });
 });

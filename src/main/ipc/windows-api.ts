@@ -47,6 +47,14 @@ export const windowsApi = {
   getDialogData: async (id: string) => {
     return dialogs.getDialogData(id);
   },
+  confirmDialog: async (
+    title: string,
+    content: string,
+    okayLabel?: string,
+    cancelLabel?: string,
+  ) => {
+    return dialogs.confirmDialog(title, content, okayLabel, cancelLabel);
+  },
   openDialog: async (id: string, data: DialogData<any>) => {
     return dialogs.createDialog(id, data);
   },

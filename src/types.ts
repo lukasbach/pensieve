@@ -5,6 +5,8 @@ import { datahookMarkdownTemplate } from "./datahooks-defaults";
 export type RecordingConfig = {
   recordScreenAudio?: boolean;
   mic?: MediaDeviceInfo;
+  autoEndTime?: string;
+  askBeforeAutoEnd?: boolean;
 };
 
 export type RecordingData = {

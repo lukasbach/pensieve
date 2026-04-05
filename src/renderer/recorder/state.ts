@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { useCallback } from "react";
-import { historyApi, mainApi, recorderIpcApi } from "../api";
+import { historyApi, mainApi, recorderIpcApi, windowsApi } from "../api";
 import { blobToBuffer } from "../../utils";
 import { RecordingConfig, RecordingMeta } from "../../types";
 import { createRecorder } from "./create-recorder";
+import { resolveRecordingAutoEndAt } from "./resolve-recording-auto-end";
 
 type RecorderState = {
   recorder?: { screen: MediaRecorder | null; mic: MediaRecorder | null };
@@ -22,6 +23,65 @@ type RecorderState = {
   addHighlight: () => void;
   addTimestampedNote: (note: string) => void;
   addScreenshot: (fileName: string) => void;
+};
+
+let scheduledRecordingEndTimeout: ReturnType<typeof setTimeout> | undefined;
+
+const clearScheduledRecordingEnd = () => {
+  if (scheduledRecordingEndTimeout) {
+    clearTimeout(scheduledRecordingEndTimeout);
+    scheduledRecordingEndTimeout = undefined;
+  }
+};
+
+const stopRecordingAndSave = async () => {
+  const { recorder, meta, reset } = useRecorderState.getState();
+  if (!recorder || !meta) return;
+
+  await reset();
+  await historyApi.saveRecording({
+    mic: await unpackMediaRecorder(recorder.mic),
+    screen: await unpackMediaRecorder(recorder.screen),
+    meta,
+  });
+};
+
+const onScheduledRecordingEnd = async () => {
+  clearScheduledRecordingEnd();
+
+  const { recorder, meta, recordingConfig } = useRecorderState.getState();
+  if (!recorder || !meta) return;
+
+  if (recordingConfig.askBeforeAutoEnd) {
+    const shouldStop = await windowsApi.confirmDialog(
+      "End recording now?",
+      "The selected meeting end time has been reached. Stop and save the recording now?",
+      "Yes, stop and save",
+      "No, keep recording",
+    );
+
+    if (!shouldStop) return;
+  }
+
+  await stopRecordingAndSave();
+};
+
+const scheduleRecordingEnd = (
+  startedAt: string,
+  recordingConfig: RecordingConfig,
+) => {
+  clearScheduledRecordingEnd();
+
+  const autoEndAt = resolveRecordingAutoEndAt(
+    startedAt,
+    recordingConfig.autoEndTime,
+  );
+  if (!autoEndAt) return;
+
+  const delay = Math.max(0, new Date(autoEndAt).getTime() - Date.now());
+  scheduledRecordingEndTimeout = setTimeout(() => {
+    void onScheduledRecordingEnd();
+  }, delay);
 };
 
 export const useRecorderState = create<RecorderState>()((_set, get) => {
@@ -48,7 +108,7 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
   };
 
   return {
-    recordingConfig: { recordScreenAudio: true },
+    recordingConfig: { recordScreenAudio: true, askBeforeAutoEnd: true },
     meta: { started: new Date().toISOString() },
     isRecording: false,
     isPaused: false,
@@ -61,17 +121,26 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
     setConfig: (config) =>
       set({ recordingConfig: { ...get().recordingConfig, ...config } }),
     startRecording: async () => {
+      const { recordingConfig } = get();
+      const recorder = await createRecorder(recordingConfig);
+      const startedAt = new Date().toISOString();
+
       set({
-        recorder: await createRecorder(get().recordingConfig),
-        meta: { ...get().meta, started: new Date().toISOString() },
+        recorder,
+        meta: { ...get().meta, started: startedAt },
         isRecording: true,
         isPaused: false,
       });
+
+      scheduleRecordingEnd(startedAt, recordingConfig);
     },
-    reset: async () =>
+    reset: async () => {
+      clearScheduledRecordingEnd();
+
       set({
         recordingConfig: {
           recordScreenAudio: true,
+          askBeforeAutoEnd: true,
           mic: (await navigator.mediaDevices.enumerateDevices()).find(
             (d) => d.kind === "audioinput",
           ),
@@ -80,7 +149,8 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
         meta: undefined,
         isRecording: false,
         isPaused: false,
-      }),
+      });
+    },
     pause: () => {
       get().recorder?.mic?.pause();
       get().recorder?.screen?.pause();
@@ -143,17 +213,9 @@ const unpackMediaRecorder = async (
 };
 
 export const useStopRecording = () => {
-  const { recorder, meta, reset } = useRecorderState();
   return useCallback(async () => {
-    if (!recorder || !meta) return;
-
-    reset();
-    await historyApi.saveRecording({
-      mic: await unpackMediaRecorder(recorder.mic),
-      screen: await unpackMediaRecorder(recorder.screen),
-      meta,
-    });
-  }, [meta, recorder, reset]);
+    await stopRecordingAndSave();
+  }, []);
 };
 
 export const useMakeScreenshot = () => {

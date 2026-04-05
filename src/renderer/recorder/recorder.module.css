@@ -1,0 +1,18 @@
+.autoEndSection {
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-4);
+  background: var(--color-surface);
+}
+
+.autoEndTimeInput {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-7);
+  border-radius: var(--radius-3);
+  background: var(--color-background);
+  color: var(--gray-12);
+  font: inherit;
+}

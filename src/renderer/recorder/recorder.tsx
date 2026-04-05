@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Checkbox,
   CheckboxCards,
   Flex,
   Text,
@@ -12,6 +13,19 @@ import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
 import { RecorderInsession } from "./recorder-insession";
+import styles from "./recorder.module.css";
+
+const toTimeInputValue = (date: Date) => {
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
+const getDefaultAutoEndTime = () => {
+  const defaultEnd = new Date();
+  defaultEnd.setHours(defaultEnd.getHours() + 1, 0, 0, 0);
+  return toTimeInputValue(defaultEnd);
+};
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
@@ -94,6 +108,57 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
             </Text>
             <MicSelector />
           </Box>
+        </Flex>
+      </Box>
+
+      <Box mt="1rem" p="3" className={styles.autoEndSection}>
+        <Flex direction="column" gap="3">
+          <Text as="label" size="2">
+            <Flex align="center" gap="2">
+              <Checkbox
+                checked={!!recordingConfig.autoEndTime}
+                onCheckedChange={(checked) => {
+                  setConfig({
+                    autoEndTime:
+                      checked === true
+                        ? recordingConfig.autoEndTime ?? getDefaultAutoEndTime()
+                        : undefined,
+                    askBeforeAutoEnd: recordingConfig.askBeforeAutoEnd ?? true,
+                  });
+                }}
+              />
+              <Text weight="bold">End recording at</Text>
+            </Flex>
+          </Text>
+
+          {recordingConfig.autoEndTime && (
+            <>
+              <Text as="label" htmlFor="recording-auto-end-time" size="2">
+                End time
+              </Text>
+              <input
+                id="recording-auto-end-time"
+                aria-label="End time"
+                type="time"
+                value={recordingConfig.autoEndTime}
+                onChange={(e) => {
+                  setConfig({ autoEndTime: e.currentTarget.value });
+                }}
+                className={styles.autoEndTimeInput}
+              />
+              <Text as="label" size="2">
+                <Flex align="center" gap="2">
+                  <Checkbox
+                    checked={recordingConfig.askBeforeAutoEnd !== false}
+                    onCheckedChange={(checked) => {
+                      setConfig({ askBeforeAutoEnd: checked === true });
+                    }}
+                  />
+                  Ask before ending
+                </Flex>
+              </Text>
+            </>
+          )}
         </Flex>
       </Box>
 
