@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { useCallback } from "react";
 import { historyApi, mainApi, recorderIpcApi, windowsApi } from "../api";
 import { blobToBuffer } from "../../utils";
-import { RecordingConfig, RecordingMeta } from "../../types";
+import { RecordingConfig, RecordingIpcState, RecordingMeta } from "../../types";
 import { createRecorder } from "./create-recorder";
 import { resolveRecordingAutoEndAt } from "./resolve-recording-auto-end";
 
@@ -26,6 +26,28 @@ type RecorderState = {
 };
 
 let scheduledRecordingEndTimeout: ReturnType<typeof setTimeout> | undefined;
+
+const syncRecorderIpcState = (stateUpdate: Partial<RecorderState>) => {
+  const ipcState: Partial<RecordingIpcState> = {};
+
+  if ("meta" in stateUpdate) {
+    ipcState.meta = stateUpdate.meta;
+  }
+  if (stateUpdate.isRecording !== undefined) {
+    ipcState.isRecording = stateUpdate.isRecording;
+  }
+  if (stateUpdate.isPaused !== undefined) {
+    ipcState.isPaused = stateUpdate.isPaused;
+  }
+  if (stateUpdate.recordingConfig !== undefined) {
+    ipcState.enableRecordingOverlay =
+      stateUpdate.recordingConfig.enableRecordingOverlay;
+  }
+
+  if (Object.keys(ipcState).length > 0) {
+    recorderIpcApi.setState(ipcState);
+  }
+};
 
 const clearScheduledRecordingEnd = () => {
   if (scheduledRecordingEndTimeout) {
@@ -89,22 +111,14 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
     if (typeof newState === "function") {
       _set((state) => {
         const result = newState(state);
-        recorderIpcApi.setState({
-          meta: result.meta,
-          isRecording: result.isRecording,
-          isPaused: result.isPaused,
-        });
+        syncRecorderIpcState(result);
         return result;
       });
       return;
     }
 
     _set(newState);
-    recorderIpcApi.setState({
-      meta: newState.meta,
-      isRecording: newState.isRecording,
-      isPaused: newState.isPaused,
-    });
+    syncRecorderIpcState(newState);
   };
 
   return {
@@ -141,6 +155,7 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
         recordingConfig: {
           recordScreenAudio: true,
           askBeforeAutoEnd: true,
+          enableRecordingOverlay: undefined,
           mic: (await navigator.mediaDevices.enumerateDevices()).find(
             (d) => d.kind === "audioinput",
           ),

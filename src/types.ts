@@ -7,6 +7,7 @@ export type RecordingConfig = {
   mic?: MediaDeviceInfo;
   autoEndTime?: string;
   askBeforeAutoEnd?: boolean;
+  enableRecordingOverlay?: boolean;
 };
 
 export type RecordingData = {
@@ -181,6 +182,7 @@ export type RecordingIpcState = {
   meta: RecordingMeta | undefined;
   isRecording: boolean;
   isPaused: boolean;
+  enableRecordingOverlay?: boolean;
 };
 
 export type RecordingIpcEvents = {

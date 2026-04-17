@@ -73,8 +73,10 @@ export const openRecordingWindow = (
   );
 };
 
-export const openRecorderOverlayWindow = async () => {
-  if (!(await getSettings()).ui.useOverlayTool) {
+export const openRecorderOverlayWindow = async (
+  useOverlayTool?: boolean,
+) => {
+  if (!(useOverlayTool ?? (await getSettings()).ui.useOverlayTool)) {
     return;
   }
 
@@ -163,8 +165,9 @@ export const hideMainWindow = () => {
   mainWindow?.hide();
   mainWindowMode = MainWindowModeValue.Minimized;
 
-  if (recorderIpc.getState().isRecording) {
-    openRecorderOverlayWindow();
+  const recorderState = recorderIpc.getState();
+  if (recorderState.isRecording) {
+    openRecorderOverlayWindow(recorderState.enableRecordingOverlay);
   }
 };
 

@@ -51,6 +51,7 @@ describe("recorder-ipc", () => {
     recorderIpc.setState({ isRecording: true });
 
     expect(openRecorderOverlayWindowMock).toHaveBeenCalledTimes(1);
+    expect(openRecorderOverlayWindowMock).toHaveBeenCalledWith(undefined);
     expect(recorderIpc.getState()).toMatchObject({
       isPaused: false,
       isRecording: true,
@@ -74,6 +75,18 @@ describe("recorder-ipc", () => {
     expect(recorderIpc.getState().isRecording).toBe(false);
   });
 
+  it("passes the recording overlay preference when recording starts", async () => {
+    const recorderIpc = await import("./recorder-ipc");
+
+    recorderIpc.setState({ enableRecordingOverlay: false });
+    openRecorderOverlayWindowMock.mockReset();
+
+    recorderIpc.setState({ isRecording: true });
+
+    expect(openRecorderOverlayWindowMock).toHaveBeenCalledWith(false);
+    expect(recorderIpc.getState().enableRecordingOverlay).toBe(false);
+  });
+
   it("merges partial state updates", async () => {
     const recorderIpc = await import("./recorder-ipc");
 
@@ -86,6 +99,19 @@ describe("recorder-ipc", () => {
       isPaused: true,
       meta: { started: "2024-01-01T10:00:00.000Z", name: "Daily standup" },
     });
+  });
+
+  it("clears explicitly undefined state values", async () => {
+    const recorderIpc = await import("./recorder-ipc");
+
+    recorderIpc.setState({
+      enableRecordingOverlay: false,
+      meta: { started: "2024-01-01T10:00:00.000Z", name: "Daily standup" },
+    });
+    recorderIpc.setState({ enableRecordingOverlay: undefined, meta: undefined });
+
+    expect(recorderIpc.getState().enableRecordingOverlay).toBeUndefined();
+    expect(recorderIpc.getState().meta).toBeUndefined();
   });
 
   it("forwards recorder events to the main window", async () => {

@@ -10,24 +10,36 @@ const state: RecordingIpcState = {
 };
 
 export const setState = (newState: Partial<RecordingIpcState>) => {
-  if (
-    !state.isRecording &&
-    newState.isRecording &&
-    !windows.isMainWindowOpen()
-  ) {
-    windows.openRecorderOverlayWindow();
+  const nextIsRecording = newState.isRecording ?? state.isRecording;
+  const nextEnableRecordingOverlay =
+    "enableRecordingOverlay" in newState
+      ? newState.enableRecordingOverlay
+      : state.enableRecordingOverlay;
+
+  if (!state.isRecording && nextIsRecording && !windows.isMainWindowOpen()) {
+    windows.openRecorderOverlayWindow(nextEnableRecordingOverlay);
   }
   if (
     state.isRecording &&
-    newState.isRecording === false &&
+    nextIsRecording === false &&
     windows.isRecorderOverlayOpen()
   ) {
     windows.closeRecorderOverlayWindow();
   }
 
-  state.isRecording = newState.isRecording ?? state.isRecording;
-  state.isPaused = newState.isPaused ?? state.isPaused;
-  state.meta = newState.meta ?? state.meta;
+  if (newState.isRecording !== undefined) {
+    state.isRecording = newState.isRecording;
+  }
+  if (newState.isPaused !== undefined) {
+    state.isPaused = newState.isPaused;
+  }
+  if ("meta" in newState) {
+    state.meta = newState.meta;
+  }
+  if ("enableRecordingOverlay" in newState) {
+    state.enableRecordingOverlay = newState.enableRecordingOverlay;
+  }
+
   invalidateUiKeys(QueryKeys.RecorderIpcState);
 };
 

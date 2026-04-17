@@ -1,7 +1,46 @@
-.autoEndSection {
+.root {
+  min-height: 100%;
+}
+
+.audioCard {
+  min-height: 6.5rem;
+}
+
+.audioCardContent {
+  height: 100%;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.audioCardTitle {
+  color: var(--gray-12);
+}
+
+.audioCardTitleIcon {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  flex-shrink: 0;
+  color: var(--gray-11);
+}
+
+.audioCardSubtitleRow {
+  align-items: flex-start;
+}
+
+.audioCardSubtitle {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.advancedSection {
   border: 1px solid var(--gray-6);
   border-radius: var(--radius-4);
   background: var(--color-surface);
+}
+
+.advancedSettingRow {
+  padding-top: 0.25rem;
 }
 
 .autoEndTimeInput {
@@ -15,4 +54,14 @@
   background: var(--color-background);
   color: var(--gray-12);
   font: inherit;
+}
+
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+}
+
+.startRecordingButton {
+  flex: 1;
 }
