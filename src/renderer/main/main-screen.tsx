@@ -1,5 +1,6 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { IconButton, Tabs } from "@radix-ui/themes";
+import { useQuery } from "@tanstack/react-query";
 import {
   HiMiniListBullet,
   HiOutlineChatBubbleLeftRight,
@@ -10,15 +11,37 @@ import {
 import { History } from "../history/history";
 import { PageContainer } from "../common/page-container";
 import { Postprocess } from "../postprocess/postprocess";
-import { windowsApi } from "../api";
+import { historyApi, windowsApi } from "../api";
 import { Recorder } from "../recorder/recorder";
 import { ResponsiveTabTrigger } from "../common/responsive-tab-trigger";
 import { Fancybg } from "../common/fancybg";
 import { Chat } from "../chat/chat";
+import { QueryKeys } from "../../query-keys";
+
+type MainScreenTab = "record" | "history" | "chat" | "postprocess";
 
 export const MainScreen: FC = () => {
+  const [activeTab, setActiveTab] = useState<MainScreenTab>("record");
+  const { data: postprocessing } = useQuery({
+    queryKey: [QueryKeys.PostProcessing],
+    queryFn: historyApi.getPostProcessingProgress,
+  });
+  const showPostprocessTab = (postprocessing?.processingQueue.length ?? 0) > 0;
+  const visibleTab =
+    activeTab === "postprocess" && !showPostprocessTab ? "record" : activeTab;
+
+  useEffect(() => {
+    if (!showPostprocessTab && activeTab === "postprocess") {
+      setActiveTab("record");
+    }
+  }, [activeTab, showPostprocessTab]);
+
   return (
-    <Tabs.Root defaultValue="record" style={{ height: "100%" }}>
+    <Tabs.Root
+      value={visibleTab}
+      onValueChange={(value) => setActiveTab(value as MainScreenTab)}
+      style={{ height: "100%" }}
+    >
       <PageContainer
         tabs={
           <Tabs.List style={{ flexGrow: "1" }}>
@@ -37,12 +60,14 @@ export const MainScreen: FC = () => {
             >
               Chat
             </ResponsiveTabTrigger>
-            <ResponsiveTabTrigger
-              value="postprocess"
-              icon={<HiOutlineDocumentText />}
-            >
-              Postprocessing
-            </ResponsiveTabTrigger>
+            {showPostprocessTab && (
+              <ResponsiveTabTrigger
+                value="postprocess"
+                icon={<HiOutlineDocumentText />}
+              >
+                Postprocessing
+              </ResponsiveTabTrigger>
+            )}
           </Tabs.List>
         }
         statusButtons={
@@ -69,9 +94,11 @@ export const MainScreen: FC = () => {
           <Chat />
         </Tabs.Content>
 
-        <Tabs.Content value="postprocess">
-          <Postprocess />
-        </Tabs.Content>
+        {showPostprocessTab && (
+          <Tabs.Content value="postprocess">
+            <Postprocess />
+          </Tabs.Content>
+        )}
       </PageContainer>
     </Tabs.Root>
   );
