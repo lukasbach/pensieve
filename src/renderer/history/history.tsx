@@ -1,5 +1,12 @@
 import { FC, useMemo } from "react";
-import { Box, Flex, IconButton, TextField, Tooltip } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Flex,
+  IconButton,
+  TextField,
+  Tooltip,
+} from "@radix-ui/themes";
 import { HiSparkles } from "react-icons/hi2";
 import { useQuery } from "@tanstack/react-query";
 import { useHistoryRecordings } from "./state";
@@ -9,9 +16,12 @@ import { getHistoryGroup } from "./get-history-group";
 import { useSearch } from "./use-search";
 import { historyApi } from "../api";
 import { useSettings } from "../common/use-settings";
+import { useTags } from "../common/use-tags";
 import { QueryKeys } from "../../query-keys";
 import { EmptyState } from "../common/empty-state";
 import { EntityTitle } from "../common/entity-title";
+import { getTagColor } from "../../tagging";
+import styles from "./styles.module.css";
 
 export const History: FC = () => {
   const { data: recordings } = useHistoryRecordings();
@@ -21,6 +31,7 @@ export const History: FC = () => {
   });
   const { settings } = useSettings();
   const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
+  const { availableTags } = useTags({ settings });
   const search = useSearch({
     embeddingsEnabled,
     historyGroupBy: settings?.ui.historyGroupBy,
@@ -89,8 +100,26 @@ export const History: FC = () => {
           </Tooltip>
         )}
 
-        <HistoryMenu search={search} />
+        <HistoryMenu availableTags={availableTags} search={search} />
       </Flex>
+
+      {search.tagFilters.length > 0 && (
+        <Flex gap=".5rem" mt=".75rem" wrap="wrap">
+          {search.tagFilters.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className={styles.tagFilterButton}
+              aria-label={`Toggle ${tag} tag filter`}
+              onClick={() => {
+                search.toggleTagFilter(tag);
+              }}
+            >
+              <Badge color={getTagColor(availableTags, tag)}>{tag}</Badge>
+            </button>
+          ))}
+        </Flex>
+      )}
 
       {search.recordingList.length === 0 && (
         <EmptyState
@@ -118,6 +147,7 @@ export const History: FC = () => {
               id={id}
               recording={meta}
               searchText={search.searchResults[id]?.snippet}
+              availableTags={availableTags}
               isProcessing={processingRecordings.has(id)}
               isPinnedItem
             />
@@ -133,6 +163,7 @@ export const History: FC = () => {
           recording={meta}
           groupLabel={groupLabel}
           searchText={search.searchResults[id]?.snippet}
+          availableTags={availableTags}
           isProcessing={processingRecordings.has(id)}
         />
       ))}

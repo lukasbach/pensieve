@@ -4,6 +4,8 @@ import { useSearch } from "@tanstack/react-router";
 import { Box, Button, Checkbox, Flex, Text, TextField } from "@radix-ui/themes";
 import { windowsApi } from "../api";
 import { PageContainer } from "../common/page-container";
+import { TagDialogInput } from "./tag-dialog-input";
+import styles from "./windowed-dialog.module.css";
 
 export const WindowedDialog: FC = () => {
   const { dialogId } = useSearch({ from: "/dialog" as const });
@@ -22,7 +24,7 @@ export const WindowedDialog: FC = () => {
   return (
     <PageContainer title={dialog.title}>
       <form
-        style={{ height: "100%" }}
+        className={styles.form}
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -58,6 +60,17 @@ export const WindowedDialog: FC = () => {
                 {dialog.input.label}
               </Flex>
             </Text>
+          )}
+
+          {dialog?.input?.type === "tags" && (
+            <Box mb="2">
+              <TagDialogInput
+                autoFocus
+                label={dialog.input.label}
+                value={Array.isArray(value) ? value : []}
+                onChange={setValue}
+              />
+            </Box>
           )}
 
           {dialog?.actions === null

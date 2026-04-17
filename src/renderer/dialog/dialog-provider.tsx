@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { FC, PropsWithChildren, useMemo, useState } from "react";
 import {
+  Box,
   Button,
   Checkbox,
   Dialog,
@@ -9,6 +10,7 @@ import {
   TextField,
 } from "@radix-ui/themes";
 import { DialogContext, DialogData } from "./context";
+import { TagDialogInput } from "./tag-dialog-input";
 
 export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
   const [dialog, setDialog] = useState<DialogData<any> | null>(null);
@@ -74,6 +76,17 @@ export const DialogProvider: FC<PropsWithChildren> = ({ children }) => {
                   {dialog.input.label}
                 </Flex>
               </Text>
+            )}
+
+            {dialog?.input?.type === "tags" && (
+              <Box mb="2">
+                <TagDialogInput
+                  autoFocus
+                  label={dialog.input.label}
+                  value={Array.isArray(value) ? value : []}
+                  onChange={setValue}
+                />
+              </Box>
             )}
 
             {dialog?.actions === null

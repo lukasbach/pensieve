@@ -10,6 +10,7 @@ const {
   getCurrentEmbeddingConfigurationKeyMock,
   getDurationMock,
   getSettingsMock,
+  saveSettingsMock,
   hasCompatibleRecordingEmbeddingMock,
   invalidateUiKeysMock,
   invalidateSemanticSearchStoreMock,
@@ -33,6 +34,7 @@ const {
   getCurrentEmbeddingConfigurationKeyMock: vi.fn(),
   getDurationMock: vi.fn(),
   getSettingsMock: vi.fn(),
+  saveSettingsMock: vi.fn(),
   hasCompatibleRecordingEmbeddingMock: vi.fn(),
   invalidateUiKeysMock: vi.fn(),
   invalidateSemanticSearchStoreMock: vi.fn(),
@@ -88,6 +90,7 @@ vi.mock("./ffmpeg", () => ({
 
 vi.mock("./settings", () => ({
   getSettings: getSettingsMock,
+  saveSettings: saveSettingsMock,
 }));
 
 vi.mock("./embeddings", () => ({
@@ -108,6 +111,7 @@ describe("history", () => {
     getCurrentEmbeddingConfigurationKeyMock.mockReset();
     getDurationMock.mockReset();
     getSettingsMock.mockReset();
+    saveSettingsMock.mockReset();
     hasCompatibleRecordingEmbeddingMock.mockReset();
     invalidateUiKeysMock.mockReset();
     invalidateSemanticSearchStoreMock.mockReset();
@@ -129,6 +133,11 @@ describe("history", () => {
     getCurrentEmbeddingConfigurationKeyMock.mockResolvedValue("embedding-key");
     getSettingsMock.mockResolvedValue({
       core: { recordingsFolder },
+      tags: {
+        Existing: "red",
+        Team: "blue",
+        Review: "teal",
+      },
     });
     hasCompatibleRecordingEmbeddingMock.mockResolvedValue(false);
   });
@@ -315,17 +324,28 @@ describe("history", () => {
   });
 
   it("updates recording metadata and invalidates both list and item queries", async () => {
-    readJsonMock.mockResolvedValue({
-      started: "2024-01-01T01:00:00.000Z",
-      name: "Original",
-      notes: "before",
-    });
+    readJsonMock
+      .mockResolvedValueOnce({
+        started: "2024-01-01T01:00:00.000Z",
+        name: "Original",
+        notes: "before",
+        tags: ["Existing", "Team"],
+      })
+      .mockResolvedValueOnce({
+        started: "2024-01-01T01:00:00.000Z",
+        name: "Renamed",
+        notes: "after",
+        tags: ["Team", "Review"],
+      });
+    readdirMock.mockResolvedValue(["recording-1"]);
+    statMock.mockResolvedValue({ isDirectory: () => true });
 
     const history = await import("./history");
 
     await history.updateRecording("recording-1", {
       name: "Renamed",
       notes: "after",
+      tags: [" Team ", "team", "Review"],
     });
 
     expect(writeJsonMock).toHaveBeenCalledWith(
@@ -334,6 +354,7 @@ describe("history", () => {
         started: "2024-01-01T01:00:00.000Z",
         name: "Renamed",
         notes: "after",
+        tags: ["Team", "Review"],
       },
       { spaces: 2 },
     );
@@ -341,6 +362,12 @@ describe("history", () => {
       "recording-1",
       "Renamed",
     );
+    expect(saveSettingsMock).toHaveBeenCalledWith({
+      tags: {
+        Team: "blue",
+        Review: "teal",
+      },
+    });
     expect(invalidateUiKeysMock).toHaveBeenNthCalledWith(
       1,
       QueryKeys.History,
@@ -350,6 +377,7 @@ describe("history", () => {
   });
 
   it("opens and removes recording folders", async () => {
+    readdirMock.mockResolvedValue([]);
     const history = await import("./history");
 
     await history.openRecordingFolder("recording-1");
@@ -363,6 +391,7 @@ describe("history", () => {
     );
     expect(removeRecordingFromIndexMock).toHaveBeenCalledWith("recording-1");
     expect(invalidateSemanticSearchStoreMock).toHaveBeenCalledTimes(1);
+    expect(saveSettingsMock).toHaveBeenCalledWith({ tags: {} });
     expect(invalidateUiKeysMock).toHaveBeenCalledWith(QueryKeys.History);
   });
 });

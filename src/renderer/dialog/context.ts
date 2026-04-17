@@ -18,6 +18,10 @@ export type DialogData<T> = {
     | {
         type: "text";
         label: string;
+      }
+    | {
+        type: "tags";
+        label: string;
       };
 };
 

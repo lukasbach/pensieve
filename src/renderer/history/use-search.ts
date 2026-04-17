@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { QueryKeys } from "../../query-keys";
 import { RecordingMeta, Settings } from "../../types";
+import { normalizeSelectedTags, normalizeTagName } from "../../tagging";
 import { historyApi } from "../api";
 
 export type HistoryFilter = "all" | "unprocessed" | "missingEmbeddings";
@@ -29,6 +30,20 @@ const matchesHistoryFilter = (
   }
 };
 
+const matchesTagFilters = (tagFilters: string[], meta: RecordingMeta) => {
+  if (tagFilters.length === 0) {
+    return true;
+  }
+
+  const recordingTags = new Set(
+    (meta.tags ?? []).map((tag) => normalizeTagName(tag).toLowerCase()),
+  );
+
+  return tagFilters.every((tag) =>
+    recordingTags.has(normalizeTagName(tag).toLowerCase()),
+  );
+};
+
 export const useSearch = ({
   embeddingsEnabled,
   historyGroupBy,
@@ -36,6 +51,7 @@ export const useSearch = ({
 }: UseSearchOptions = {}) => {
   const [search, setSearch] = useDebouncedState("", 500, 1000);
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [activeHistoryGroupBy, setHistoryGroupBy] = useState<HistoryGroupBy>(
     historyGroupBy ?? "day",
   );
@@ -84,9 +100,10 @@ export const useSearch = ({
       recordingList.filter(
         ([id, meta]) =>
           matchesHistoryFilter(historyFilter, meta) &&
+          matchesTagFilters(tagFilters, meta) &&
           (!hasSearch || Boolean(searchResults[id])),
       ),
-    [hasSearch, historyFilter, recordingList, searchResults],
+    [hasSearch, historyFilter, recordingList, searchResults, tagFilters],
   );
 
   const visibleRecordings = useMemo(() => {
@@ -107,6 +124,26 @@ export const useSearch = ({
     [filteredRecordings, hasSearch],
   );
 
+  const toggleTagFilter = (tag: string) => {
+    const normalizedTag = normalizeTagName(tag).toLowerCase();
+
+    setTagFilters((current) => {
+      if (
+        current.some(
+          (currentTag) =>
+            normalizeTagName(currentTag).toLowerCase() === normalizedTag,
+        )
+      ) {
+        return current.filter(
+          (currentTag) =>
+            normalizeTagName(currentTag).toLowerCase() !== normalizedTag,
+        );
+      }
+
+      return normalizeSelectedTags([...current, tag]);
+    });
+  };
+
   return {
     historyFilter,
     historyGroupBy: activeHistoryGroupBy,
@@ -120,6 +157,8 @@ export const useSearch = ({
     setHistoryFilter,
     setHistoryGroupBy,
     setUseSemanticSearch,
+    tagFilters,
+    toggleTagFilter,
     useSemanticSearch,
     visibleRecordings,
   };
@@ -127,5 +166,10 @@ export const useSearch = ({
 
 export type HistoryMenuSearch = Pick<
   ReturnType<typeof useSearch>,
-  "historyFilter" | "historyGroupBy" | "setHistoryFilter" | "setHistoryGroupBy"
+  | "historyFilter"
+  | "historyGroupBy"
+  | "setHistoryFilter"
+  | "setHistoryGroupBy"
+  | "tagFilters"
+  | "toggleTagFilter"
 >;

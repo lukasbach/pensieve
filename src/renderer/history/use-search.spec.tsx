@@ -24,16 +24,19 @@ describe("useSearch", () => {
       isPinned: true,
       isPostProcessed: true,
       started: "2024-01-03T10:00:00.000Z",
+      tags: ["Roadmap", "Urgent"],
     },
     beta: {
       hasEmbedding: false,
       isPostProcessed: false,
       started: "2024-01-02T10:00:00.000Z",
+      tags: ["Roadmap"],
     },
     gamma: {
       hasEmbedding: true,
       isPostProcessed: true,
       started: "2024-01-01T10:00:00.000Z",
+      tags: ["Support"],
     },
   };
 
@@ -178,5 +181,29 @@ describe("useSearch", () => {
         "alpha",
       ]);
     });
+  });
+
+  it("filters recordings by all selected tags", () => {
+    const { result } = renderHook(
+      () => useSearch({ embeddingsEnabled: true, recordings }),
+      { wrapper: TestProvider },
+    );
+
+    act(() => {
+      result.current.toggleTagFilter("Roadmap");
+    });
+
+    expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+      "alpha",
+      "beta",
+    ]);
+
+    act(() => {
+      result.current.toggleTagFilter("Urgent");
+    });
+
+    expect(result.current.visibleRecordings.map(([id]) => id)).toEqual([
+      "alpha",
+    ]);
   });
 });

@@ -15,10 +15,14 @@ const dialogs: Record<
 > = {};
 
 export const createDialog = <T>(id: string, dialog: DialogData<T>) => {
+  const dialogWindowOptions =
+    dialog.input?.type === "tags"
+      ? { width: 560, height: 260, minWidth: 360, minHeight: 240 }
+      : { width: 560, height: 160, minWidth: 320, minHeight: 160 };
   const win = windows.openAppWindow(
     "/dialog",
     { dialogId: id },
-    { width: 560, height: 160, minWidth: 320, minHeight: 160 },
+    dialogWindowOptions,
   );
 
   return new Promise<T | null>((r) => {

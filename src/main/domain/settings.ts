@@ -4,6 +4,7 @@ import { app } from "electron";
 import deepmerge from "deepmerge";
 import type { DeepPartial } from "@tanstack/react-router/dist/esm/utils";
 import { Settings, defaultSettings } from "../../types";
+import { normalizeStoredTags } from "../../tagging";
 import { embeddingCache } from "./embedding-cache";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
@@ -63,6 +64,7 @@ const normalizeSettings = (rawSettings: unknown): Settings => {
   return {
     core: merged.core,
     ui: merged.ui,
+    tags: normalizeStoredTags(raw.tags ?? merged.tags),
     providers: {
       ollama: {
         baseUrl:
@@ -181,7 +183,16 @@ export const saveSettings = async (partialSettings: DeepPartial<Settings>) => {
     settings as Record<string, unknown>,
     partialSettings,
   );
-  const resolvedSettings = normalizeSettings(merged);
+  const mergedWithReplacedTags = Object.prototype.hasOwnProperty.call(
+    partialSettings,
+    "tags",
+  )
+    ? {
+        ...merged,
+        tags: normalizeStoredTags(partialSettings.tags ?? {}),
+      }
+    : merged;
+  const resolvedSettings = normalizeSettings(mergedWithReplacedTags);
   await fs.writeJSON(settingsFile, resolvedSettings, {
     spaces: 2,
   });

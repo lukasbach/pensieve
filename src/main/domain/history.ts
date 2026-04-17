@@ -2,6 +2,11 @@ import path from "path";
 import fs from "fs-extra";
 import { app, shell } from "electron";
 import { RecordingData, RecordingMeta, RecordingTranscript } from "../../types";
+import {
+  getTagKey,
+  normalizeSelectedTags,
+  retainStoredTags,
+} from "../../tagging";
 import { invalidateUiKeys } from "../ipc/invalidate-ui";
 import { QueryKeys } from "../../query-keys";
 import * as ffmpeg from "./ffmpeg";
@@ -9,13 +14,85 @@ import * as settings from "./settings";
 import * as embeddings from "./embeddings";
 import { getDuration } from "./ffmpeg";
 
+const normalizeRecordingMeta = (meta: RecordingMeta): RecordingMeta => {
+  const tags = normalizeSelectedTags(meta.tags);
+
+  return {
+    ...meta,
+    tags: tags.length > 0 ? tags : undefined,
+  };
+};
+
+const getVisibleRecordingFolders = async () => {
+  const {
+    core: { recordingsFolder },
+  } = await settings.getSettings();
+  const recordingFolders = await fs.readdir(recordingsFolder);
+  const validFolders = (
+    await Promise.all(
+      recordingFolders.map(async (folder) => {
+        if (folder.startsWith(".")) {
+          return null;
+        }
+
+        const stats = await fs.stat(path.join(recordingsFolder, folder));
+        return stats.isDirectory() ? folder : null;
+      }),
+    )
+  ).flatMap((folder) => (folder ? [folder] : []));
+
+  return {
+    recordingsFolder,
+    validFolders,
+  };
+};
+
+const listStoredRecordingMetas = async () => {
+  const { recordingsFolder, validFolders } = await getVisibleRecordingFolders();
+
+  return Promise.all(
+    validFolders.map(async (recordingFolder) => {
+      const meta = (await fs.readJson(
+        path.join(recordingsFolder, recordingFolder, "meta.json"),
+      )) as RecordingMeta;
+
+      return [recordingFolder, normalizeRecordingMeta(meta)] as const;
+    }),
+  );
+};
+
+const hasRemovedTags = (before?: string[], after?: string[]) => {
+  const nextTags = new Set(normalizeSelectedTags(after).map(getTagKey));
+
+  return normalizeSelectedTags(before).some(
+    (tag) => !nextTags.has(getTagKey(tag)),
+  );
+};
+
+const syncTagCatalogWithRecordings = async () => {
+  const currentSettings = await settings.getSettings();
+
+  if (Object.keys(currentSettings.tags).length === 0) {
+    return;
+  }
+
+  const referencedTags = (await listStoredRecordingMetas()).flatMap(
+    ([, meta]) => meta.tags ?? [],
+  );
+  const nextTags = retainStoredTags(currentSettings.tags, referencedTags);
+
+  if (JSON.stringify(nextTags) !== JSON.stringify(currentSettings.tags)) {
+    await settings.saveSettings({ tags: nextTags });
+  }
+};
+
 const withDerivedRecordingMeta = async (
   recordingId: string,
   meta: RecordingMeta,
   embeddingConfigurationKey?: string,
 ) => {
   return {
-    ...meta,
+    ...normalizeRecordingMeta(meta),
     hasEmbedding: await embeddings.hasCompatibleRecordingEmbedding(
       recordingId,
       embeddingConfigurationKey,
@@ -48,14 +125,14 @@ export const storeUnassociatedScreenshot = async (
 
 export const saveRecording = async (recording: RecordingData) => {
   const started = new Date(recording.meta.started);
-  const meta: RecordingMeta = {
+  const meta = normalizeRecordingMeta({
     duration: Date.now() - started.getTime(),
     isPostProcessed: false,
     hasRawRecording: true,
     hasMic: !!recording.mic,
     hasScreen: !!recording.screen,
     ...recording.meta,
-  };
+  });
 
   const recordingId = `${started.getFullYear()}-${started.getMonth() + 1}-${started.getDate()}_${started.getHours()}-${started.getMinutes()}-${started.getSeconds()}`;
   const folder = path.join(await getRecordingsFolder(), recordingId);
@@ -96,7 +173,7 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
   const folder = path.join(await getRecordingsFolder(), recordingId);
   await fs.ensureDir(folder);
   await ffmpeg.simpleTranscode(file, path.join(folder, "screen.webm"));
-  const fullMeta: RecordingMeta = {
+  const fullMeta = normalizeRecordingMeta({
     ...meta,
     hasMic: false,
     hasRawRecording: true,
@@ -104,7 +181,7 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
     isImported: true,
     isPostProcessed: false,
     duration: await getDuration(file),
-  };
+  });
   await fs.writeJSON(path.join(folder, "meta.json"), fullMeta, {
     spaces: 2,
   });
@@ -118,30 +195,8 @@ export const importRecording = async (file: string, meta: RecordingMeta) => {
 export const listRecordings = async () => {
   const embeddingConfigurationKey =
     await embeddings.getCurrentEmbeddingConfigurationKey();
-  const recordingFolders = await fs.readdir(await getRecordingsFolder());
-
-  // Filter out non-directories and .DS_Store files first
-  const validFolders = [];
-  for (const folder of recordingFolders) {
-    // Skip .DS_Store and other hidden files
-    if (folder.startsWith(".")) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    const folderPath = path.join(await getRecordingsFolder(), folder);
-    const stats = await fs.stat(folderPath);
-    if (stats.isDirectory()) {
-      validFolders.push(folder);
-    }
-  }
-
   const items = await Promise.all(
-    validFolders.map(async (recordingFolder) => {
-      const meta = (await fs.readJson(
-        path.join(await getRecordingsFolder(), recordingFolder, "meta.json"),
-      )) as RecordingMeta;
-
+    (await listStoredRecordingMetas()).map(async ([recordingFolder, meta]) => {
       return [
         recordingFolder,
         await withDerivedRecordingMeta(
@@ -194,19 +249,24 @@ export const updateRecording = async (
   recordingId: string,
   partial: Partial<RecordingMeta>,
 ) => {
-  const meta = await fs.readJson(
+  const meta = (await fs.readJson(
     path.join(await getRecordingsFolder(), recordingId, "meta.json"),
-  );
+  )) as RecordingMeta;
+  const previousMeta = normalizeRecordingMeta(meta);
+  const nextMeta = normalizeRecordingMeta({
+    ...previousMeta,
+    ...partial,
+  });
   await fs.writeJson(
     path.join(await getRecordingsFolder(), recordingId, "meta.json"),
-    {
-      ...meta,
-      ...partial,
-    },
+    nextMeta,
     { spaces: 2 },
   );
   const searchIndex = await import("./search");
   searchIndex.updateRecordingName(recordingId, partial.name);
+  if (hasRemovedTags(previousMeta.tags, nextMeta.tags)) {
+    await syncTagCatalogWithRecordings();
+  }
   invalidateUiKeys(QueryKeys.History, recordingId);
   invalidateUiKeys(QueryKeys.History);
 };
@@ -221,5 +281,6 @@ export const removeRecording = async (recordingId: string) => {
   const searchIndex = await import("./search");
   searchIndex.removeRecordingFromIndex(recordingId);
   embeddings.invalidateSemanticSearchStore();
+  await syncTagCatalogWithRecordings();
   invalidateUiKeys(QueryKeys.History);
 };

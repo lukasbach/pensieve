@@ -1,0 +1,258 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+
+.control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--gray-a7);
+  border-radius: var(--radius-3);
+  background: var(--color-surface);
+}
+
+.control:focus-within {
+  border-color: var(--accent-8);
+  box-shadow: 0 0 0 1px var(--accent-7);
+}
+
+.input {
+  flex: 1 1 5rem;
+  min-width: 5rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.1rem 0;
+}
+
+.suggestions {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  overflow-y: auto;
+  max-height: 12rem;
+  padding: 0.25rem;
+  border: 1px solid var(--gray-a6);
+  border-radius: var(--radius-3);
+  background: var(--color-panel-solid);
+  box-shadow: var(--shadow-4);
+}
+
+.suggestionButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--radius-2);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.suggestionButton:hover {
+  background: var(--gray-a3);
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.02rem 0.35rem;
+  border: 1px solid var(--gray-a5);
+  border-radius: 999px;
+  background: var(--gray-3);
+  color: var(--gray-11);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.tagChipLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagChipRemoveButton {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.tagChipRemoveButton:hover {
+  opacity: 1;
+}
+
+.tagChip[data-color="amber"] {
+  background: var(--amber-3);
+  border-color: var(--amber-6);
+  color: var(--amber-11);
+}
+
+.tagChip[data-color="blue"] {
+  background: var(--blue-3);
+  border-color: var(--blue-6);
+  color: var(--blue-11);
+}
+
+.tagChip[data-color="bronze"] {
+  background: var(--bronze-3);
+  border-color: var(--bronze-6);
+  color: var(--bronze-11);
+}
+
+.tagChip[data-color="brown"] {
+  background: var(--brown-3);
+  border-color: var(--brown-6);
+  color: var(--brown-11);
+}
+
+.tagChip[data-color="crimson"] {
+  background: var(--crimson-3);
+  border-color: var(--crimson-6);
+  color: var(--crimson-11);
+}
+
+.tagChip[data-color="cyan"] {
+  background: var(--cyan-3);
+  border-color: var(--cyan-6);
+  color: var(--cyan-11);
+}
+
+.tagChip[data-color="gold"] {
+  background: var(--gold-3);
+  border-color: var(--gold-6);
+  color: var(--gold-11);
+}
+
+.tagChip[data-color="grass"] {
+  background: var(--grass-3);
+  border-color: var(--grass-6);
+  color: var(--grass-11);
+}
+
+.tagChip[data-color="gray"] {
+  background: var(--gray-3);
+  border-color: var(--gray-6);
+  color: var(--gray-11);
+}
+
+.tagChip[data-color="green"] {
+  background: var(--green-3);
+  border-color: var(--green-6);
+  color: var(--green-11);
+}
+
+.tagChip[data-color="indigo"] {
+  background: var(--indigo-3);
+  border-color: var(--indigo-6);
+  color: var(--indigo-11);
+}
+
+.tagChip[data-color="iris"] {
+  background: var(--iris-3);
+  border-color: var(--iris-6);
+  color: var(--iris-11);
+}
+
+.tagChip[data-color="jade"] {
+  background: var(--jade-3);
+  border-color: var(--jade-6);
+  color: var(--jade-11);
+}
+
+.tagChip[data-color="lime"] {
+  background: var(--lime-3);
+  border-color: var(--lime-6);
+  color: var(--lime-11);
+}
+
+.tagChip[data-color="mint"] {
+  background: var(--mint-3);
+  border-color: var(--mint-6);
+  color: var(--mint-11);
+}
+
+.tagChip[data-color="orange"] {
+  background: var(--orange-3);
+  border-color: var(--orange-6);
+  color: var(--orange-11);
+}
+
+.tagChip[data-color="pink"] {
+  background: var(--pink-3);
+  border-color: var(--pink-6);
+  color: var(--pink-11);
+}
+
+.tagChip[data-color="plum"] {
+  background: var(--plum-3);
+  border-color: var(--plum-6);
+  color: var(--plum-11);
+}
+
+.tagChip[data-color="purple"] {
+  background: var(--purple-3);
+  border-color: var(--purple-6);
+  color: var(--purple-11);
+}
+
+.tagChip[data-color="red"] {
+  background: var(--red-3);
+  border-color: var(--red-6);
+  color: var(--red-11);
+}
+
+.tagChip[data-color="ruby"] {
+  background: var(--ruby-3);
+  border-color: var(--ruby-6);
+  color: var(--ruby-11);
+}
+
+.tagChip[data-color="sky"] {
+  background: var(--sky-3);
+  border-color: var(--sky-6);
+  color: var(--sky-11);
+}
+
+.tagChip[data-color="teal"] {
+  background: var(--teal-3);
+  border-color: var(--teal-6);
+  color: var(--teal-11);
+}
+
+.tagChip[data-color="tomato"] {
+  background: var(--tomato-3);
+  border-color: var(--tomato-6);
+  color: var(--tomato-11);
+}
+
+.tagChip[data-color="violet"] {
+  background: var(--violet-3);
+  border-color: var(--violet-6);
+  color: var(--violet-11);
+}
+
+.tagChip[data-color="yellow"] {
+  background: var(--yellow-3);
+  border-color: var(--yellow-6);
+  color: var(--yellow-11);
+}

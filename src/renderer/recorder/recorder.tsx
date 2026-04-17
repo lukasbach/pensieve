@@ -14,8 +14,10 @@ import {
   HiOutlineMicrophone,
 } from "react-icons/hi2";
 
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import { useSettings } from "../common/use-settings";
+import { TagInput } from "../common/tag-input";
+import { useTags } from "../common/use-tags";
 import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
@@ -48,6 +50,19 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   } = useRecorderState();
   const { settings, saveSettings } = useSettings();
   const uiSettings = settings?.ui;
+  const updateRecorderTags = useCallback(
+    async (nextTags: string[]) => {
+      setMeta({ tags: nextTags });
+    },
+    [setMeta],
+  );
+  const { availableTags, createTag, setTags } = useTags({
+    currentTags: meta?.tags ?? [],
+    onChange: updateRecorderTags,
+    saveSettings,
+    settings,
+    syncStoredTags: true,
+  });
 
   useEffect(() => {
     if (uiSettings) {
@@ -106,6 +121,16 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
         mx="3"
         my="4"
       />
+
+      <Box mx="3" mb="4">
+        <TagInput
+          ariaLabel="Tags"
+          availableTags={availableTags}
+          value={meta?.tags ?? []}
+          onChange={setTags}
+          onCreateTag={createTag}
+        />
+      </Box>
 
       <CheckboxCards.Root
         value={selectedSources}

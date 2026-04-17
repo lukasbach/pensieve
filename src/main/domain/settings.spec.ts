@@ -83,6 +83,7 @@ describe("settings", () => {
   it("merges saved settings with defaults and caches the result", async () => {
     existsSyncMock.mockReturnValue(true);
     readJSONMock.mockResolvedValue({
+      tags: { " Team  ": "blue", team: "teal" },
       ui: { dark: false },
       whisper: { threads: 8 },
     });
@@ -94,6 +95,7 @@ describe("settings", () => {
     expect(firstRead.ui.dark).toBe(false);
     expect(firstRead.ui.historyGroupBy).toBe("day");
     expect(firstRead.ui.recorderAdvancedSettingsOpen).toBe(false);
+    expect(firstRead.tags).toEqual({ Team: "blue" });
     expect(firstRead.whisper.threads).toBe(8);
     expect(firstRead.llm.provider).toBe("ollama");
     expect(firstRead.chat.enabled).toBe(false);
@@ -202,6 +204,34 @@ describe("settings", () => {
     );
     expect(invalidateUiKeysMock).toHaveBeenCalledWith(QueryKeys.Settings);
     expect(invalidateUiKeysMock).toHaveBeenCalledWith(QueryKeys.Theme);
+  });
+
+  it("replaces the saved tag catalog when tags are explicitly provided", async () => {
+    existsSyncMock.mockReturnValue(true);
+    readJSONMock.mockResolvedValue({
+      tags: {
+        Existing: "red",
+        Review: "teal",
+      },
+    });
+
+    const settings = await import("./settings");
+
+    await settings.saveSettings({
+      tags: {
+        Review: "teal",
+      },
+    });
+
+    expect(writeJSONMock).toHaveBeenCalledWith(
+      "C:\\Users\\tester\\AppData\\Roaming\\Pensieve\\settings.json",
+      expect.objectContaining({
+        tags: {
+          Review: "teal",
+        },
+      }),
+      { spaces: 2 },
+    );
   });
 
   it("removes the settings file during reset", async () => {

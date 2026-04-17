@@ -1,6 +1,7 @@
 import { app } from "electron";
 import path from "path";
 import { datahookMarkdownTemplate } from "./datahooks-defaults";
+import type { TagDefinition } from "./tagging";
 
 export type RecordingConfig = {
   recordScreenAudio?: boolean;
@@ -20,6 +21,7 @@ export type RecordingMeta = {
   started: string;
   duration?: number;
   name?: string;
+  tags?: string[];
   isPostProcessed?: boolean;
   hasEmbedding?: boolean;
   isImported?: boolean;
@@ -78,6 +80,7 @@ export const defaultSettings = {
     useOverlayTool: true,
     historyGroupBy: "day" as "none" | "day" | "week" | "month",
   },
+  tags: {} as Record<string, TagDefinition["color"]>,
   providers: {
     ollama: {
       baseUrl: "http://localhost:11434",

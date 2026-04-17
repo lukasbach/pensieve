@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DropdownMenu, IconButton } from "@radix-ui/themes";
+import { Badge, DropdownMenu, IconButton } from "@radix-ui/themes";
 import {
   HiMiniBars3,
   HiOutlineArrowDownOnSquare,
@@ -10,6 +10,7 @@ import {
   HiSparkles,
 } from "react-icons/hi2";
 import { QueryKeys } from "../../query-keys";
+import type { TagDefinition } from "../../tagging";
 import { historyApi } from "../api";
 import { useSettings } from "../common/use-settings";
 import { useWindowedPromptText } from "../dialog/context";
@@ -33,6 +34,7 @@ const historyGroupByOptions = [
 ] as const;
 
 type HistoryMenuProps = {
+  availableTags: TagDefinition[];
   search: HistoryMenuSearch;
 };
 
@@ -40,7 +42,10 @@ const getDefaultImportName = (filePath: string) => {
   return filePath.split(/[\\/]/).at(-1) ?? "Untitled import";
 };
 
-export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
+export const HistoryMenu: FC<HistoryMenuProps> = ({
+  availableTags,
+  search,
+}) => {
   const { data: recordings } = useHistoryRecordings();
   const { data: postprocessing } = useQuery({
     queryKey: [QueryKeys.PostProcessing],
@@ -143,7 +148,11 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <IconButton variant="outline" color="gray">
+        <IconButton
+          aria-label="Open history options"
+          variant="outline"
+          color="gray"
+        >
           <HiMiniBars3 />
         </IconButton>
       </DropdownMenu.Trigger>
@@ -171,7 +180,7 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Sub>
-          <DropdownMenu.SubTrigger>Filter</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubTrigger>Filter by type</DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent>
             {historyFilters.map(({ label, value }) => (
               <DropdownMenu.Item
@@ -184,6 +193,31 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
                 {label}
               </DropdownMenu.Item>
             ))}
+          </DropdownMenu.SubContent>
+        </DropdownMenu.Sub>
+        <DropdownMenu.Sub>
+          <DropdownMenu.SubTrigger>Filter by tag</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubContent>
+            {availableTags.length > 0 ? (
+              availableTags.map((tag) => (
+                <DropdownMenu.Item
+                  key={tag.name}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    search.toggleTagFilter(tag.name);
+                  }}
+                >
+                  <HiOutlineCheck
+                    style={{
+                      opacity: search.tagFilters.includes(tag.name) ? 1 : 0,
+                    }}
+                  />
+                  <Badge color={tag.color}>{tag.name}</Badge>
+                </DropdownMenu.Item>
+              ))
+            ) : (
+              <DropdownMenu.Item disabled>No tags</DropdownMenu.Item>
+            )}
           </DropdownMenu.SubContent>
         </DropdownMenu.Sub>
         <DropdownMenu.Sub>
