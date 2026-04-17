@@ -25,6 +25,13 @@ const historyFilters = [
   },
 ] as const;
 
+const historyGroupByOptions = [
+  { label: "None", value: "none" },
+  { label: "Day", value: "day" },
+  { label: "Week", value: "week" },
+  { label: "Month", value: "month" },
+] as const;
+
 type HistoryMenuProps = {
   search: HistoryMenuSearch;
 };
@@ -39,7 +46,7 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
     queryKey: [QueryKeys.PostProcessing],
     queryFn: historyApi.getPostProcessingProgress,
   });
-  const { settings } = useSettings();
+  const { settings, saveSettings } = useSettings();
   const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
   const datahooksEnabled = settings?.datahooks?.enabled ?? false;
   const askImportName = useWindowedPromptText(
@@ -173,6 +180,25 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
               >
                 <HiOutlineCheck
                   style={{ opacity: search.historyFilter === value ? 1 : 0 }}
+                />
+                {label}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.SubContent>
+        </DropdownMenu.Sub>
+        <DropdownMenu.Sub>
+          <DropdownMenu.SubTrigger>Group by</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubContent>
+            {historyGroupByOptions.map(({ label, value }) => (
+              <DropdownMenu.Item
+                key={value}
+                onClick={async () => {
+                  search.setHistoryGroupBy(value);
+                  await saveSettings({ ui: { historyGroupBy: value } });
+                }}
+              >
+                <HiOutlineCheck
+                  style={{ opacity: search.historyGroupBy === value ? 1 : 0 }}
                 />
                 {label}
               </DropdownMenu.Item>

@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useState } from "react";
+import type { Settings } from "../../types";
 import { useSearch } from "./use-search";
 import { TestProvider } from "../test-provider";
 
@@ -104,6 +105,43 @@ describe("useSearch", () => {
       "beta",
     ]);
     expect(result.current.pinnedItems.map(([id]) => id)).toEqual([]);
+  });
+
+  it("tracks the active history grouping from settings", () => {
+    const initialProps: {
+      historyGroupBy: Settings["ui"]["historyGroupBy"];
+    } = {
+      historyGroupBy: "week",
+    };
+
+    const { result, rerender } = renderHook(
+      ({ historyGroupBy }: { historyGroupBy: Settings["ui"]["historyGroupBy"] }) =>
+        useSearch({
+          embeddingsEnabled: true,
+          historyGroupBy,
+          recordings,
+        }),
+      {
+        initialProps,
+        wrapper: TestProvider,
+      },
+    );
+
+    expect(result.current.historyGroupBy).toBe("week");
+
+    act(() => {
+      result.current.setHistoryGroupBy("none");
+    });
+
+    expect(result.current.historyGroupBy).toBe("none");
+
+    rerender({ historyGroupBy: "month" });
+
+    expect(result.current.historyGroupBy).toBe("month");
+
+    rerender({ historyGroupBy: "day" });
+
+    expect(result.current.historyGroupBy).toBe("day");
   });
 
   it("can switch to semantic search and expose the result ordering", async () => {

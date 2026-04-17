@@ -76,6 +76,7 @@ export const defaultSettings = {
     trayRunningNotificationShown: false,
     recorderAdvancedSettingsOpen: false,
     useOverlayTool: true,
+    historyGroupBy: "day" as "none" | "day" | "week" | "month",
   },
   providers: {
     ollama: {

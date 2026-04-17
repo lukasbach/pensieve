@@ -92,6 +92,7 @@ describe("settings", () => {
     const secondRead = await settings.getSettings();
 
     expect(firstRead.ui.dark).toBe(false);
+    expect(firstRead.ui.historyGroupBy).toBe("day");
     expect(firstRead.ui.recorderAdvancedSettingsOpen).toBe(false);
     expect(firstRead.whisper.threads).toBe(8);
     expect(firstRead.llm.provider).toBe("ollama");
@@ -193,6 +194,7 @@ describe("settings", () => {
         core: { recordingsFolder: "C:\\Updated" },
         ui: expect.objectContaining({
           dark: false,
+          historyGroupBy: "day",
           recorderAdvancedSettingsOpen: true,
         }),
       }),

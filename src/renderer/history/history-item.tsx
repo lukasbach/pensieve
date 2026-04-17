@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { Badge, DropdownMenu, IconButton, Tooltip } from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
@@ -40,7 +40,7 @@ const getSubtitle = ({
 export const HistoryItem: FC<{
   recording: RecordingMeta;
   id: string;
-  priorItemDate: string;
+  groupLabel?: string;
   searchText?: string;
   isProcessing?: boolean;
   isPinnedItem?: boolean;
@@ -48,7 +48,7 @@ export const HistoryItem: FC<{
   recording,
   searchText,
   id,
-  priorItemDate,
+  groupLabel,
   isProcessing,
   isPinnedItem,
 }) => {
@@ -62,13 +62,6 @@ export const HistoryItem: FC<{
     "What should the name of the recording be?",
     "Untitled Recording",
   );
-  const isNewDate = useMemo(() => {
-    if (!priorItemDate) return true;
-    return (
-      new Date(priorItemDate).toDateString() !==
-      new Date(recording.started).toDateString()
-    );
-  }, [priorItemDate, recording.started]);
 
   const process = useCallback(
     async (steps?: PostProcessingStep[]) => {
@@ -92,9 +85,9 @@ export const HistoryItem: FC<{
 
   return (
     <>
-      {isNewDate && !isPinnedItem && (
+      {groupLabel && !isPinnedItem && (
         <EntityTitle mb=".5rem" mt="1rem">
-          {new Date(recording.started).toDateString()}
+          {groupLabel}
         </EntityTitle>
       )}
       <ListItem

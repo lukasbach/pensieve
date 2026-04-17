@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useHistoryRecordings } from "./state";
 import { HistoryItem } from "./history-item";
 import { HistoryMenu } from "./history-menu";
+import { getHistoryGroup } from "./get-history-group";
 import { useSearch } from "./use-search";
 import { historyApi } from "../api";
 import { useSettings } from "../common/use-settings";
@@ -22,6 +23,7 @@ export const History: FC = () => {
   const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
   const search = useSearch({
     embeddingsEnabled,
+    historyGroupBy: settings?.ui.historyGroupBy,
     recordings,
   });
 
@@ -34,6 +36,31 @@ export const History: FC = () => {
       ),
     [postprocessing?.processingQueue],
   );
+
+  const groupedVisibleRecordings = useMemo(() => {
+    if (search.search.length > 0) {
+      return search.visibleRecordings.map(([id, meta]) => ({
+        groupLabel: undefined,
+        id,
+        meta,
+      }));
+    }
+
+    let previousGroupKey: string | null = null;
+    return search.visibleRecordings.map(([id, meta]) => {
+      const group = getHistoryGroup(meta.started, search.historyGroupBy);
+      const groupLabel =
+        !group || group.key === previousGroupKey ? undefined : group.label;
+
+      previousGroupKey = group?.key ?? previousGroupKey;
+
+      return {
+        groupLabel,
+        id,
+        meta,
+      };
+    });
+  }, [search.historyGroupBy, search.search.length, search.visibleRecordings]);
 
   return (
     <Box p="1rem">
@@ -85,12 +112,11 @@ export const History: FC = () => {
           <EntityTitle mb=".5rem" mt="1rem">
             Pinned recordings
           </EntityTitle>
-          {search.pinnedItems.map(([id, meta], idx, arr) => (
+          {search.pinnedItems.map(([id, meta]) => (
             <HistoryItem
               key={id}
               id={id}
               recording={meta}
-              priorItemDate={arr[idx - 1]?.[1].started}
               searchText={search.searchResults[id]?.snippet}
               isProcessing={processingRecordings.has(id)}
               isPinnedItem
@@ -100,14 +126,12 @@ export const History: FC = () => {
         </>
       )}
 
-      {search.visibleRecordings.map(([id, meta], idx, arr) => (
+      {groupedVisibleRecordings.map(({ groupLabel, id, meta }) => (
         <HistoryItem
           key={id}
           id={id}
           recording={meta}
-          priorItemDate={
-            search.search.length ? meta.started : arr[idx - 1]?.[1].started
-          }
+          groupLabel={groupLabel}
           searchText={search.searchResults[id]?.snippet}
           isProcessing={processingRecordings.has(id)}
         />

@@ -2,13 +2,16 @@ import { useDebouncedState } from "@react-hookz/web";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { QueryKeys } from "../../query-keys";
+import { RecordingMeta, Settings } from "../../types";
 import { historyApi } from "../api";
-import { RecordingMeta } from "../../types";
 
 export type HistoryFilter = "all" | "unprocessed" | "missingEmbeddings";
 
+type HistoryGroupBy = Settings["ui"]["historyGroupBy"];
+
 type UseSearchOptions = {
   embeddingsEnabled?: boolean;
+  historyGroupBy?: HistoryGroupBy;
   recordings?: Record<string, RecordingMeta>;
 };
 
@@ -28,10 +31,14 @@ const matchesHistoryFilter = (
 
 export const useSearch = ({
   embeddingsEnabled,
+  historyGroupBy,
   recordings,
 }: UseSearchOptions = {}) => {
   const [search, setSearch] = useDebouncedState("", 500, 1000);
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>("all");
+  const [activeHistoryGroupBy, setHistoryGroupBy] = useState<HistoryGroupBy>(
+    historyGroupBy ?? "day",
+  );
   const [useSemanticSearch, setUseSemanticSearch] = useState(false);
   const emptySearchResponse: Awaited<ReturnType<typeof historyApi.search>> = {
     matches: {},
@@ -44,6 +51,10 @@ export const useSearch = ({
       setUseSemanticSearch(false);
     }
   }, [embeddingsEnabled, useSemanticSearch]);
+
+  useEffect(() => {
+    setHistoryGroupBy(historyGroupBy ?? "day");
+  }, [historyGroupBy]);
 
   const { data } = useQuery({
     queryKey: [QueryKeys.History, search, useSemanticSearch],
@@ -98,6 +109,7 @@ export const useSearch = ({
 
   return {
     historyFilter,
+    historyGroupBy: activeHistoryGroupBy,
     orderedIds,
     pinnedItems,
     recordingList,
@@ -106,6 +118,7 @@ export const useSearch = ({
     setSearch,
     searchResults,
     setHistoryFilter,
+    setHistoryGroupBy,
     setUseSemanticSearch,
     useSemanticSearch,
     visibleRecordings,
@@ -114,5 +127,5 @@ export const useSearch = ({
 
 export type HistoryMenuSearch = Pick<
   ReturnType<typeof useSearch>,
-  "historyFilter" | "setHistoryFilter"
+  "historyFilter" | "historyGroupBy" | "setHistoryFilter" | "setHistoryGroupBy"
 >;
