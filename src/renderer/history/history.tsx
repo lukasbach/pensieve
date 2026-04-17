@@ -6,7 +6,8 @@ import { useHistoryRecordings } from "./state";
 import { HistoryItem } from "./history-item";
 import { HistoryMenu } from "./history-menu";
 import { useSearch } from "./use-search";
-import { historyApi, mainApi } from "../api";
+import { historyApi } from "../api";
+import { useSettings } from "../common/use-settings";
 import { QueryKeys } from "../../query-keys";
 import { EmptyState } from "../common/empty-state";
 import { EntityTitle } from "../common/entity-title";
@@ -17,12 +18,10 @@ export const History: FC = () => {
     queryKey: [QueryKeys.PostProcessing],
     queryFn: historyApi.getPostProcessingProgress,
   });
-  const { data: settings } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: mainApi.getSettings,
-  });
+  const { settings } = useSettings();
+  const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
   const search = useSearch({
-    embeddingsEnabled: settings?.embeddings.enabled,
+    embeddingsEnabled,
     recordings,
   });
 
@@ -45,7 +44,7 @@ export const History: FC = () => {
           onChange={(e) => search.setSearch(e.currentTarget.value)}
         />
 
-        {settings?.embeddings.enabled && (
+        {embeddingsEnabled && (
           <Tooltip
             content={
               search.useSemanticSearch

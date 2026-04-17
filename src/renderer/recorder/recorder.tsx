@@ -7,7 +7,6 @@ import {
   Text,
   TextField,
 } from "@radix-ui/themes";
-import { useQuery } from "@tanstack/react-query";
 import {
   HiChevronDown,
   HiChevronUp,
@@ -15,9 +14,8 @@ import {
   HiOutlineMicrophone,
 } from "react-icons/hi2";
 
-import { forwardRef, useState } from "react";
-import { QueryKeys } from "../../query-keys";
-import { mainApi } from "../api";
+import { forwardRef, useEffect, useState } from "react";
+import { useSettings } from "../common/use-settings";
 import { useRecorderState } from "./state";
 import { MicSelector } from "./mic-selector";
 import { useMicSources } from "./hooks";
@@ -38,7 +36,7 @@ const getDefaultAutoEndTime = () => {
 
 export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
   const defaultMic = useMicSources()?.[0];
-  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState(false);
+  const [advancedSettingsOpen, setAdvancedSettingsOpen] = useState<boolean>();
 
   const {
     setConfig,
@@ -48,11 +46,27 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
     meta,
     setMeta,
   } = useRecorderState();
+  const { settings, saveSettings } = useSettings();
+  const uiSettings = settings?.ui;
 
-  const { data: defaultOverlayEnabled = true } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: async () => (await mainApi.getSettings()).ui.useOverlayTool,
-  });
+  useEffect(() => {
+    if (uiSettings) {
+      setAdvancedSettingsOpen(
+        (current) => current ?? uiSettings.recorderAdvancedSettingsOpen,
+      );
+    }
+  }, [uiSettings]);
+
+  const defaultOverlayEnabled = uiSettings?.useOverlayTool ?? true;
+  const isAdvancedSettingsOpen = advancedSettingsOpen ?? false;
+
+  const toggleAdvancedSettings = async () => {
+    const nextAdvancedSettingsOpen = !isAdvancedSettingsOpen;
+    setAdvancedSettingsOpen(nextAdvancedSettingsOpen);
+    await saveSettings({
+      ui: { recorderAdvancedSettingsOpen: nextAdvancedSettingsOpen },
+    });
+  };
 
   const selectedSources = [
     recordingConfig.recordScreenAudio ? "screen" : null,
@@ -159,7 +173,7 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
         </Flex>
       </Box>
 
-      {advancedSettingsOpen && (
+      {isAdvancedSettingsOpen && (
         <Box
           id="recorder-advanced-settings"
           mt="4"
@@ -264,12 +278,12 @@ export const Recorder = forwardRef<HTMLDivElement>((_, ref) => {
           type="button"
           variant="surface"
           color="gray"
-          onClick={() => setAdvancedSettingsOpen((value) => !value)}
-          aria-expanded={advancedSettingsOpen}
+          onClick={toggleAdvancedSettings}
+          aria-expanded={isAdvancedSettingsOpen}
           aria-controls="recorder-advanced-settings"
         >
           Advanced Settings
-          {advancedSettingsOpen ? <HiChevronUp /> : <HiChevronDown />}
+          {isAdvancedSettingsOpen ? <HiChevronUp /> : <HiChevronDown />}
         </Button>
       </Flex>
 

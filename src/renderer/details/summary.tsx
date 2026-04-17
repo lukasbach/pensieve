@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -16,9 +15,9 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { RecordingMeta } from "../../types";
-import { QueryKeys } from "../../query-keys";
-import { mainApi, windowsApi } from "../api";
+import { windowsApi } from "../api";
 import { EmptyState } from "../common/empty-state";
+import { useSettings } from "../common/use-settings";
 import { SettingsTab } from "../settings/tabs";
 import { PageContent } from "../common/page-content";
 
@@ -26,10 +25,7 @@ export const Summary: FC<{
   meta: RecordingMeta;
   onJumpTo: (time: number) => void;
 }> = ({ meta, onJumpTo }) => {
-  const { data: settings } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: mainApi.getSettings,
-  });
+  const { settings } = useSettings();
 
   if (!meta.summary && !settings?.llm.enabled) {
     return (

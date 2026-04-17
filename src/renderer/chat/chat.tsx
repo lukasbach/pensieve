@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -22,9 +21,9 @@ import {
   HiOutlinePaperAirplane,
   HiSparkles,
 } from "react-icons/hi2";
-import { QueryKeys } from "../../query-keys";
-import { chatApi, mainApi, windowsApi } from "../api";
+import { chatApi, windowsApi } from "../api";
 import { EmptyState } from "../common/empty-state";
+import { useSettings } from "../common/use-settings";
 import { SettingsTab } from "../settings/tabs";
 import { ChatHistoryMenu } from "./chat-history-menu";
 import { ChatRichContent } from "./chat-rich-content";
@@ -63,10 +62,7 @@ const createMessage = (
   }) satisfies ChatUiMessage;
 
 export const Chat: FC = () => {
-  const { data: settings } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: mainApi.getSettings,
-  });
+  const { settings } = useSettings();
   const [sessionId, setSessionId] = useState(createSessionId);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);

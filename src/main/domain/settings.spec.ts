@@ -92,6 +92,7 @@ describe("settings", () => {
     const secondRead = await settings.getSettings();
 
     expect(firstRead.ui.dark).toBe(false);
+    expect(firstRead.ui.recorderAdvancedSettingsOpen).toBe(false);
     expect(firstRead.whisper.threads).toBe(8);
     expect(firstRead.llm.provider).toBe("ollama");
     expect(firstRead.chat.enabled).toBe(false);
@@ -182,7 +183,7 @@ describe("settings", () => {
 
     await settings.saveSettings({
       core: { recordingsFolder: "C:\\Updated" },
-      ui: { dark: false },
+      ui: { dark: false, recorderAdvancedSettingsOpen: true },
     });
 
     expect(ensureDirMock).toHaveBeenCalledWith("C:\\Updated");
@@ -190,7 +191,10 @@ describe("settings", () => {
       "C:\\Users\\tester\\AppData\\Roaming\\Pensieve\\settings.json",
       expect.objectContaining({
         core: { recordingsFolder: "C:\\Updated" },
-        ui: expect.objectContaining({ dark: false }),
+        ui: expect.objectContaining({
+          dark: false,
+          recorderAdvancedSettingsOpen: true,
+        }),
       }),
       { spaces: 2 },
     );

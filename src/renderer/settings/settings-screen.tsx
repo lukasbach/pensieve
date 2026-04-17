@@ -1,7 +1,6 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import { Box, Flex } from "@radix-ui/themes";
 import * as Tabs from "@radix-ui/react-tabs";
-import { useQuery } from "@tanstack/react-query";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDebouncedCallback } from "@react-hookz/web";
 import {
@@ -10,9 +9,8 @@ import {
 } from "react-icons/hi2";
 import { useSearch } from "@tanstack/react-router";
 import { PageContainer } from "../common/page-container";
-import { QueryKeys } from "../../query-keys";
-import { mainApi } from "../api";
 import { Settings } from "../../types";
+import { useSettings } from "../common/use-settings";
 import { GeneralSettings } from "./general-settings";
 import { WhisperSettings } from "./whisper-settings";
 import { SettingsTabs } from "./settings-tabs";
@@ -28,21 +26,17 @@ export const SettingsScreen: FC = () => {
   const { settingsTab } = useSearch({
     from: "/settings" as const,
   });
-  const { data: values } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: mainApi.getSettings,
-  });
-  const form = useForm<Settings>({ values, mode: "onChange" });
+  const { settings, saveSettings } = useSettings();
+  const form = useForm<Settings>({ values: settings, mode: "onChange" });
   const [hasSaved, setHasSaved] = useState(false);
 
-  const flushSubmit = useCallback(
-    () => mainApi.saveSettings(form.getValues()),
-    [form],
-  );
+  const flushSubmit = useCallback(async () => {
+    await saveSettings(form.getValues());
+  }, [form, saveSettings]);
 
   const handleSubmit = useDebouncedCallback(
-    () => {
-      mainApi.saveSettings(form.getValues());
+    async () => {
+      await flushSubmit();
       setHasSaved((old) => {
         if (!old) {
           setTimeout(() => setHasSaved(false), 1500);
@@ -51,7 +45,7 @@ export const SettingsScreen: FC = () => {
         return old;
       });
     },
-    [],
+    [flushSubmit],
     1000,
     10000,
   );

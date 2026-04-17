@@ -74,6 +74,7 @@ export const defaultSettings = {
     dark: true,
     autoStart: true,
     trayRunningNotificationShown: false,
+    recorderAdvancedSettingsOpen: false,
     useOverlayTool: true,
   },
   providers: {

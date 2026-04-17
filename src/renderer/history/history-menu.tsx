@@ -10,7 +10,8 @@ import {
   HiSparkles,
 } from "react-icons/hi2";
 import { QueryKeys } from "../../query-keys";
-import { historyApi, mainApi } from "../api";
+import { historyApi } from "../api";
+import { useSettings } from "../common/use-settings";
 import { useWindowedPromptText } from "../dialog/context";
 import { useHistoryRecordings } from "./state";
 import type { HistoryMenuSearch } from "./use-search";
@@ -38,10 +39,9 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
     queryKey: [QueryKeys.PostProcessing],
     queryFn: historyApi.getPostProcessingProgress,
   });
-  const { data: settings } = useQuery({
-    queryKey: [QueryKeys.Settings],
-    queryFn: mainApi.getSettings,
-  });
+  const { settings } = useSettings();
+  const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
+  const datahooksEnabled = settings?.datahooks?.enabled ?? false;
   const askImportName = useWindowedPromptText(
     "Import audio file",
     "Name of the recording",
@@ -190,15 +190,13 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({ search }) => {
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={computeMissingEmbeddings}
-              disabled={
-                !settings?.embeddings.enabled || missingEmbeddingsCount === 0
-              }
+              disabled={!embeddingsEnabled || missingEmbeddingsCount === 0}
             >
               <HiSparkles /> Compute missing embeddings
             </DropdownMenu.Item>
             <DropdownMenu.Item
               onClick={runAllDatahooks}
-              disabled={!settings?.datahooks.enabled || datahooksCount === 0}
+              disabled={!datahooksEnabled || datahooksCount === 0}
             >
               <HiOutlineServerStack /> Run all datahooks
             </DropdownMenu.Item>
