@@ -152,7 +152,7 @@ export const History: FC = () => {
               isPinnedItem
             />
           ))}
-          <Box mb="3rem" />
+          <Box mb="1rem" />
         </>
       )}
 

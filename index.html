@@ -1,17 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pensieve Meeting Recorder</title>
-    <script>
-      try {
-        if (localStorage.getItem("dark") === "true") {
-          document.body.style.background = "#111111";
-        }
-      } catch {
-        /* empty */
-      }
-    </script>
+    <script type="module" src="/src/theme-bootstrap.ts"></script>
   </head>
   <body>
   <div id="root"></div>

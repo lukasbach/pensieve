@@ -25,6 +25,25 @@ import {
 } from "./main/domain/audio-server";
 import { mcpServer } from "./main/domain/mcp";
 
+const getSessionDataPath = () => {
+  const userDataPath = app.getPath("userData");
+
+  if (process.platform !== "win32") {
+    return path.join(userDataPath, "session-data");
+  }
+
+  const localAppData = process.env.LOCALAPPDATA;
+  if (!localAppData) {
+    return path.join(userDataPath, "session-data");
+  }
+
+  return path.join(localAppData, path.basename(userDataPath), "session-data");
+};
+
+const sessionDataPath = getSessionDataPath();
+fs.ensureDirSync(sessionDataPath);
+app.setPath("sessionData", sessionDataPath);
+
 log.initialize({ spyRendererConsole: true });
 
 updateElectronApp();
