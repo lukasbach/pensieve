@@ -11,14 +11,20 @@ export const Editable: FC<{
   }) => ReactNode;
   value: any;
   onChange: (value: any) => void;
-}> = ({ value, renderValue, renderInput, onChange }) => {
+  compact?: boolean;
+}> = ({ value, renderValue, renderInput, onChange, compact }) => {
   const [editingValue, setEditingValue] = useState(value);
   const [isEditing, setIsEditing] = useState(false);
+  const controlSize: "1" | "2" = compact ? "1" : "2";
 
   const input =
     renderInput ??
     (({ submitBtn, onChange, value }) => (
-      <TextField.Root value={value} onChange={(e) => onChange(e.target.value)}>
+      <TextField.Root
+        size={controlSize}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
         <TextField.Slot />
         <TextField.Slot>{submitBtn}</TextField.Slot>
       </TextField.Root>
@@ -45,7 +51,7 @@ export const Editable: FC<{
           value: editingValue,
           onChange: setEditingValue,
           submitBtn: (
-            <IconButton type="submit" size="1" variant="ghost">
+            <IconButton type="submit" size={controlSize} variant="ghost">
               <HiCheck />
             </IconButton>
           ),
@@ -57,7 +63,7 @@ export const Editable: FC<{
     value,
     editBtn: (
       <IconButton
-        size="1"
+        size={controlSize}
         variant="ghost"
         className="hoverhide-item"
         onClick={() => {

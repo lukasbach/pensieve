@@ -20,6 +20,7 @@ export type RecordingData = {
 export type RecordingMeta = {
   started: string;
   duration?: number;
+  fileSizeBytes?: number;
   name?: string;
   tags?: string[];
   isPostProcessed?: boolean;
@@ -62,6 +63,13 @@ export type PostProcessingStep =
   | "summary"
   | "datahooks";
 
+export type HistoryItemDetailsMode =
+  | "none"
+  | "summaryOrDuration"
+  | "duration"
+  | "dateTime"
+  | "technicalDetails";
+
 export type PostProcessingJob = {
   recordingId: string;
   steps?: PostProcessingStep[];
@@ -79,6 +87,7 @@ export const defaultSettings = {
     recorderAdvancedSettingsOpen: false,
     useOverlayTool: true,
     historyGroupBy: "day" as "none" | "day" | "week" | "month",
+    historyItemDetails: "summaryOrDuration" as HistoryItemDetailsMode,
   },
   tags: {} as Record<string, TagDefinition["color"]>,
   providers: {

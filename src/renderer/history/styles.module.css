@@ -12,6 +12,15 @@
 	white-space: nowrap;
 }
 
+.historySubtitleBadges {
+	display: inline-flex;
+	gap: 0.25rem;
+	flex-wrap: nowrap;
+	max-width: 100%;
+	overflow: hidden;
+	min-width: 0;
+}
+
 .tagFilterButton {
 	all: unset;
 	display: inline-flex;

@@ -261,17 +261,40 @@ describe("history", () => {
   });
 
   it("lists recordings from visible directories in reverse order", async () => {
+    const olderRecordingFolder = path.join(recordingsFolder, "2024-1-1_1-0-0");
+    const newerRecordingFolder = path.join(recordingsFolder, "2024-1-2_2-0-0");
+
     hasCompatibleRecordingEmbeddingMock.mockImplementation(
       async (recordingId: string) => recordingId === "2024-1-2_2-0-0",
     );
-    readdirMock.mockResolvedValue([
-      "2024-1-1_1-0-0",
-      ".DS_Store",
-      "notes.txt",
-      "2024-1-2_2-0-0",
-    ]);
+    readdirMock.mockImplementation(async (folderPath: string) => {
+      if (folderPath === recordingsFolder) {
+        return [
+          "2024-1-1_1-0-0",
+          ".DS_Store",
+          "notes.txt",
+          "2024-1-2_2-0-0",
+        ];
+      }
+
+      if (folderPath === olderRecordingFolder) {
+        return ["meta.json", "screen.webm"];
+      }
+
+      if (folderPath === newerRecordingFolder) {
+        return ["meta.json", "recording.mp3"];
+      }
+
+      return [];
+    });
     statMock.mockImplementation(async (folderPath: string) => ({
-      isDirectory: () => !folderPath.endsWith("notes.txt"),
+      isDirectory: () =>
+        folderPath === olderRecordingFolder || folderPath === newerRecordingFolder,
+      size: folderPath.endsWith("screen.webm")
+        ? 2048
+        : folderPath.endsWith("recording.mp3")
+          ? 4096
+          : 100,
     }));
     readJsonMock.mockImplementation(async (filePath: string) =>
       filePath.includes("2024-1-1_1-0-0")
@@ -284,17 +307,30 @@ describe("history", () => {
 
     expect(Object.keys(result)).toEqual(["2024-1-2_2-0-0", "2024-1-1_1-0-0"]);
     expect(result["2024-1-2_2-0-0"]).toEqual(
-      expect.objectContaining({ hasEmbedding: true, name: "Newer" }),
+      expect.objectContaining({
+        fileSizeBytes: 4196,
+        hasEmbedding: true,
+        name: "Newer",
+      }),
     );
     expect(result["2024-1-1_1-0-0"]).toEqual(
-      expect.objectContaining({ hasEmbedding: false, name: "Older" }),
+      expect.objectContaining({
+        fileSizeBytes: 2148,
+        hasEmbedding: false,
+        name: "Older",
+      }),
     );
   });
 
   it("reads meta, transcript, and generated audio files", async () => {
+    readdirMock.mockResolvedValue(["meta.json", "recording.mp3"]);
     readJsonMock
       .mockResolvedValueOnce({ started: "2024-01-01T01:00:00.000Z" })
       .mockResolvedValueOnce({ transcription: [] });
+    statMock.mockImplementation(async (filePath: string) => ({
+      isDirectory: () => false,
+      size: filePath.endsWith("recording.mp3") ? 4096 : 120,
+    }));
     existsSyncMock
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true)
@@ -304,6 +340,7 @@ describe("history", () => {
     const history = await import("./history");
 
     await expect(history.getRecordingMeta("recording-1")).resolves.toEqual({
+      fileSizeBytes: 4216,
       hasEmbedding: false,
       started: "2024-01-01T01:00:00.000Z",
     });

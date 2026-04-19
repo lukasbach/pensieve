@@ -31,10 +31,12 @@ export const History: FC = () => {
   });
   const { settings } = useSettings();
   const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
+  const historyItemDetails =
+    settings?.ui?.historyItemDetails ?? "summaryOrDuration";
   const { availableTags } = useTags({ settings });
   const search = useSearch({
     embeddingsEnabled,
-    historyGroupBy: settings?.ui.historyGroupBy,
+    historyGroupBy: settings?.ui?.historyGroupBy,
     recordings,
   });
 
@@ -146,6 +148,7 @@ export const History: FC = () => {
               key={id}
               id={id}
               recording={meta}
+              itemDetailsMode={historyItemDetails}
               searchText={search.searchResults[id]?.snippet}
               availableTags={availableTags}
               isProcessing={processingRecordings.has(id)}
@@ -162,6 +165,7 @@ export const History: FC = () => {
           id={id}
           recording={meta}
           groupLabel={groupLabel}
+          itemDetailsMode={historyItemDetails}
           searchText={search.searchResults[id]?.snippet}
           availableTags={availableTags}
           isProcessing={processingRecordings.has(id)}

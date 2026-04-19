@@ -8,11 +8,12 @@ export const ListItem: FC<
     title: string;
     icon?: ReactNode;
     onRename?: (newValue: string) => void;
-    subtitle?: string;
+    subtitle?: ReactNode;
     tags?: ReactNode;
     forceHoverState?: boolean;
     id?: string;
     isHighlighted?: boolean;
+    compact?: boolean;
   }>
 > = ({
   id,
@@ -24,16 +25,21 @@ export const ListItem: FC<
   tags,
   forceHoverState,
   isHighlighted,
+  compact,
 }) => {
   return (
-    <Box pb=".5rem" id={id}>
+    <Box pb={compact ? ".25rem" : ".5rem"} id={id}>
       <Card
         className="hoverhide-container"
-        style={isHighlighted ? { background: "var(--accent-8)" } : undefined}
+        style={{
+          ...(isHighlighted ? { background: "var(--accent-8)" } : {}),
+          ...(compact ? { padding: "var(--space-2)" } : {}),
+        }}
       >
-        <Flex align="center" gap=".5rem">
+        <Flex align="center" gap={compact ? ".35rem" : ".5rem"}>
           <Box flexGrow="1" maxWidth="100%" overflow="hidden">
             <Editable
+              compact={compact}
               value={title}
               onChange={onRename as any}
               renderValue={({ value, editBtn }) => (
@@ -56,7 +62,10 @@ export const ListItem: FC<
               )}
             />
           </Box>
-          <Flex className={forceHoverState ? "" : "hoverhide-item"} gap="8px">
+          <Flex
+            className={forceHoverState ? "" : "hoverhide-item"}
+            gap={compact ? "6px" : "8px"}
+          >
             {children}
           </Flex>
         </Flex>

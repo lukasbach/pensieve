@@ -3,7 +3,7 @@ import { Box, Flex, FlexProps, Text } from "@radix-ui/themes";
 
 export const EntityTitle: FC<
   PropsWithChildren<
-    { subtitle?: string; icon?: ReactNode; tags?: ReactNode } & FlexProps
+    { subtitle?: ReactNode; icon?: ReactNode; tags?: ReactNode } & FlexProps
   >
 > = ({ subtitle, tags, icon, children, ...props }) => {
   return (
@@ -29,19 +29,24 @@ export const EntityTitle: FC<
             </Box>
           )}
         </Flex>
-        {subtitle && (
-          <Text
-            mt="-.4rem"
-            style={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              overflowWrap: "break-word",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {subtitle}
-          </Text>
-        )}
+        {subtitle &&
+          (typeof subtitle === "string" || typeof subtitle === "number" ? (
+            <Text
+              mt="-.4rem"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                overflowWrap: "break-word",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {subtitle}
+            </Text>
+          ) : (
+            <Box mt="-.2rem" overflow="hidden">
+              {subtitle}
+            </Box>
+          ))}
       </Flex>
     </Flex>
   );

@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi2";
 import { QueryKeys } from "../../query-keys";
 import type { TagDefinition } from "../../tagging";
+import type { HistoryItemDetailsMode } from "../../types";
 import { historyApi } from "../api";
 import { useSettings } from "../common/use-settings";
 import { useWindowedPromptText } from "../dialog/context";
@@ -33,6 +34,17 @@ const historyGroupByOptions = [
   { label: "Month", value: "month" },
 ] as const;
 
+const historyItemDetailsOptions: {
+  label: string;
+  value: HistoryItemDetailsMode;
+}[] = [
+  { label: "None", value: "none" },
+  { label: "Summary or duration", value: "summaryOrDuration" },
+  { label: "Duration", value: "duration" },
+  { label: "Date and time", value: "dateTime" },
+  { label: "Technical details", value: "technicalDetails" },
+];
+
 type HistoryMenuProps = {
   availableTags: TagDefinition[];
   search: HistoryMenuSearch;
@@ -40,6 +52,10 @@ type HistoryMenuProps = {
 
 const getDefaultImportName = (filePath: string) => {
   return filePath.split(/[\\/]/).at(-1) ?? "Untitled import";
+};
+
+const preventMenuClose = (event: Event) => {
+  event.preventDefault();
 };
 
 export const HistoryMenu: FC<HistoryMenuProps> = ({
@@ -54,6 +70,8 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({
   const { settings, saveSettings } = useSettings();
   const embeddingsEnabled = settings?.embeddings?.enabled ?? false;
   const datahooksEnabled = settings?.datahooks?.enabled ?? false;
+  const historyItemDetails =
+    settings?.ui?.historyItemDetails ?? "summaryOrDuration";
   const askImportName = useWindowedPromptText(
     "Import audio file",
     "Name of the recording",
@@ -237,6 +255,39 @@ export const HistoryMenu: FC<HistoryMenuProps> = ({
                 {label}
               </DropdownMenu.Item>
             ))}
+          </DropdownMenu.SubContent>
+        </DropdownMenu.Sub>
+        <DropdownMenu.Sub>
+          <DropdownMenu.SubTrigger>Item Details</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubContent>
+            <DropdownMenu.Item
+              onSelect={async (event) => {
+                preventMenuClose(event);
+                await saveSettings({ ui: { historyItemDetails: "none" } });
+              }}
+            >
+              <HiOutlineCheck
+                style={{ opacity: historyItemDetails === "none" ? 1 : 0 }}
+              />
+              None
+            </DropdownMenu.Item>
+            <DropdownMenu.Separator />
+            {historyItemDetailsOptions
+              .filter(({ value }) => value !== "none")
+              .map(({ label, value }) => (
+                <DropdownMenu.Item
+                  key={value}
+                  onSelect={async (event) => {
+                    preventMenuClose(event);
+                    await saveSettings({ ui: { historyItemDetails: value } });
+                  }}
+                >
+                  <HiOutlineCheck
+                    style={{ opacity: historyItemDetails === value ? 1 : 0 }}
+                  />
+                  {label}
+                </DropdownMenu.Item>
+              ))}
           </DropdownMenu.SubContent>
         </DropdownMenu.Sub>
         <DropdownMenu.Sub>

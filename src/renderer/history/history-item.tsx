@@ -1,5 +1,12 @@
 import { FC, useCallback, useState } from "react";
-import { Badge, DropdownMenu, IconButton, Tooltip } from "@radix-ui/themes";
+import {
+  Badge,
+  DropdownMenu,
+  Flex,
+  IconButton,
+  Text,
+  Tooltip,
+} from "@radix-ui/themes";
 import {
   HiArrowTopRightOnSquare,
   HiMiniBars3,
@@ -17,7 +24,11 @@ import {
 import humanizer from "humanize-duration";
 import { RiRobot2Line } from "react-icons/ri";
 import { LuMouse } from "react-icons/lu";
-import { PostProcessingStep, RecordingMeta } from "../../types";
+import {
+  HistoryItemDetailsMode,
+  PostProcessingStep,
+  RecordingMeta,
+} from "../../types";
 import type { TagDefinition } from "../../tagging";
 import { abbreviateTagName, getTagColor } from "../../tagging";
 import { historyApi, windowsApi } from "../api";
@@ -27,24 +38,121 @@ import { useWindowedConfirm, useWindowedPromptText } from "../dialog/context";
 import { HistoryItemIcon } from "./history-item-icon";
 import styles from "./styles.module.css";
 
+const getSummary = (recording: RecordingMeta) => {
+  const summary =
+    recording.summary?.sentenceSummary ?? recording.summary?.summary;
+  return summary?.trim() ? summary.trim() : null;
+};
+
+const hasSummary = (recording: RecordingMeta) => {
+  return Boolean(
+    getSummary(recording) || (recording.summary?.actionItems?.length ?? 0) > 0,
+  );
+};
+
+const formatFileSize = (fileSizeBytes?: number) => {
+  if (typeof fileSizeBytes !== "number" || Number.isNaN(fileSizeBytes)) {
+    return null;
+  }
+
+  if (fileSizeBytes < 1024) {
+    return `${fileSizeBytes} B`;
+  }
+
+  const unit = [
+    { label: "TB", threshold: 1024 ** 4 },
+    { label: "GB", threshold: 1024 ** 3 },
+    { label: "MB", threshold: 1024 ** 2 },
+    { label: "KB", threshold: 1024 },
+  ].find(({ threshold }) => fileSizeBytes >= threshold) ?? {
+    label: "KB",
+    threshold: 1024,
+  };
+  const value = fileSizeBytes / unit.threshold;
+  const fractionDigits = value >= 10 || Number.isInteger(value) ? 0 : 1;
+
+  return `${value.toFixed(fractionDigits)} ${unit.label}`;
+};
+
+const getTechnicalDetailsSubtitle = (recording: RecordingMeta) => {
+  const detailBadges = [
+    !recording.isPostProcessed
+      ? { color: "orange" as const, label: "Unprocessed" }
+      : null,
+    recording.hasEmbedding
+      ? { color: "green" as const, label: "Embeddings" }
+      : null,
+    hasSummary(recording) ? { color: "blue" as const, label: "Summary" } : null,
+    recording.hasRawRecording
+      ? { color: "gray" as const, label: "Raw recording" }
+      : null,
+  ].flatMap((badge) => (badge ? [badge] : []));
+
+  return (
+    <Flex align="center" gap="2" wrap="nowrap" style={{ overflow: "hidden" }}>
+      <Text
+        size="1"
+        color="gray"
+        style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+      >
+        {formatFileSize(recording.fileSizeBytes) ?? "0 B"}
+      </Text>
+      {detailBadges.length > 0 && (
+        <span className={styles.historySubtitleBadges}>
+          {detailBadges.map(({ color, label }) => (
+            <Badge key={label} color={color} size="1">
+              {label}
+            </Badge>
+          ))}
+        </span>
+      )}
+    </Flex>
+  );
+};
+
 const getSubtitle = ({
-  summary,
+  detailsMode,
+  isProcessing,
+  recording,
   searchText,
   duration,
 }: {
+  detailsMode: HistoryItemDetailsMode;
+  isProcessing?: boolean;
+  recording: RecordingMeta;
   searchText?: string;
   duration: string;
-  summary?: string | null;
 }) => {
-  if (searchText) return searchText;
-  if (summary) return `${summary} - ${duration}`;
-  return duration;
+  if (detailsMode === "none") {
+    return undefined;
+  }
+
+  if (isProcessing) {
+    return "Recording is processing...";
+  }
+
+  if (searchText) {
+    return searchText;
+  }
+
+  switch (detailsMode) {
+    case "duration":
+      return duration;
+    case "dateTime":
+      return new Date(recording.started).toLocaleString();
+    case "technicalDetails":
+      return getTechnicalDetailsSubtitle(recording);
+    case "summaryOrDuration":
+    default:
+      return getSummary(recording) ?? duration;
+  }
 };
 
 export const HistoryItem: FC<{
   availableTags: TagDefinition[];
   recording: RecordingMeta;
   id: string;
+  itemDetailsMode: HistoryItemDetailsMode;
   groupLabel?: string;
   searchText?: string;
   isProcessing?: boolean;
@@ -52,6 +160,7 @@ export const HistoryItem: FC<{
 }> = ({
   availableTags,
   recording,
+  itemDetailsMode,
   searchText,
   id,
   groupLabel,
@@ -59,6 +168,8 @@ export const HistoryItem: FC<{
   isPinnedItem,
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const compact = itemDetailsMode === "none";
+  const actionButtonSize: "1" | "2" = compact ? "1" : "2";
   const confirmDeletion = useWindowedConfirm(
     "Delete recording",
     "Are you sure you want to delete this recording?",
@@ -104,6 +215,13 @@ export const HistoryItem: FC<{
   }, [id, recording.tags]);
 
   const duration = humanizer(recording.duration || 0, { maxDecimalPoints: 0 });
+  const subtitle = getSubtitle({
+    detailsMode: itemDetailsMode,
+    duration,
+    isProcessing,
+    recording,
+    searchText,
+  });
 
   return (
     <>
@@ -116,21 +234,15 @@ export const HistoryItem: FC<{
         id={!isPinnedItem ? id : undefined}
         isHighlighted={recording.isPinned && !isPinnedItem}
         title={recording.name || "Untitled"}
-        subtitle={
-          isProcessing
-            ? "Recording is processing..."
-            : getSubtitle({
-                summary: recording.summary?.sentenceSummary,
-                searchText,
-                duration,
-              })
-        }
+        compact={compact}
+        subtitle={subtitle}
         onRename={(name) => historyApi.updateRecordingMeta(id, { name })}
         tags={
           <>
-            {!recording.isPostProcessed && (
-              <Badge color="orange">Unprocessed</Badge>
-            )}
+            {!recording.isPostProcessed &&
+              itemDetailsMode !== "technicalDetails" && (
+                <Badge color="orange">Unprocessed</Badge>
+              )}
             {(recording.tags ?? []).length > 0 && (
               <span className={styles.historyTagList}>
                 {(recording.tags ?? []).slice(0, 3).map((tag) => (
@@ -157,6 +269,7 @@ export const HistoryItem: FC<{
         {isPinnedItem && (
           <Tooltip content="Jump to item">
             <IconButton
+              size={actionButtonSize}
               variant="outline"
               color="gray"
               onClick={async () => {
@@ -173,6 +286,7 @@ export const HistoryItem: FC<{
         <DropdownMenu.Root onOpenChange={setDropdownOpen}>
           <DropdownMenu.Trigger>
             <IconButton
+              size={actionButtonSize}
               aria-label="Open recording actions"
               variant="outline"
               color="gray"
@@ -264,7 +378,10 @@ export const HistoryItem: FC<{
           </DropdownMenu.Content>
         </DropdownMenu.Root>
         {recording.isPostProcessed && (
-          <IconButton onClick={() => historyApi.openRecordingDetailsWindow(id)}>
+          <IconButton
+            size={actionButtonSize}
+            onClick={() => historyApi.openRecordingDetailsWindow(id)}
+          >
             <HiArrowTopRightOnSquare />
           </IconButton>
         )}
@@ -273,6 +390,7 @@ export const HistoryItem: FC<{
           !isProcessing && (
             <Tooltip content="Postprocess recording">
               <IconButton
+                size={actionButtonSize}
                 onClick={async () => {
                   await historyApi.addToPostProcessingQueue({
                     recordingId: id,

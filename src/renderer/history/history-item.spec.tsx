@@ -69,6 +69,7 @@ describe("HistoryItem", () => {
             started: "2024-01-02T09:00:00.000Z",
             tags: ["LongerTagName", "Hotfix", "Support", "Ignored"],
           }}
+          itemDetailsMode="summaryOrDuration"
         />
       </TestProvider>,
     );
@@ -95,6 +96,7 @@ describe("HistoryItem", () => {
             started: "2024-01-02T09:00:00.000Z",
             tags: ["LongerTagName", "Hotfix"],
           }}
+          itemDetailsMode="summaryOrDuration"
         />
       </TestProvider>,
     );
@@ -117,5 +119,120 @@ describe("HistoryItem", () => {
         tags: ["Hotfix"],
       });
     });
+  });
+
+  it("prefers the saved summary over duration in summary mode", () => {
+    render(
+      <TestProvider>
+        <HistoryItem
+          id="rec-1"
+          availableTags={[]}
+          recording={{
+            duration: 60000,
+            isPostProcessed: true,
+            name: "Weekly review",
+            started: "2024-01-02T09:00:00.000Z",
+            summary: { sentenceSummary: "Discussed launch readiness" },
+          }}
+          itemDetailsMode="summaryOrDuration"
+        />
+      </TestProvider>,
+    );
+
+    expect(screen.getByText("Discussed launch readiness")).toBeInTheDocument();
+    expect(screen.queryByText("1 minute")).not.toBeInTheDocument();
+  });
+
+  it("renders duration, date and time, and compact item detail modes", () => {
+    const started = "2024-01-02T09:00:00.000Z";
+    const { container, rerender } = render(
+      <TestProvider>
+        <HistoryItem
+          id="rec-1"
+          availableTags={[]}
+          recording={{
+            duration: 60000,
+            isPostProcessed: true,
+            name: "Weekly review",
+            started,
+          }}
+          itemDetailsMode="duration"
+        />
+      </TestProvider>,
+    );
+
+    expect(screen.getByText("1 minute")).toBeInTheDocument();
+
+    rerender(
+      <TestProvider>
+        <HistoryItem
+          id="rec-1"
+          availableTags={[]}
+          recording={{
+            duration: 60000,
+            isPostProcessed: true,
+            name: "Weekly review",
+            started,
+          }}
+          itemDetailsMode="dateTime"
+        />
+      </TestProvider>,
+    );
+
+    expect(screen.getByText(new Date(started).toLocaleString())).toBeInTheDocument();
+
+    rerender(
+      <TestProvider>
+        <HistoryItem
+          id="rec-1"
+          availableTags={[]}
+          recording={{
+            duration: 60000,
+            isPostProcessed: true,
+            name: "Weekly review",
+            started,
+          }}
+          itemDetailsMode="none"
+        />
+      </TestProvider>,
+    );
+
+    expect(screen.queryByText("1 minute")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(new Date(started).toLocaleString()),
+    ).not.toBeInTheDocument();
+    expect(
+      container
+        .querySelector('button[aria-label="Open recording actions"]')
+        ?.className,
+    ).toContain("rt-r-size-1");
+  });
+
+  it("renders technical details with file size and badges", () => {
+    render(
+      <TestProvider>
+        <HistoryItem
+          id="rec-1"
+          availableTags={[]}
+          recording={{
+            duration: 60000,
+            fileSizeBytes: 15360,
+            hasEmbedding: true,
+            hasRawRecording: true,
+            isPostProcessed: false,
+            name: "Weekly review",
+            started: "2024-01-02T09:00:00.000Z",
+            summary: { sentenceSummary: "Discussed launch readiness" },
+          }}
+          itemDetailsMode="technicalDetails"
+        />
+      </TestProvider>,
+    );
+
+    expect(screen.getByText("15 KB")).toBeInTheDocument();
+    expect(screen.getAllByText("Unprocessed")).toHaveLength(1);
+    expect(screen.getByText("Embeddings")).toBeInTheDocument();
+    expect(screen.getByText("Summary")).toBeInTheDocument();
+    expect(screen.getByText("Raw recording")).toBeInTheDocument();
   });
 });

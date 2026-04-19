@@ -91,8 +91,19 @@ const withDerivedRecordingMeta = async (
   meta: RecordingMeta,
   embeddingConfigurationKey?: string,
 ) => {
+  const recordingFolder = path.join(await getRecordingsFolder(), recordingId);
+  const fileSizeBytes = (
+    await Promise.all(
+      (await fs.readdir(recordingFolder)).map(async (fileName) => {
+        const stats = await fs.stat(path.join(recordingFolder, fileName));
+        return stats.isDirectory() ? 0 : stats.size;
+      }),
+    )
+  ).reduce((total, size) => total + size, 0);
+
   return {
     ...normalizeRecordingMeta(meta),
+    fileSizeBytes,
     hasEmbedding: await embeddings.hasCompatibleRecordingEmbedding(
       recordingId,
       embeddingConfigurationKey,
