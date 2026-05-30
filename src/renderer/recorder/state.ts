@@ -56,7 +56,23 @@ const clearScheduledRecordingEnd = () => {
   }
 };
 
+const unpackMediaRecorder = async (
+  recorder: MediaRecorder | null,
+  type = "audio/webm",
+) => {
+  if (!recorder) return Promise.resolve(null);
+  return new Promise<Buffer>((r) => {
+    recorder.stop();
+    // eslint-disable-next-line no-param-reassign
+    recorder.ondataavailable = async (e) => {
+      const blob = new Blob([e.data], { type });
+      r(await blobToBuffer(blob));
+    };
+  });
+};
+
 const stopRecordingAndSave = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const { recorder, meta, reset } = useRecorderState.getState();
   if (!recorder || !meta) return;
 
@@ -71,6 +87,7 @@ const stopRecordingAndSave = async () => {
 const onScheduledRecordingEnd = async () => {
   clearScheduledRecordingEnd();
 
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const { recorder, meta, recordingConfig } = useRecorderState.getState();
   if (!recorder || !meta) return;
 
@@ -102,7 +119,7 @@ const scheduleRecordingEnd = (
 
   const delay = Math.max(0, new Date(autoEndAt).getTime() - Date.now());
   scheduledRecordingEndTimeout = setTimeout(() => {
-    void onScheduledRecordingEnd();
+    onScheduledRecordingEnd().catch(() => {});
   }, delay);
 };
 
@@ -211,21 +228,6 @@ export const useRecorderState = create<RecorderState>()((_set, get) => {
     },
   };
 });
-
-const unpackMediaRecorder = async (
-  recorder: MediaRecorder | null,
-  type = "audio/webm",
-) => {
-  if (!recorder) return Promise.resolve(null);
-  return new Promise<Buffer>((r) => {
-    recorder.stop();
-    // eslint-disable-next-line no-param-reassign
-    recorder.ondataavailable = async (e) => {
-      const blob = new Blob([e.data], { type });
-      r(await blobToBuffer(blob));
-    };
-  });
-};
 
 export const useStopRecording = () => {
   return useCallback(async () => {

@@ -118,7 +118,11 @@ describe("useSearch", () => {
     };
 
     const { result, rerender } = renderHook(
-      ({ historyGroupBy }: { historyGroupBy: Settings["ui"]["historyGroupBy"] }) =>
+      ({
+        historyGroupBy,
+      }: {
+        historyGroupBy: Settings["ui"]["historyGroupBy"];
+      }) =>
         useSearch({
           embeddingsEnabled: true,
           historyGroupBy,

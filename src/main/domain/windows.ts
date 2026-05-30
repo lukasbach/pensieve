@@ -73,9 +73,7 @@ export const openRecordingWindow = (
   );
 };
 
-export const openRecorderOverlayWindow = async (
-  useOverlayTool?: boolean,
-) => {
+export const openRecorderOverlayWindow = async (useOverlayTool?: boolean) => {
   if (!(useOverlayTool ?? (await getSettings()).ui.useOverlayTool)) {
     return;
   }

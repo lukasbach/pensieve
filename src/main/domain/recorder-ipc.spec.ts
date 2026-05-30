@@ -108,7 +108,10 @@ describe("recorder-ipc", () => {
       enableRecordingOverlay: false,
       meta: { started: "2024-01-01T10:00:00.000Z", name: "Daily standup" },
     });
-    recorderIpc.setState({ enableRecordingOverlay: undefined, meta: undefined });
+    recorderIpc.setState({
+      enableRecordingOverlay: undefined,
+      meta: undefined,
+    });
 
     expect(recorderIpc.getState().enableRecordingOverlay).toBeUndefined();
     expect(recorderIpc.getState().meta).toBeUndefined();

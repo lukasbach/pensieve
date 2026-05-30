@@ -73,7 +73,9 @@ describe("ChatRichContent", () => {
     render(
       <TestProvider>
         <ChatRichContent
-          content={'Take a look at this recording.\n\n<recording id="rec-1" highlightedLine="3"/>'}
+          content={
+            'Take a look at this recording.\n\n<recording id="rec-1" highlightedLine="3"/>'
+          }
         />
       </TestProvider>,
     );
@@ -85,9 +87,7 @@ describe("ChatRichContent", () => {
     expect(
       screen.getByText("The roadmap moved into July."),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Action items were assigned."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Action items were assigned.")).toBeInTheDocument();
     expect(screen.queryByText("Kickoff context.")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Budget questions were deferred."),
@@ -137,7 +137,9 @@ describe("ChatRichContent", () => {
     render(
       <TestProvider>
         <ChatRichContent
-          content={'Relevant excerpt:\n\n<recording-lines id="rec-2" startLine="2" length="2"/>'}
+          content={
+            'Relevant excerpt:\n\n<recording-lines id="rec-2" startLine="2" length="2"/>'
+          }
         />
       </TestProvider>,
     );
@@ -146,9 +148,7 @@ describe("ChatRichContent", () => {
     expect(
       screen.getByText("We discussed the hiring plan."),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Budget approval is pending."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Budget approval is pending.")).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", {

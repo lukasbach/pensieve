@@ -4,7 +4,11 @@ import { Box, Button, Text } from "@radix-ui/themes";
 import Markdown from "react-markdown";
 import { HiOutlineArrowTopRightOnSquare } from "react-icons/hi2";
 import { QueryKeys } from "../../query-keys";
-import { RecordingMeta, RecordingTranscript, RecordingTranscriptItem } from "../../types";
+import {
+  RecordingMeta,
+  RecordingTranscript,
+  RecordingTranscriptItem,
+} from "../../types";
 import { historyApi } from "../api";
 import * as styles from "./chat.module.css";
 
@@ -39,8 +43,7 @@ type TranscriptDisplayLine = {
 
 const richElementPattern =
   /<(recording|recording-lines)\s+([^<>]*?)(?:\/\s*>|><\/\1\s*>)/gi;
-const attributePattern =
-  /([A-Za-z][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
+const attributePattern = /([A-Za-z][\w-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
 
 const buildAttributeMap = (attributeSource: string) => {
   return [...attributeSource.matchAll(attributePattern)].reduce(
@@ -213,7 +216,10 @@ const getRecordingSnippetLines = (
   }
 
   const startLine = Math.max(highlightedLine - 1, 1);
-  const endLine = Math.min(highlightedLine + 1, transcript.transcription.length);
+  const endLine = Math.min(
+    highlightedLine + 1,
+    transcript.transcription.length,
+  );
 
   return transcript.transcription
     .slice(startLine - 1, endLine)
@@ -252,18 +258,18 @@ const RecordingLineCard: FC<{
     );
   }
 
-  return (
-    <Box className={className}>
-      {content}
-    </Box>
-  );
+  return <Box className={className}>{content}</Box>;
 };
 
 const RecordingCard: FC<{
   recordingId: string;
   highlightedLine?: number;
 }> = ({ recordingId, highlightedLine }) => {
-  const { data: meta, error: metaError, isLoading: isMetaLoading } = useQuery({
+  const {
+    data: meta,
+    error: metaError,
+    isLoading: isMetaLoading,
+  } = useQuery({
     queryKey: [QueryKeys.History, recordingId],
     queryFn: () => historyApi.getRecordingMeta(recordingId),
   });
@@ -289,7 +295,8 @@ const RecordingCard: FC<{
     return (
       <Box className={`${styles.richCard} ${styles.richCardError}`}>
         <Text className={styles.richCardStatus}>
-          Unable to load recording {recordingId}: {getErrorMessage(metaError ?? transcriptError)}
+          Unable to load recording {recordingId}:{" "}
+          {getErrorMessage(metaError ?? transcriptError)}
         </Text>
       </Box>
     );
@@ -311,13 +318,18 @@ const RecordingCard: FC<{
               size="1"
               aria-label={`Open recording ${title}`}
               onClick={async () =>
-                historyApi.openRecordingDetailsWindow(recordingId, highlightedLine)
+                historyApi.openRecordingDetailsWindow(
+                  recordingId,
+                  highlightedLine,
+                )
               }
             >
               <HiOutlineArrowTopRightOnSquare /> Open
             </Button>
           </div>
-          <div className={styles.richCardDate}>{formatRecordingDate(meta.started)}</div>
+          <div className={styles.richCardDate}>
+            {formatRecordingDate(meta.started)}
+          </div>
         </div>
       </div>
 
@@ -333,14 +345,18 @@ const RecordingCard: FC<{
                   isHighlighted={line.lineNumber === highlightedLine}
                   title={title}
                   onClick={async () =>
-                    historyApi.openRecordingDetailsWindow(recordingId, line.lineNumber)
+                    historyApi.openRecordingDetailsWindow(
+                      recordingId,
+                      line.lineNumber,
+                    )
                   }
                 />
               ))}
             </div>
           ) : (
             <Text className={styles.richCardStatus}>
-              Transcript line {highlightedLine} is not available for this recording.
+              Transcript line {highlightedLine} is not available for this
+              recording.
             </Text>
           )}
         </div>
@@ -354,7 +370,11 @@ const RecordingLinesCard: FC<{
   startLine: number;
   length: number;
 }> = ({ recordingId, startLine, length }) => {
-  const { data: meta, error: metaError, isLoading: isMetaLoading } = useQuery({
+  const {
+    data: meta,
+    error: metaError,
+    isLoading: isMetaLoading,
+  } = useQuery({
     queryKey: [QueryKeys.History, recordingId],
     queryFn: () => historyApi.getRecordingMeta(recordingId),
   });
@@ -379,7 +399,8 @@ const RecordingLinesCard: FC<{
     return (
       <Box className={`${styles.richCard} ${styles.richCardError}`}>
         <Text className={styles.richCardStatus}>
-          Unable to load transcript for {recordingId}: {getErrorMessage(metaError ?? transcriptError)}
+          Unable to load transcript for {recordingId}:{" "}
+          {getErrorMessage(metaError ?? transcriptError)}
         </Text>
       </Box>
     );
@@ -398,12 +419,16 @@ const RecordingLinesCard: FC<{
               variant="outline"
               size="1"
               aria-label={`Open recording ${title}`}
-              onClick={async () => historyApi.openRecordingDetailsWindow(recordingId)}
+              onClick={async () =>
+                historyApi.openRecordingDetailsWindow(recordingId)
+              }
             >
               <HiOutlineArrowTopRightOnSquare /> Open
             </Button>
           </div>
-          <div className={styles.richCardDate}>{formatRecordingDate(meta.started)}</div>
+          <div className={styles.richCardDate}>
+            {formatRecordingDate(meta.started)}
+          </div>
         </div>
       </div>
 
@@ -417,14 +442,18 @@ const RecordingLinesCard: FC<{
                 lineNumber={line.lineNumber}
                 title={title}
                 onClick={async () =>
-                  historyApi.openRecordingDetailsWindow(recordingId, line.lineNumber)
+                  historyApi.openRecordingDetailsWindow(
+                    recordingId,
+                    line.lineNumber,
+                  )
                 }
               />
             ))}
           </div>
         ) : (
           <Text className={styles.richCardStatus}>
-            Transcript lines {startLine}-{startLine + length - 1} are not available for this recording.
+            Transcript lines {startLine}-{startLine + length - 1} are not
+            available for this recording.
           </Text>
         )}
       </div>

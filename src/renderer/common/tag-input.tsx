@@ -152,9 +152,7 @@ export const TagInput: FC<TagInputProps> = ({
               key={tag}
               name={tag}
               color={definition?.color ?? availableTagColors[0]}
-              onRemove={() => {
-                void removeTag(tag);
-              }}
+              onRemove={() => removeTag(tag)}
             />
           );
         })}
@@ -165,6 +163,7 @@ export const TagInput: FC<TagInputProps> = ({
           placeholder={placeholder}
           aria-label={ariaLabel ?? placeholder}
           aria-autocomplete="list"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus={autoFocus}
           onBlur={() => setIsFocused(false)}
           onFocus={() => setIsFocused(true)}
@@ -173,7 +172,7 @@ export const TagInput: FC<TagInputProps> = ({
             if (event.key === "Enter") {
               event.preventDefault();
               event.stopPropagation();
-              void addTag(inputValue);
+              addTag(inputValue);
             }
 
             if (
@@ -182,7 +181,7 @@ export const TagInput: FC<TagInputProps> = ({
               selectedTags.length
             ) {
               event.preventDefault();
-              void removeTag(selectedTags[selectedTags.length - 1]);
+              removeTag(selectedTags[selectedTags.length - 1]);
             }
 
             if (event.key === "Escape") {
@@ -193,22 +192,17 @@ export const TagInput: FC<TagInputProps> = ({
       </div>
 
       {isFocused && suggestions.length > 0 && (
-        <div
-          className={styles.suggestions}
-          role="listbox"
-          aria-label="Tag suggestions"
-        >
+        <div className={styles.suggestions} aria-label="Tag suggestions">
           {suggestions.map((tag) => (
             <button
               key={tag.name}
               type="button"
               className={styles.suggestionButton}
-              role="option"
               aria-label={`Add ${tag.name} tag`}
               title={tag.name}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
-                void addTag(tag.name);
+                addTag(tag.name);
               }}
             >
               <TagChip name={tag.name} color={tag.color} />

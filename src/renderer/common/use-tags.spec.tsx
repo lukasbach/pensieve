@@ -74,7 +74,7 @@ describe("useTags", () => {
       ...defaultSettings,
       tags,
     };
-    const onChange = vi.fn(async (_tags: string[]) => undefined);
+    const onChange = vi.fn(async () => undefined);
 
     getRecordingsMock.mockResolvedValue({
       "recording-1": { tags: ["Team"] },

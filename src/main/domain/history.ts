@@ -86,6 +86,10 @@ const syncTagCatalogWithRecordings = async () => {
   }
 };
 
+export const getRecordingsFolder = async () => {
+  return (await settings.getSettings()).core.recordingsFolder;
+};
+
 const withDerivedRecordingMeta = async (
   recordingId: string,
   meta: RecordingMeta,
@@ -109,10 +113,6 @@ const withDerivedRecordingMeta = async (
       embeddingConfigurationKey,
     ),
   };
-};
-
-export const getRecordingsFolder = async () => {
-  return (await settings.getSettings()).core.recordingsFolder;
 };
 
 export const init = async () => {

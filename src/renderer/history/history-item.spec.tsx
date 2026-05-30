@@ -104,7 +104,9 @@ describe("HistoryItem", () => {
     fireEvent.pointerDown(
       screen.getByRole("button", { name: "Open recording actions" }),
     );
-    fireEvent.click(await screen.findByRole("menuitem", { name: /Edit tags/i }));
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: /Edit tags/i }),
+    );
 
     expect(openDialogMock).toHaveBeenCalledWith(
       expect.stringMatching(/^edit-tags-rec-1-/),
@@ -179,7 +181,9 @@ describe("HistoryItem", () => {
       </TestProvider>,
     );
 
-    expect(screen.getByText(new Date(started).toLocaleString())).toBeInTheDocument();
+    expect(
+      screen.getByText(new Date(started).toLocaleString()),
+    ).toBeInTheDocument();
 
     rerender(
       <TestProvider>
@@ -202,8 +206,7 @@ describe("HistoryItem", () => {
       screen.queryByText(new Date(started).toLocaleString()),
     ).not.toBeInTheDocument();
     expect(
-      container
-        .querySelector('button[aria-label="Open recording actions"]')
+      container.querySelector('button[aria-label="Open recording actions"]')
         ?.className,
     ).toContain("rt-r-size-1");
   });

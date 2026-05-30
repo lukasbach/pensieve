@@ -269,12 +269,7 @@ describe("history", () => {
     );
     readdirMock.mockImplementation(async (folderPath: string) => {
       if (folderPath === recordingsFolder) {
-        return [
-          "2024-1-1_1-0-0",
-          ".DS_Store",
-          "notes.txt",
-          "2024-1-2_2-0-0",
-        ];
+        return ["2024-1-1_1-0-0", ".DS_Store", "notes.txt", "2024-1-2_2-0-0"];
       }
 
       if (folderPath === olderRecordingFolder) {
@@ -289,7 +284,8 @@ describe("history", () => {
     });
     statMock.mockImplementation(async (folderPath: string) => ({
       isDirectory: () =>
-        folderPath === olderRecordingFolder || folderPath === newerRecordingFolder,
+        folderPath === olderRecordingFolder ||
+        folderPath === newerRecordingFolder,
       size: folderPath.endsWith("screen.webm")
         ? 2048
         : folderPath.endsWith("recording.mp3")

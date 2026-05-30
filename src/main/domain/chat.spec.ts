@@ -1,8 +1,8 @@
-export {};
-
 import { AIMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import { QueryKeys } from "../../query-keys";
+
+export {};
 
 const userDataFolder = "C:\\Users\\tester\\AppData\\Roaming\\Pensieve";
 const historyFolder = `${userDataFolder}\\chat-history`;
@@ -130,9 +130,11 @@ describe("chat", () => {
     removeMock.mockImplementation(async (filePath: string) => {
       storedFiles.delete(filePath);
     });
-    writeJSONMock.mockImplementation(async (filePath: string, data: unknown) => {
-      storedFiles.set(filePath, data);
-    });
+    writeJSONMock.mockImplementation(
+      async (filePath: string, data: unknown) => {
+        storedFiles.set(filePath, data);
+      },
+    );
 
     getSettingsMock.mockResolvedValue({
       chat: {
@@ -273,7 +275,9 @@ describe("chat", () => {
   });
 
   it("removes persisted history when the session is reset", async () => {
-    invokeMock.mockResolvedValueOnce(new AIMessage({ content: "Stored answer" }));
+    invokeMock.mockResolvedValueOnce(
+      new AIMessage({ content: "Stored answer" }),
+    );
 
     const { chat } = await import("./chat");
 

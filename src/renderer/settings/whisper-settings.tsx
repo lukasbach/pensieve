@@ -25,13 +25,7 @@ import { SettingsTab } from "./tabs";
 import { SettingsField } from "./settings-field";
 
 type YesNoAnyFilter = "any" | "yes" | "no";
-type ModelTypeFilter =
-  | "any"
-  | "base"
-  | "tiny"
-  | "small"
-  | "medium"
-  | "large";
+type ModelTypeFilter = "any" | "base" | "tiny" | "small" | "medium" | "large";
 
 const yesNoAnyFilterValues: Record<YesNoAnyFilter, string> = {
   any: "Any",
@@ -88,10 +82,8 @@ const FilterSelect: FC<{
 
 export const WhisperSettings: FC = () => {
   const form = useFormContext<Settings>();
-  const [quantizedFilter, setQuantizedFilter] =
-    useState<YesNoAnyFilter>("any");
-  const [installedFilter, setInstalledFilter] =
-    useState<YesNoAnyFilter>("any");
+  const [quantizedFilter, setQuantizedFilter] = useState<YesNoAnyFilter>("any");
+  const [installedFilter, setInstalledFilter] = useState<YesNoAnyFilter>("any");
   const [typeFilter, setTypeFilter] = useState<ModelTypeFilter>("any");
   const [englishFilter, setEnglishFilter] = useState<YesNoAnyFilter>("any");
 
@@ -135,17 +127,13 @@ export const WhisperSettings: FC = () => {
           label="Quantized"
           value={quantizedFilter}
           values={yesNoAnyFilterValues}
-          onValueChange={(value) =>
-            setQuantizedFilter(value as YesNoAnyFilter)
-          }
+          onValueChange={(value) => setQuantizedFilter(value as YesNoAnyFilter)}
         />
         <FilterSelect
           label="Installed"
           value={installedFilter}
           values={yesNoAnyFilterValues}
-          onValueChange={(value) =>
-            setInstalledFilter(value as YesNoAnyFilter)
-          }
+          onValueChange={(value) => setInstalledFilter(value as YesNoAnyFilter)}
         />
         <FilterSelect
           label="Type"
